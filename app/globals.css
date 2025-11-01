@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "primereact/resources/themes/lara-light-blue/theme.css";
+@import "primereact/resources/primereact.min.css";
+@import "primeicons/primeicons.css";
 
 :root {
   --background: #ffffff;
@@ -8,8 +11,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-cairo);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +24,267 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-cairo), Arial, Helvetica, sans-serif;
+}
+
+/* PrimeReact Button Primary Override */
+.p-button:not(:disabled):hover {
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* Primary color button hover - detect by inline style */
+.p-button[style*="4C226A"]:hover:not(:disabled) {
+  background-color: rgba(76, 34, 106, 0.9) !important;
+  border-color: rgba(76, 34, 106, 0.9) !important;
+}
+
+.p-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* PrimeReact Input Override - WHITE BACKGROUND ALWAYS - Force override all states */
+.p-inputtext,
+input.p-inputtext,
+input[class*="p-inputtext"],
+.p-inputtext:not(:placeholder-shown),
+input.p-inputtext:not(:placeholder-shown),
+input[class*="p-inputtext"]:not(:placeholder-shown),
+.p-inputtext:hover,
+input.p-inputtext:hover,
+input[class*="p-inputtext"]:hover,
+.p-inputtext:active,
+input.p-inputtext:active,
+input[class*="p-inputtext"]:active,
+.p-inputtext.p-filled,
+input.p-inputtext.p-filled,
+input[class*="p-inputtext"].p-filled,
+.p-inputtext.p-inputwrapper-filled,
+input.p-inputtext.p-inputwrapper-filled,
+input[class*="p-inputtext"].p-inputwrapper-filled {
+  background-color: white !important;
+  background: white !important;
+  color: #202020 !important;
+  box-sizing: border-box !important;
+}
+
+/* Default border color */
+.p-inputtext,
+input.p-inputtext,
+input[class*="p-inputtext"] {
+  border-color: #A5A5A5 !important;
+}
+
+.p-inputtext:focus,
+.p-inputtext:focus-visible,
+.p-inputtext.p-focus,
+.p-inputtext:focus:hover,
+.p-inputtext:focus:active,
+input.p-inputtext:focus,
+input.p-inputtext:focus-visible,
+input[class*="p-inputtext"]:focus,
+input.p-inputtext:focus:hover,
+input.p-inputtext:focus:active,
+input[class*="p-inputtext"]:focus:hover,
+input[class*="p-inputtext"]:focus:active {
+  background-color: white !important;
+  background: white !important;
+  outline: none !important;
+}
+
+/* Primary border for focus when no error */
+.p-inputtext:focus:not(.border-error),
+.p-inputtext:focus-visible:not(.border-error),
+input.p-inputtext:focus:not(.border-error),
+input[class*="p-inputtext"]:focus:not(.border-error) {
+  border-color: #4C226A !important;
+  box-shadow: 0 0 0 2px rgba(76, 34, 106, 0.2) !important;
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Error border - all states */
+.p-inputtext.border-error,
+input.p-inputtext.border-error,
+input[class*="p-inputtext"].border-error,
+.p-inputtext[style*="E53935"],
+input.p-inputtext[style*="E53935"],
+input[class*="p-inputtext"][style*="E53935"] {
+  border-color: #E53935 !important;
+}
+
+/* Error border for focus when error exists */
+.p-inputtext.border-error:focus,
+.p-inputtext.border-error:focus-visible,
+input.p-inputtext.border-error:focus,
+input[class*="p-inputtext"].border-error:focus,
+.p-inputtext[style*="E53935"]:focus,
+input.p-inputtext[style*="E53935"]:focus,
+input[class*="p-inputtext"][style*="E53935"]:focus {
+  border-color: #E53935 !important;
+  box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.2) !important;
+  background-color: white !important;
+  background: white !important;
+}
+
+/* Primary border for filled inputs when no error */
+.p-inputtext:not(:placeholder-shown):not(.border-error),
+input.p-inputtext:not(:placeholder-shown):not(.border-error),
+input[class*="p-inputtext"]:not(:placeholder-shown):not(.border-error),
+.p-inputtext[style*="4C226A"],
+input.p-inputtext[style*="4C226A"],
+input[class*="p-inputtext"][style*="4C226A"] {
+  border-color: #4C226A !important;
+  background-color: white !important;
+  background: white !important;
+}
+
+.p-inputtext::placeholder,
+input.p-inputtext::placeholder {
+  color: #A5A5A5 !important;
+}
+
+/* Override PrimeReact's blue theme variables */
+.p-inputtext:focus,
+.p-inputtext.p-focus {
+  --p-focus-ring: rgba(76, 34, 106, 0.2);
+  --p-inputtext-border-color-focus: #4C226A;
+  --p-inputtext-focus-border-color: #4C226A;
+}
+
+/* PrimeReact Dropdown Override - White Background and Primary Border */
+.p-dropdown,
+.p-dropdown.p-focus,
+.p-dropdown:hover,
+.p-dropdown.p-inputwrapper-filled {
+  background-color: white !important;
+  background: white !important;
+  color: #202020 !important;
+  border-color: #A5A5A5 !important;
+  padding: 0 !important;
+  min-height: 2.375rem !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.p-dropdown:focus,
+.p-dropdown:focus-visible,
+.p-dropdown.p-focus:not(.border-error) {
+  border-color: #4C226A !important;
+  box-shadow: 0 0 0 2px rgba(76, 34, 106, 0.2) !important;
+  background-color: white !important;
+  background: white !important;
+  outline: none !important;
+}
+
+.p-dropdown.border-error,
+.p-dropdown.border-error:focus,
+.p-dropdown.border-error.p-focus {
+  border-color: #E53935 !important;
+  box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.2) !important;
+  background-color: white !important;
+  background: white !important;
+}
+
+.p-dropdown[style*="4C226A"] {
+  border-color: #4C226A !important;
+}
+
+.p-dropdown[style*="E53935"] {
+  border-color: #E53935 !important;
+}
+
+.p-dropdown .p-inputwrapper {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  min-height: 100% !important;
+}
+
+.p-dropdown .p-inputwrapper-content {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  min-height: 100% !important;
+}
+
+.p-dropdown .p-dropdown-label {
+  color: #202020 !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  flex: 1 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: 100% !important;
+}
+
+.p-dropdown .p-dropdown-label.p-placeholder {
+  color: #A5A5A5 !important;
+}
+
+.p-dropdown .p-dropdown-trigger {
+  color: #202020 !important;
+  padding: 0.5rem 0 !important;
+  width: 2.5rem !important;
+  min-width: 2.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  min-height: 100% !important;
+}
+
+/* Header dropdown - rounded-full styling */
+header .p-dropdown.rounded-full,
+header .p-dropdown[class*="rounded-full"] {
+  border-radius: 9999px !important;
+}
+
+header .p-dropdown.rounded-full .p-inputwrapper,
+header .p-dropdown[class*="rounded-full"] .p-inputwrapper {
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+}
+
+header .p-dropdown.rounded-full .p-dropdown-label,
+header .p-dropdown[class*="rounded-full"] .p-dropdown-label {
+  border-radius: 9999px !important;
+}
+
+/* Header language dropdown - single chevron, fixed width */
+header .header-language-dropdown {
+  width: 140px !important;
+  max-width: 140px !important;
+  min-width: 140px !important;
+}
+
+header .header-language-dropdown .p-dropdown-label {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+header .header-language-dropdown .p-dropdown-trigger {
+  width: 2.5rem !important;
+  min-width: 2.5rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* Ensure only one chevron is visible */
+header .header-language-dropdown .p-dropdown-trigger i {
+  font-size: 10px !important;
+  color: #A5A5A5 !important;
+}
+
+/* Rotate chevron when dropdown is open */
+header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
+  transform: rotate(180deg);
+  transition: transform 0.2s;
 }
