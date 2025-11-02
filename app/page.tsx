@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
 export default function Home() {
-  redirect("/login");
+  // Middleware will handle locale redirect
+  redirect("/tr/login");
 }

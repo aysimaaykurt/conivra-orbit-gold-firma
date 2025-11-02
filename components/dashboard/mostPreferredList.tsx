@@ -1,7 +1,7 @@
 "use client";
 
 import { mostPreferred } from "@/src/mocks/dashboard";
-import MostPreferredItemComponent from "./mostPreferredItem";
+ import MostPreferredItemComponent from "./mostPreferredItem";
 
 export default function MostPreferredList() {
   return (

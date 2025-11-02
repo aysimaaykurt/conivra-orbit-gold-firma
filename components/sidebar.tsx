@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/src/navigation";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/src/navigation";
 import { useState } from "react";
 import activeTabImage from "@/src/images/ActiveTab.png";
 
@@ -15,8 +15,7 @@ type MenuItem = {
 const menuItems: MenuItem[] = [
   { label: "Ana Sayfa", href: "/dashboard", icon: "pi pi-home" },
   { label: "İlan Yönetimi", href: "/ad-management", icon: "pi pi-list" },
-  { label: "Influencer / Freelancer", href: "/influencer-freelancer", icon: "pi pi-th-large" },
-  { label: "Başvurular", href: "/applications", icon: "pi pi-calendar" },
+   { label: "Başvurular", href: "/applications", icon: "pi pi-calendar" },
   { label: "Projelerim", href: "/projects", icon: "pi pi-check" },
    { label: "Profil", href: "/profile", icon: "pi pi-id-card" },
   { label: "Talep / Destek", href: "/support", icon: "pi pi-headphones" },

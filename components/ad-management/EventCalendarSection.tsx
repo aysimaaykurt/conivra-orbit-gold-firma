@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import type { AdEvent } from "@/src/mocks/adManagement";
-import EventCard from "./EventCard";
+ import EventCard from "./EventCard";
+import { AdEvent } from "@/src/mocks/adManagement";
 
 interface EventCalendarSectionProps {
   event: AdEvent;

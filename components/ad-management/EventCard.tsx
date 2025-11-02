@@ -1,14 +1,13 @@
 "use client";
 
+import { AdEvent } from "@/src/mocks/adManagement";
 import Image from "next/image";
-import type { AdEvent } from "@/src/mocks/adManagement";
-
+ 
 export default function EventCard({ event }: { event: AdEvent }) {
   return (
     <div className="rounded-lg bg-[#EED7EF] p-3 cursor-pointer hover:shadow-md transition-shadow h-full">
       <div className="flex items-start gap-3 relative">
-        {/* Cover image */}
-        <div className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
+         <div className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
           {event.coverImageUrl ? (
             <Image src={event.coverImageUrl} alt={event.title} fill className="object-cover" />
           ) : (

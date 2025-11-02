@@ -1,7 +1,7 @@
 "use client";
 
 import { pendingReviews } from "@/src/mocks/dashboard";
-import PendingReviewItemComponent from "./pendingReviewItem";
+ import PendingReviewItemComponent from "./pendingReviewItem";
 
 export default function PendingReviewList() {
   return (

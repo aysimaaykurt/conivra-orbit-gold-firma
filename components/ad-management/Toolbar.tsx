@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "@/src/navigation";
 
 export default function Toolbar() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -48,14 +50,19 @@ export default function Toolbar() {
               onClick={() => setOpen(false)}
             />
             <div
-              className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg border z-20 overflow-hidden"
-              style={{ backgroundColor: "#EED7EF", borderColor: "#EED7EF" }}
+              className="absolute right-0 mt-2 w-56 rounded-lg bg-white border border-gray-200 z-20 overflow-hidden shadow-lg"
+              style={{ 
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+              }}
             >
               <ul className="py-2">
                 <li>
                   <button
                     className="w-full text-left px-4 py-3 text-sm text-dark hover:bg-primary/10 transition-colors"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      router.push("/ad-management/add");
+                    }}
                   >
                     İlan Ekle
                   </button>
@@ -63,7 +70,10 @@ export default function Toolbar() {
                 <li className="border-t border-primary/20">
                   <button
                     className="w-full text-left px-4 py-3 text-sm text-dark hover:bg-primary/10 transition-colors"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      router.push("/ad-management/workshop/add");
+                    }}
                   >
                     WorkShop Ekle
                   </button>
@@ -71,7 +81,10 @@ export default function Toolbar() {
                 <li className="border-t border-primary/20">
                   <button
                     className="w-full text-left px-4 py-3 text-sm text-dark hover:bg-primary/10 transition-colors"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      router.push("/ad-management/gift-kit/add");
+                    }}
                   >
                     Hediye Kiti Ekle
                   </button>

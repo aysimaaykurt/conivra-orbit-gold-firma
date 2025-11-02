@@ -25,6 +25,7 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
       placeholder,
       value,
       onChange,
+      onBlur,
       name,
       ...rest
     },
@@ -43,6 +44,19 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
         onChange(syntheticEvent as any);
       } else if (onChange) {
         onChange(e);
+      }
+    };
+
+    const handleBlur = (e: any) => {
+      if (onBlur && name) {
+        const syntheticEvent = {
+          target: {
+            name,
+          },
+        };
+        onBlur(syntheticEvent as any);
+      } else if (onBlur) {
+        onBlur(e);
       }
     };
     const dropdownId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
@@ -100,12 +114,13 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
             options={options}
             placeholder={getPlaceholder()}
             onChange={handleChange}
+            onBlur={handleBlur}
             optionLabel="label"
             optionValue="value"
             className={[
               "w-full",
               "bg-white text-dark",
-              "py-2 px-3 rounded-md border text-sm",
+              "py-1.5 px-3 rounded-md border text-sm h-9",
               error ? "border-error" : hasValue ? "border-primary" : "border-lightGray/40",
               error 
                 ? "focus:outline-none focus:border-error focus:ring-2 focus:ring-error/20"
@@ -119,6 +134,10 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
               backgroundColor: "white",
               background: "white",
               borderColor: borderColor,
+              minWidth: "100%",
+            }}
+            panelStyle={{
+              minWidth: "100%",
             }}
             {...(rest as Record<string, unknown>)}
           />

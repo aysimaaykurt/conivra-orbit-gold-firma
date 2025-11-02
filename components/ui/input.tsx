@@ -152,7 +152,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               leftIcon ? "pl-10" : "",
               rightIcon ? "pr-10" : "",
               "bg-white text-dark placeholder:text-lightGray",
-              "py-2 px-3 rounded-md border text-sm",
+              "py-1.5 px-3 rounded-md border text-sm h-9",
               error ? "border-error" : hasValue ? "border-primary" : "border-lightGray/40",
               error 
                 ? "focus:outline-none focus:border-error focus:ring-2 focus:ring-error/20"

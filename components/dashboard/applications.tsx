@@ -1,7 +1,9 @@
 "use client";
 
-import { applications, type Application } from "@/src/mocks/dashboard";
+import { Application, applications } from "@/src/mocks/dashboard";
 
+ 
+ 
 export default function ApplicationList() {
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 h-full">

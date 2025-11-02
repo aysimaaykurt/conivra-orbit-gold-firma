@@ -1,7 +1,8 @@
 "use client";
 
-import { type MostPreferredItem } from "@/src/mocks/dashboard";
+import { MostPreferredItem } from "@/src/mocks/dashboard";
 
+  
 interface MostPreferredItemProps {
   item: MostPreferredItem;
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { type PendingReviewItem } from "@/src/mocks/dashboard";
+import { PendingReviewItem } from "@/src/mocks/dashboard";
 
+ 
 interface PendingReviewItemProps {
   item: PendingReviewItem;
 }
