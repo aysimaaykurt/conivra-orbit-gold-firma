@@ -1,6 +1,7 @@
 "use client";
 
 import { Project } from "@/src/mocks/projects";
+import { useTranslations } from "next-intl";
 import React from "react";
  
 interface ProjectCardProps {
@@ -12,6 +13,7 @@ interface ProjectCardProps {
 const cardColors = ["#E3D2EC", "#D2ABC7", "#C9B7C1"];
 
 export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }: ProjectCardProps) {
+  const t = useTranslations("projects");
   const {
     imageSrc,
     title,
@@ -26,6 +28,11 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
   } = project;
 
   const cardColor = cardColors[colorIndex % cardColors.length];
+  
+  // Translate overlay text based on overlayAction
+  const translatedOverlayText = overlayText && project.overlayAction 
+    ? t(`overlayText.${project.overlayAction}`)
+    : overlayText;
 
   const getOverlayIconClass = () => {
     if (overlayIcon === "star-yellow") return "pi pi-star text-yellow-500";
@@ -60,7 +67,7 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
           >
             <i className={`${getOverlayIconClass()} text-3xl mb-2`} />
             <p className="text-white text-xs text-center font-medium leading-tight">
-              {overlayText}
+              {translatedOverlayText}
             </p>
           </div>
         )}
@@ -68,7 +75,7 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
 
       {/* Content Section */}
       <div className="flex-1 flex flex-col justify-between min-w-0">
-        {/* Title */}
+        {/* Title */}image.png
         <h3 className="font-bold text-dark mb-3 text-base line-clamp-1">{title}</h3>
 
         {/* Details Grid (2x2) */}
@@ -88,7 +95,7 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
           {/* Row 2 - Left: Type */}
           <div className="flex items-center gap-2 bg-white rounded-lg px-2.5 py-1">
             <i className="pi pi-tag text-sm" style={{ color: "#4C226A" }} />
-            <span className="text-xs text-gray-800 font-medium">{type}</span>
+            <span className="text-xs text-gray-800 font-medium">{t("type.ad")}</span>
           </div>
 
           {/* Row 2 - Right: Assignee */}

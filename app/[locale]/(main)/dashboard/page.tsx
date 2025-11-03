@@ -3,8 +3,11 @@ import ApplicationList from "@/components/dashboard/applications";
 import Shortcuts from "@/components/dashboard/shortcuts";
 import MostPreferredList from "@/components/dashboard/mostPreferredList";
 import PendingReviewList from "@/components/dashboard/pendingReviewList";
+import { getTranslations } from "next-intl/server";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const t = await getTranslations("dashboard");
+  
   return (
     <div className="p-4 bg-[#F7F6F9] min-h-screen">
       {/* Main Grid: 12 columns */}
@@ -40,7 +43,7 @@ export default function DashboardPage() {
           {/* Reklam Alanı: col-span-1 - flex-1 ile kalan boşluğu doldurur */}
           <div className="flex-1">
             <div className="bg-gray-200 rounded-lg shadow-sm p-6 flex items-center justify-center h-full min-h-[200px]">
-              <span className="text-lightGray text-base font-semibold">Reklam Alanı</span>
+              <span className="text-lightGray text-base font-semibold">{t("adArea")}</span>
             </div>
           </div>
 

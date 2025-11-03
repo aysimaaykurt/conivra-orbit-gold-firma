@@ -1,7 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { Link, useRouter } from "@/src/navigation";
+import { useMemo } from "react";
+import { Dropdown as PrimeDropdown } from "primereact/dropdown";
+import { Link, useRouter, usePathname } from "@/src/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useFormik } from "formik";
 import { loginSchema } from "@/src/yups/auth";
 import circles from "@/src/images/circles.png";
@@ -10,6 +13,24 @@ import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations("header");
+  
+  const languageOptions = useMemo(
+    () => [
+      { label: t("languages.turkish"), value: "tr", flag: "🇹🇷" },
+      { label: t("languages.english"), value: "en", flag: "🇺🇸" },
+      { label: t("languages.spanish"), value: "es", flag: "🇪🇸" },
+    ],
+    [t]
+  );
+
+  const handleLanguageChange = (newLocale: string) => {
+    if (newLocale !== locale) {
+      router.replace(pathname || '/', { locale: newLocale });
+    }
+  };
   
   const formik = useFormik({
     initialValues: { email: "", password: "" },
@@ -25,7 +46,42 @@ export default function LoginPage() {
   const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = formik;
 
   return (
-    <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2">
+    <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2 relative">
+      {/* Language Dropdown - Top Right */}
+      <div className="absolute top-4 right-4 z-10">
+        <PrimeDropdown
+          value={languageOptions.find((opt) => opt.value === locale) || languageOptions[0]}
+          onChange={(e) => handleLanguageChange(e.value)}
+          options={languageOptions}
+          optionLabel="label"
+          itemTemplate={(option) => (
+            <div className="flex items-center gap-2 py-2">
+              <span className="text-base">{option.flag}</span>
+              <span className="font-semibold text-sm text-dark">{option.label}</span>
+            </div>
+          )}
+          valueTemplate={(option) => {
+            if (!option) return null;
+            return (
+              <div className="flex items-center gap-2 px-1">
+                <span className="text-base">{option.flag}</span>
+                <span className="font-semibold text-sm text-dark">{option.label}</span>
+              </div>
+            );
+          }}
+          className="!border-lightGray rounded-full"
+          panelClassName="rounded-lg shadow-lg border border-lightGray/20"
+          style={{ 
+            backgroundColor: "white",
+            borderColor: "#A5A5A5",
+            borderWidth: "0.5px",
+            width: "140px",
+            maxWidth: "140px",
+            height: "40px",
+          }}
+        />
+      </div>
+
       <div className="hidden md:flex flex-col items-center justify-center bg-[#F7F6F9]">
         <div className="max-w-[520px] w-full px-8">
           <div className="mb-8">

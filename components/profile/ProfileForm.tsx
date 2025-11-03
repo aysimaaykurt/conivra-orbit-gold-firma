@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +30,8 @@ export default function ProfileForm({
   initialValues,
   onSubmit,
 }: ProfileFormProps) {
+  const t = useTranslations("profile");
+  
   const formik = useFormik<ProfileFormValues>({
     initialValues,
     validationSchema,
@@ -37,6 +40,37 @@ export default function ProfileForm({
     },
     enableReinitialize: true,
   });
+
+  // Translate options
+  const translatedCityOptions = useMemo(
+    () =>
+      cityOptions.map((option) => ({
+        ...option,
+        label: t(`cities.${option.value}`),
+      })),
+    [t]
+  );
+
+  const translatedDistrictOptions = useMemo(
+    () => {
+      if (!formik.values.city) return [];
+      const districts = districtOptions[formik.values.city] || [];
+      return districts.map((option) => ({
+        ...option,
+        label: t(`districts.${formik.values.city}.${option.value}`),
+      }));
+    },
+    [formik.values.city, t]
+  );
+
+  const translatedSectorOptions = useMemo(
+    () =>
+      sectorOptions.map((option) => ({
+        ...option,
+        label: t(`sectors.${option.value}`),
+      })),
+    [t]
+  );
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-6">
@@ -94,7 +128,7 @@ export default function ProfileForm({
                   ? formik.errors.city
                   : undefined
               }
-              options={cityOptions}
+              options={translatedCityOptions}
               placeholder="İl seçiniz"
             />
           </div>
@@ -114,7 +148,7 @@ export default function ProfileForm({
                   ? formik.errors.district
                   : undefined
               }
-              options={formik.values.city ? districtOptions[formik.values.city] || [] : []}
+              options={translatedDistrictOptions}
               placeholder="İlçe seçiniz"
               disabled={!formik.values.city}
             />
@@ -153,7 +187,7 @@ export default function ProfileForm({
                   ? formik.errors.sector
                   : undefined
               }
-              options={sectorOptions}
+              options={translatedSectorOptions}
               placeholder="Sektör seçiniz"
             />
           </div>

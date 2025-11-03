@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Link } from "@/src/navigation";
+import { useTranslations } from "next-intl";
 import { adTypeTabs, ApplicationListItem, applicationsList, AdType } from "@/src/mocks/applications";
 
 export default function ApplicationsList() {
+  const t = useTranslations("applications.adTypes");
   const [activeTab, setActiveTab] = useState<AdType>("soiree-menu");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -93,7 +95,7 @@ export default function ApplicationsList() {
                 : undefined
             }
           >
-            {tab.label}
+            {t(tab.id)}
           </button>
         ))}
       </div>

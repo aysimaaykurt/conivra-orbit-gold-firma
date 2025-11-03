@@ -1,6 +1,7 @@
 "use client";
 
 import { TabType } from "@/src/mocks/supportRequests";
+import { useTranslations } from "next-intl";
 import React from "react";
  
 interface SupportTabsProps {
@@ -9,6 +10,8 @@ interface SupportTabsProps {
 }
 
 export default function SupportTabs({ activeTab, onTabChange }: SupportTabsProps) {
+  const t = useTranslations("supportRequests.tabs");
+  
   return (
     <div className="flex items-center gap-2">
       <button
@@ -22,7 +25,7 @@ export default function SupportTabs({ activeTab, onTabChange }: SupportTabsProps
           backgroundColor: activeTab === "taleplerim" ? "#4C226A" : "#E8DAF5",
         }}
       >
-        Taleplerim
+        {t("taleplerim")}
       </button>
       <button
         onClick={() => onTabChange("desteklerim")}
@@ -35,7 +38,7 @@ export default function SupportTabs({ activeTab, onTabChange }: SupportTabsProps
           backgroundColor: activeTab === "desteklerim" ? "#4C226A" : "#E8DAF5",
         }}
       >
-        Desteklerim
+        {t("desteklerim")}
       </button>
     </div>
   );

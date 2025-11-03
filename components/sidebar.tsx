@@ -3,27 +3,42 @@
 import { Link } from "@/src/navigation";
 import Image from "next/image";
 import { usePathname } from "@/src/navigation";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useState, useMemo } from "react";
 import activeTabImage from "@/src/images/ActiveTab.png";
 
-type MenuItem = {
-  label: string;
+type MenuItemBase = {
+  labelKey: string;
   href: string;
   icon: string;
 };
 
-const menuItems: MenuItem[] = [
-  { label: "Ana Sayfa", href: "/dashboard", icon: "pi pi-home" },
-  { label: "İlan Yönetimi", href: "/ad-management", icon: "pi pi-list" },
-   { label: "Başvurular", href: "/applications", icon: "pi pi-calendar" },
-  { label: "Projelerim", href: "/projects", icon: "pi pi-check" },
-   { label: "Profil", href: "/profile", icon: "pi pi-id-card" },
-  { label: "Talep / Destek", href: "/support", icon: "pi pi-headphones" },
+type MenuItem = MenuItemBase & {
+  label: string;
+};
+
+const menuItems: MenuItemBase[] = [
+  { labelKey: "dashboard", href: "/dashboard", icon: "pi pi-home" },
+  { labelKey: "adManagement", href: "/ad-management", icon: "pi pi-list" },
+  { labelKey: "applications", href: "/applications", icon: "pi pi-calendar" },
+  { labelKey: "projects", href: "/projects", icon: "pi pi-check" },
+  { labelKey: "profile", href: "/profile", icon: "pi pi-id-card" },
+  { labelKey: "support", href: "/support", icon: "pi pi-headphones" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations("sidebar");
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const translatedMenuItems = useMemo<MenuItem[]>(
+    () =>
+      menuItems.map((item) => ({
+        ...item,
+        label: t(item.labelKey),
+      })),
+    [t]
+  );
 
   return (
     <div className={`h-screen bg-primary flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`} style={{ backgroundColor: '#4C226A' }}>
@@ -43,7 +58,7 @@ export default function Sidebar() {
       {/* Menu Items */}
       <nav className="flex-1 py-4 pl-2">
         <ul className="space-y-2">
-          {menuItems.map((item) => {
+          {translatedMenuItems.map((item) => {
             const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
             return (
               <li key={item.href} className="relative">

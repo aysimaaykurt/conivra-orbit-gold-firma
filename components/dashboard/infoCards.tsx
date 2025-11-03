@@ -1,6 +1,7 @@
 "use client";
 
 import { infoCards, type InfoCard } from "@/src/mocks/dashboard";
+import { useTranslations } from "next-intl";
 
 export default function InfoCards() {
   return (
@@ -13,6 +14,8 @@ export default function InfoCards() {
 }
 
 function InfoCard({ card }: { card: InfoCard }) {
+  const t = useTranslations("dashboard.infoCards");
+  
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm h-full">
        <div className="mb-4">
@@ -23,8 +26,8 @@ function InfoCard({ card }: { card: InfoCard }) {
 
        <div className="flex items-center justify-between gap-2">
          <div className="flex flex-col flex-1 min-w-0">
-          <h3 className="text-base font-bold text-dark mb-1">{card.title}</h3>
-          <p className="text-xs text-lightGray">{card.description}</p>
+          <h3 className="text-base font-bold text-dark mb-1">{t(`${card.id}.title`)}</h3>
+          <p className="text-xs text-lightGray">{t(`${card.id}.description`)}</p>
         </div>
 
          <div

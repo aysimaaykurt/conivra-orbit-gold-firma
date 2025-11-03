@@ -1,6 +1,7 @@
 "use client";
 
 import { PendingReviewItem } from "@/src/mocks/dashboard";
+import { useTranslations } from "next-intl";
 
  
 interface PendingReviewItemProps {
@@ -8,6 +9,14 @@ interface PendingReviewItemProps {
 }
 
 export default function PendingReviewItemComponent({ item }: PendingReviewItemProps) {
+  const t = useTranslations("dashboard.pendingReviews");
+  const tAppDetail = useTranslations("applicationDetail.reviewerRole");
+  
+  // Translate reviewer role
+  const translatedRole = item.reviewerRole === "Instagram Influencer"
+    ? tAppDetail("instagramInfluencer")
+    : item.reviewerRole;
+  
   return (
     <div className="bg-white rounded-lg p-3 shadow-sm flex items-start gap-3 relative border border-gray-100">
       {/* Star Icon - Top Right */}
@@ -26,13 +35,13 @@ export default function PendingReviewItemComponent({ item }: PendingReviewItemPr
       {/* Middle: Content */}
       <div className="flex-1 min-w-0 pr-20">
         <h4 className="text-base font-bold text-dark mb-1">{item.reviewerName}</h4>
-        <p className="text-sm text-lightGray mb-2">{item.reviewerRole}</p>
+        <p className="text-sm text-lightGray mb-2">{translatedRole}</p>
         <p className="text-xs text-dark">{item.serviceDescription}</p>
       </div>
 
       {/* Right: Evaluate Button */}
       <button className="absolute bottom-4 right-4 flex items-center gap-1 text-dark text-sm font-semibold hover:opacity-80 transition-opacity">
-        <span>Değerlendir</span>
+        <span>{t("evaluate")}</span>
         <i className="pi pi-arrow-right text-xs"></i>
       </button>
     </div>

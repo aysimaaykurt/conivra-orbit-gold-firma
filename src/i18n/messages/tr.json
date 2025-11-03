@@ -1,1 +1,179 @@
-{}
+{
+  "header": {
+    "status": {
+      "gold": "Gold Statü",
+      "silver": "Silver Statü",
+      "bronze": "Bronze Statü",
+      "standard": "Standart"
+    },
+    "referralCode": "Referans Kodu",
+    "languages": {
+      "turkish": "Türkçe",
+      "english": "English",
+      "spanish": "Español"
+    }
+  },
+  "sidebar": {
+    "dashboard": "Ana Sayfa",
+    "adManagement": "İlan Yönetimi",
+    "applications": "Başvurular",
+    "projects": "Projelerim",
+    "profile": "Profil",
+    "support": "Talep / Destek"
+  },
+  "dashboard": {
+    "shortcuts": "Kısa Yollar",
+    "pendingReviews": {
+      "title": "Bekleyen Değerlendirmeler",
+      "subtitle": "Aldığınız hizmeti değerlendirin",
+      "evaluate": "Değerlendir"
+    },
+    "mostPreferred": {
+      "title": "En çok tercih edilenler",
+      "subtitle": "En çok tercih edilen influencerlar"
+    },
+    "applications": {
+      "title": "Son Gelen Başvurular",
+      "appliedTo": "ilanınıza başvurdu"
+    },
+    "adArea": "Reklam Alanı",
+    "infoCards": {
+      "active-jobs": {
+        "title": "Aktif İlanlarım",
+        "description": "Oluşturduğum iş ilan sayısı"
+      },
+      "applications": {
+        "title": "Gelen Başvurular",
+        "description": "Gelen iş başvuru sayısı"
+      },
+      "favorite-influencers": {
+        "title": "Favori Influencer",
+        "description": "Beğendiğim influencer sayısı"
+      }
+    },
+    "shortcutItems": {
+      "create-ad": "Yeni ilan oluştur",
+      "go-to-favorites": "Favorilere git",
+      "search-influencer": "Influencer ara",
+      "go-to-applications": "Başvurularıma git"
+    },
+    "timeAgo": {
+      "minutesAgo": "{count} dk önce",
+      "hoursAgo": "{count} saat önce",
+      "daysAgo": "{count} gün önce"
+    }
+  },
+  "adManagement": {
+    "type": {
+      "ad": "Reklam"
+    },
+    "months": {
+      "ocak": "Ocak",
+      "şubat": "Şubat",
+      "mart": "Mart",
+      "nisan": "Nisan",
+      "mayıs": "Mayıs",
+      "haziran": "Haziran",
+      "temmuz": "Temmuz",
+      "ağustos": "Ağustos",
+      "eylül": "Eylül",
+      "ekim": "Ekim",
+      "kasım": "Kasım",
+      "aralık": "Aralık"
+    },
+    "daysOfWeek": {
+      "pazartesi": "Pazartesi",
+      "salı": "Salı",
+      "çarşamba": "Çarşamba",
+      "perşembe": "Perşembe",
+      "cuma": "Cuma",
+      "cumartesi": "Cumartesi",
+      "pazar": "Pazar"
+    }
+  },
+  "applicationDetail": {
+    "category": {
+      "beauty": "Güzellik / Kişisel Bakım"
+    },
+    "status": {
+      "bronz": "Bronz",
+      "gümüş": "Gümüş",
+      "altın": "Altın",
+      "platin": "Platin"
+    },
+    "reviewerRole": {
+      "instagramInfluencer": "Instagram Influencer"
+    }
+  },
+  "applications": {
+    "adTypes": {
+      "soiree-menu": "Soiree Menü Reklamı",
+      "beach-cocktail": "Beach Kokteyl Reklamı",
+      "soiree-breakfast": "Soiree Kahvaltı Reklamı"
+    }
+  },
+  "profile": {
+    "cities": {
+      "istanbul": "İstanbul",
+      "ankara": "Ankara",
+      "izmir": "İzmir",
+      "bursa": "Bursa",
+      "antalya": "Antalya"
+    },
+    "districts": {
+      "istanbul": {
+        "kadikoy": "Kadıköy",
+        "besiktas": "Beşiktaş",
+        "sisli": "Şişli",
+        "beyoglu": "Beyoğlu"
+      },
+      "ankara": {
+        "cankaya": "Çankaya",
+        "kecioren": "Keçiören",
+        "yenimahalle": "Yenimahalle"
+      },
+      "izmir": {
+        "konak": "Konak",
+        "karsiyaka": "Karşıyaka",
+        "bornova": "Bornova"
+      },
+      "bursa": {
+        "osmangazi": "Osmangazi",
+        "nilufer": "Nilüfer"
+      },
+      "antalya": {
+        "muratpasa": "Muratpaşa",
+        "konyaalti": "Konyaaltı"
+      }
+    },
+    "sectors": {
+      "restaurant": "Restoran / Cafe / Bar / Beach",
+      "technology": "Teknoloji",
+      "healthcare": "Sağlık",
+      "education": "Eğitim",
+      "fashion": "Moda",
+      "tourism": "Turizm"
+    }
+  },
+  "projects": {
+    "type": {
+      "ad": "Reklam"
+    },
+    "overlayText": {
+      "evaluate": "Influencer'ı Değerlendir",
+      "view": "Değerlendirmeyi Gör"
+    }
+  },
+  "supportRequests": {
+    "tabs": {
+      "taleplerim": "Taleplerim",
+      "desteklerim": "Desteklerim"
+    },
+    "status": {
+      "çözüldü": "Çözüldü",
+      "beklemede": "Beklemede",
+      "işlemde": "İşlemde",
+      "iptal": "İptal"
+    }
+  }
+}

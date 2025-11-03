@@ -1,25 +1,63 @@
 "use client";
 
 import React from "react";
- import EventCard from "./EventCard";
+import { useTranslations } from "next-intl";
+import EventCard from "./EventCard";
 import { AdEvent } from "@/src/mocks/adManagement";
 
 interface EventCalendarSectionProps {
   event: AdEvent;
 }
 
-const dayNames = [
-  "Pazartesi",
-  "Salı",
-  "Çarşamba",
-  "Perşembe",
-  "Cuma",
-  "Cumartesi",
-  "Pazar",
-];
-
 export default function EventCalendarSection({ event }: EventCalendarSectionProps) {
+  const t = useTranslations("adManagement");
   const { calendarRange, month } = event;
+  
+  // Helper function to get month translation key
+  const getMonthKey = (month: string) => {
+    const monthMap: Record<string, string> = {
+      "Ocak": "ocak",
+      "Şubat": "şubat",
+      "Mart": "mart",
+      "Nisan": "nisan",
+      "Mayıs": "mayıs",
+      "Haziran": "haziran",
+      "Temmuz": "temmuz",
+      "Ağustos": "ağustos",
+      "Eylül": "eylül",
+      "Ekim": "ekim",
+      "Kasım": "kasım",
+      "Aralık": "aralık",
+    };
+    return monthMap[month] || month.toLowerCase();
+  };
+
+  // Helper function to get day translation key
+  const getDayKey = (day: string) => {
+    const dayMap: Record<string, string> = {
+      "Pazartesi": "pazartesi",
+      "Salı": "salı",
+      "Çarşamba": "çarşamba",
+      "Perşembe": "perşembe",
+      "Cuma": "cuma",
+      "Cumartesi": "cumartesi",
+      "Pazar": "pazar",
+    };
+    return dayMap[day] || day.toLowerCase();
+  };
+
+  const dayNames = [
+    t("daysOfWeek.pazartesi"),
+    t("daysOfWeek.salı"),
+    t("daysOfWeek.çarşamba"),
+    t("daysOfWeek.perşembe"),
+    t("daysOfWeek.cuma"),
+    t("daysOfWeek.cumartesi"),
+    t("daysOfWeek.pazar"),
+  ];
+  
+  // Get translated month
+  const translatedMonth = t(`months.${getMonthKey(month)}`);
   const timeSlots = ["09:00", "10:00"];
 
   // Generate day headers based on range
@@ -42,7 +80,7 @@ export default function EventCalendarSection({ event }: EventCalendarSectionProp
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
       {/* Month Header */}
       <div className="p-4 border-b border-gray-200">
-        <h3 className="text-xl font-bold text-dark">{month}</h3>
+        <h3 className="text-xl font-bold text-dark">{translatedMonth}</h3>
       </div>
 
       {/* Calendar Grid */}

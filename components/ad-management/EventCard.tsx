@@ -1,9 +1,44 @@
 "use client";
 
 import { AdEvent } from "@/src/mocks/adManagement";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
  
 export default function EventCard({ event }: { event: AdEvent }) {
+  const t = useTranslations("adManagement");
+  
+  // Helper function to get month translation key
+  const getMonthKey = (month: string) => {
+    const monthMap: Record<string, string> = {
+      "Ocak": "ocak",
+      "Şubat": "şubat",
+      "Mart": "mart",
+      "Nisan": "nisan",
+      "Mayıs": "mayıs",
+      "Haziran": "haziran",
+      "Temmuz": "temmuz",
+      "Ağustos": "ağustos",
+      "Eylül": "eylül",
+      "Ekim": "ekim",
+      "Kasım": "kasım",
+      "Aralık": "aralık",
+    };
+    return monthMap[month] || month.toLowerCase();
+  };
+
+  // Helper function to get day translation key
+  const getDayKey = (day: string) => {
+    const dayMap: Record<string, string> = {
+      "Pazartesi": "pazartesi",
+      "Salı": "salı",
+      "Çarşamba": "çarşamba",
+      "Perşembe": "perşembe",
+      "Cuma": "cuma",
+      "Cumartesi": "cumartesi",
+      "Pazar": "pazar",
+    };
+    return dayMap[day] || day.toLowerCase();
+  };
   return (
     <div className="rounded-lg bg-[#EED7EF] p-3 cursor-pointer hover:shadow-md transition-shadow h-full">
       <div className="flex items-start gap-3 relative">
@@ -38,7 +73,7 @@ export default function EventCard({ event }: { event: AdEvent }) {
           <div className="flex items-center gap-3 text-xs flex-wrap" style={{ color: "#4C226A" }}>
             <div className="flex items-center gap-1">
               <i className="pi pi-tag text-xs"></i>
-              <span>{event.type}</span>
+              <span>{t("type.ad")}</span>
             </div>
             <div className="flex items-center gap-1">
               <i className="pi pi-eye text-xs"></i>

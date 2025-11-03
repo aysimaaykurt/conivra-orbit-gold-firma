@@ -1,20 +1,15 @@
 "use client";
 
 import { ApplicationDetail, StatusType } from "@/src/mocks/applicationDetail";
+import { useTranslations } from "next-intl";
 import React from "react";
  
 interface ProfileCardProps {
   application: ApplicationDetail;
 }
 
-const statusLabels: Record<StatusType, string> = {
-  bronz: "Bronz",
-  gümüş: "Gümüş",
-  altın: "Altın",
-  platin: "Platin",
-};
-
 export default function ProfileCard({ application }: ProfileCardProps) {
+  const t = useTranslations("applicationDetail");
   const { profileImageSrc, fullName, category, rating, status } = application;
 
   return (
@@ -46,7 +41,7 @@ export default function ProfileCard({ application }: ProfileCardProps) {
         </h2>
 
         {/* Category */}
-        <p className="text-dark text-base">{category}</p>
+        <p className="text-dark text-base">{t("category.beauty")}</p>
 
         {/* Rating - 5 full stars based on image */}
         <div className="flex items-center gap-1">
@@ -62,7 +57,7 @@ export default function ProfileCard({ application }: ProfileCardProps) {
         {/* Status Badge */}
         <div className="flex items-center gap-2 mt-1">
           <i className="pi pi-award text-xl" style={{ color: "#CD7F32" }} />
-          <span className="text-sm text-dark">Statü: {statusLabels[status]}</span>
+          <span className="text-sm text-dark">Statü: {t(`status.${status}`)}</span>
         </div>
       </div>
     </div>

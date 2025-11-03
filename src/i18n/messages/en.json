@@ -1,1 +1,179 @@
-{}
+{
+  "header": {
+    "status": {
+      "gold": "Gold Status",
+      "silver": "Silver Status",
+      "bronze": "Bronze Status",
+      "standard": "Standard"
+    },
+    "referralCode": "Referral Code",
+    "languages": {
+      "turkish": "Turkish",
+      "english": "English",
+      "spanish": "Spanish"
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "adManagement": "Ad Management",
+    "applications": "Applications",
+    "projects": "My Projects",
+    "profile": "Profile",
+    "support": "Support / Request"
+  },
+  "dashboard": {
+    "shortcuts": "Shortcuts",
+    "pendingReviews": {
+      "title": "Pending Reviews",
+      "subtitle": "Evaluate the service you received",
+      "evaluate": "Evaluate"
+    },
+    "mostPreferred": {
+      "title": "Most Preferred",
+      "subtitle": "Most preferred influencers"
+    },
+    "applications": {
+      "title": "Recent Applications",
+      "appliedTo": "applied to your ad"
+    },
+    "adArea": "Ad Area",
+    "infoCards": {
+      "active-jobs": {
+        "title": "Active Ads",
+        "description": "Number of job ads I created"
+      },
+      "applications": {
+        "title": "Applications Received",
+        "description": "Number of job applications received"
+      },
+      "favorite-influencers": {
+        "title": "Favorite Influencer",
+        "description": "Number of influencers I liked"
+      }
+    },
+    "shortcutItems": {
+      "create-ad": "Create new ad",
+      "go-to-favorites": "Go to favorites",
+      "search-influencer": "Search influencer",
+      "go-to-applications": "Go to my applications"
+    },
+    "timeAgo": {
+      "minutesAgo": "{count} min ago",
+      "hoursAgo": "{count} hours ago",
+      "daysAgo": "{count} days ago"
+    }
+  },
+  "adManagement": {
+    "type": {
+      "ad": "Ad"
+    },
+    "months": {
+      "ocak": "January",
+      "şubat": "February",
+      "mart": "March",
+      "nisan": "April",
+      "mayıs": "May",
+      "haziran": "June",
+      "temmuz": "July",
+      "ağustos": "August",
+      "eylül": "September",
+      "ekim": "October",
+      "kasım": "November",
+      "aralık": "December"
+    },
+    "daysOfWeek": {
+      "pazartesi": "Monday",
+      "salı": "Tuesday",
+      "çarşamba": "Wednesday",
+      "perşembe": "Thursday",
+      "cuma": "Friday",
+      "cumartesi": "Saturday",
+      "pazar": "Sunday"
+    }
+  },
+  "applicationDetail": {
+    "category": {
+      "beauty": "Beauty / Personal Care"
+    },
+    "status": {
+      "bronz": "Bronze",
+      "gümüş": "Silver",
+      "altın": "Gold",
+      "platin": "Platinum"
+    },
+    "reviewerRole": {
+      "instagramInfluencer": "Instagram Influencer"
+    }
+  },
+  "applications": {
+    "adTypes": {
+      "soiree-menu": "Soiree Menu Ad",
+      "beach-cocktail": "Beach Cocktail Ad",
+      "soiree-breakfast": "Soiree Breakfast Ad"
+    }
+  },
+  "profile": {
+    "cities": {
+      "istanbul": "Istanbul",
+      "ankara": "Ankara",
+      "izmir": "Izmir",
+      "bursa": "Bursa",
+      "antalya": "Antalya"
+    },
+    "districts": {
+      "istanbul": {
+        "kadikoy": "Kadikoy",
+        "besiktas": "Besiktas",
+        "sisli": "Sisli",
+        "beyoglu": "Beyoglu"
+      },
+      "ankara": {
+        "cankaya": "Cankaya",
+        "kecioren": "Kecioren",
+        "yenimahalle": "Yenimahalle"
+      },
+      "izmir": {
+        "konak": "Konak",
+        "karsiyaka": "Karsiyaka",
+        "bornova": "Bornova"
+      },
+      "bursa": {
+        "osmangazi": "Osmangazi",
+        "nilufer": "Nilufer"
+      },
+      "antalya": {
+        "muratpasa": "Muratpasa",
+        "konyaalti": "Konyaalti"
+      }
+    },
+    "sectors": {
+      "restaurant": "Restaurant / Cafe / Bar / Beach",
+      "technology": "Technology",
+      "healthcare": "Healthcare",
+      "education": "Education",
+      "fashion": "Fashion",
+      "tourism": "Tourism"
+    }
+  },
+  "projects": {
+    "type": {
+      "ad": "Ad"
+    },
+    "overlayText": {
+      "evaluate": "Evaluate Influencer",
+      "view": "View Evaluation"
+    }
+  },
+  "supportRequests": {
+    "tabs": {
+      "taleplerim": "My Requests",
+      "desteklerim": "My Support"
+    },
+    "status": {
+      "çözüldü": "Resolved",
+      "beklemede": "Pending",
+      "işlemde": "In Process",
+      "iptal": "Cancelled"
+    }
+  }
+}

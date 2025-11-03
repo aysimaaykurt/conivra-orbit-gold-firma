@@ -1,40 +1,56 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dropdown as PrimeDropdown } from "primereact/dropdown";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter, usePathname } from "@/src/navigation";
 import goldStatue from "@/src/images/goldStatue.png";
 import { mockCompany, type CompanyProfile } from "@/src/mocks/user";
-
-function getStatusLabel(status: CompanyProfile["status"]) {
-  switch (status) {
-    case "Gold":
-      return "Gold Statü";
-    case "Silver":
-      return "Silver Statü";
-    case "Bronze":
-      return "Bronze Statü";
-    default:
-      return "Standart";
-  }
-}
-
-const languageOptions = [
-  { label: "Türkçe", value: "tr", flag: "🇹🇷" },
-  { label: "English", value: "en", flag: "🇺🇸" },
-  { label: "Español", value: "es", flag: "🇪🇸" },
-];
 
 const mockReferralCode = "REF123456";
 
 export default function Header() {
   const company = mockCompany;
-  const [selectedLanguage, setSelectedLanguage] = useState(languageOptions[0].value); // Default: Türkçe
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const t = useTranslations("header");
   const [notificationCount] = useState(4);
+
+  function getStatusLabel(status: CompanyProfile["status"]) {
+    switch (status) {
+      case "Gold":
+        return t("status.gold");
+      case "Silver":
+        return t("status.silver");
+      case "Bronze":
+        return t("status.bronze");
+      default:
+        return t("status.standard");
+    }
+  }
+
+  const languageOptions = useMemo(
+    () => [
+      { label: t("languages.turkish"), value: "tr", flag: "🇹🇷" },
+      { label: t("languages.english"), value: "en", flag: "🇺🇸" },
+      { label: t("languages.spanish"), value: "es", flag: "🇪🇸" },
+    ],
+    [t]
+  );
+
+  const handleLanguageChange = (newLocale: string) => {
+    if (newLocale !== locale) {
+      // Navigate to the same pathname but with new locale
+      // usePathname from next-intl already returns pathname without locale
+      router.replace(pathname || '/', { locale: newLocale });
+    }
+  };
 
   const copyReferralCode = () => {
     navigator.clipboard.writeText(mockReferralCode);
-   };
+  };
 
   return (
     <header className="sticky top-0 z-20 w-full bg-white" style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
@@ -65,26 +81,25 @@ export default function Header() {
           </button>
 
            <PrimeDropdown
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.value)}
+            value={languageOptions.find((opt) => opt.value === locale) || languageOptions[0]}
+            onChange={(e) => handleLanguageChange(e.value)}
             options={languageOptions}
             optionLabel="label"
-            optionValue="value"
-            defaultValue={languageOptions[0].value}
             itemTemplate={(option) => (
               <div className="flex items-center gap-2 py-2">
                 <span className="text-base">{option.flag}</span>
                 <span className="font-semibold text-sm text-dark">{option.label}</span>
               </div>
             )}
-            valueTemplate={(option) => (
-              option ? (
+            valueTemplate={(option) => {
+              if (!option) return null;
+              return (
                 <div className="flex items-center gap-2 px-1">
                   <span className="text-base">{option.flag}</span>
                   <span className="font-semibold text-sm text-dark">{option.label}</span>
                 </div>
-              ) : null
-            )}
+              );
+            }}
             className="header-language-dropdown !border-lightGray rounded-full"
             panelClassName="rounded-lg shadow-lg border border-lightGray/20"
             style={{ 
@@ -106,7 +121,7 @@ export default function Header() {
             }}
           >
             <i className="pi pi-link text-primary text-base"></i>
-            <span className="text-sm font-semibold text-dark">Referans Kodu</span>
+            <span className="text-sm font-semibold text-dark">{t("referralCode")}</span>
           </button>
 
           {/* User Profile */}
