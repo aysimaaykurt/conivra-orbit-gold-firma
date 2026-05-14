@@ -1,19 +1,93 @@
 "use client";
 
-import { infoCards, type InfoCard } from "@/src/mocks/dashboard";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { getDashboardStats } from "@/src/api/company/dashboard/dashboard.service";
+import type { DashboardStatsItem } from "@/src/api/company/dashboard/dashboard.models";
 
 export default function InfoCards() {
+  const [cards, setCards] = useState<DashboardStatsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await getDashboardStats();
+        if (response.success && response.data) {
+          setCards(response.data);
+        } else {
+          setError("Veriler yüklenemedi");
+        }
+      } catch (error: any) {
+        console.error("Dashboard stats yüklenirken hata:", error);
+        setError(error.message || "Veriler yüklenirken bir hata oluştu");
+        setCards([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white rounded-lg p-4 shadow-sm h-full animate-pulse">
+            <div className="mb-4">
+              <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col flex-1 min-w-0">
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+              </div>
+              <div className="w-12 h-8 bg-gray-200 rounded-lg"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="col-span-3 bg-white rounded-lg p-4 shadow-sm">
+          <p className="text-sm text-lightGray text-center py-4">
+            {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="col-span-3 bg-white rounded-lg p-4 shadow-sm">
+          <p className="text-sm text-lightGray text-center py-4">
+            Henüz istatistik bulunmamaktadır.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {infoCards.map((card) => (
+      {cards.map((card) => (
         <InfoCard key={card.id} card={card} />
       ))}
     </div>
   );
 }
 
-function InfoCard({ card }: { card: InfoCard }) {
+function InfoCard({ card }: { card: DashboardStatsItem }) {
   const t = useTranslations("dashboard.infoCards");
   
   return (

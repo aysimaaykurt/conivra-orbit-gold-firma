@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
+import { addWorkshop } from "@/src/api/advertisements/workshops.service";
 
 interface AddWorkshopFormProps {
   onClose?: () => void;
@@ -130,6 +132,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -151,9 +155,71 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       image: null,
       imagePreview: "",
     },
-    onSubmit: (values) => {
-      console.log("Workshop form submitted:", values);
-      // API call will be here
+    onSubmit: async (values) => {
+      // Validate dateRange
+      if (!values.dateRange || !Array.isArray(values.dateRange) || values.dateRange.length < 2 || !values.dateRange[1]) {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: "Lütfen geçerli bir tarih aralığı seçiniz",
+          life: 3000,
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        // Convert dateRange to startDate and endDate (ISO 8601 format)
+        const startDate = values.dateRange[0].toISOString();
+        const endDate = values.dateRange[1].toISOString();
+
+        const response = await addWorkshop({
+          title: values.title,
+          description: values.description,
+          startDate,
+          endDate,
+          duration: values.duration,
+          city: values.city,
+          district: values.district,
+          address: values.address,
+          category: values.category,
+          targetAudience: values.targetAudience,
+          participantCount: values.participantCount,
+          participationCondition: values.participationCondition,
+          fee: values.fee,
+          contentType: values.contentType,
+          workshopGoal: values.workshopGoal,
+          workshopContent: values.workshopContent,
+          image: values.image || undefined,
+        });
+
+        if (response.success) {
+          toastRef.current?.show({
+            severity: "success",
+            summary: "Başarılı",
+            detail: response.message || "Workshop başarıyla eklendi",
+            life: 3000,
+          });
+
+          // Redirect after success
+          setTimeout(() => {
+            if (onClose) {
+              onClose();
+            } else {
+              router.push("/ad-management");
+            }
+          }, 1500);
+        }
+      } catch (error: any) {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: error.message || "Workshop eklenirken bir hata oluştu",
+          life: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
@@ -259,7 +325,9 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   };
 
   return (
-    <div className="bg-white min-h-screen p-6">
+    <>
+      <Toast ref={toastRef} />
+      <div className="bg-white min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header - Outside form div */}
         <div className="flex items-center gap-3 mb-2">
@@ -560,10 +628,11 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               <Button
                 type="button"
                 onClick={() => formik.handleSubmit()}
+                disabled={isLoading}
                 className="bg-primary text-white"
                 style={{ backgroundColor: "#4C226A" }}
               >
-                Workshop Ekle
+                {isLoading ? "Ekleniyor..." : "Workshop Ekle"}
               </Button>
             )}
           </div>
@@ -729,16 +798,18 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
             <Button
               type="button"
               onClick={() => formik.handleSubmit()}
+              disabled={isLoading}
               className="w-full text-white py-3 rounded-lg"
               style={{ backgroundColor: "#4C226A" }}
             >
-              Workshop Ekle
+              {isLoading ? "Ekleniyor..." : "Workshop Ekle"}
             </Button>
           </div>
         </div>
       </div>
       </div>
     </div>
+    </>
   );
 }
 

@@ -48,9 +48,10 @@ export default function CreateSupportForm({
       description: "",
     },
     validationSchema,
-    onSubmit: (values) => {
+    enableReinitialize: true,
+    onSubmit: (values, { resetForm }) => {
       onSubmit(values);
-      formik.resetForm();
+      resetForm();
     },
   });
 

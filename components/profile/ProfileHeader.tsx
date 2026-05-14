@@ -1,13 +1,14 @@
 "use client";
 
-import { ProfileStats } from "@/src/mocks/profile";
-import React from "react";
+import { ProfileStats } from "@/src/api/company/profile/profileInfo.models";
+import { getProfileInfo } from "@/src/api/company/profile/profileInfo.service";
+import React, { useEffect, useState } from "react";
  
 interface ProfileHeaderProps {
   companyName: string;
   profileImageSrc?: string;
   badgeType?: "gold" | "silver" | "bronze";
-  stats: ProfileStats;
+  stats?: ProfileStats; // Optional, will be fetched if not provided
   onImageClick?: () => void;
 }
 
@@ -27,9 +28,46 @@ export default function ProfileHeader({
   companyName,
   profileImageSrc,
   badgeType,
-  stats,
+  stats: propsStats,
   onImageClick,
 }: ProfileHeaderProps) {
+  const [stats, setStats] = useState<ProfileStats>(
+    propsStats || {
+      totalJobs: 0,
+      completedJobs: 0,
+      pendingJobs: 0,
+      cancelledJobs: 0,
+    }
+  );
+  const [isLoading, setIsLoading] = useState(!propsStats);
+
+  useEffect(() => {
+    // If stats are provided as props, use them
+    if (propsStats) {
+      setStats(propsStats);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch from API
+    const fetchProfileInfo = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getProfileInfo();
+        if (response.success && response.data) {
+          setStats(response.data);
+        }
+      } catch (error: any) {
+        console.error("Profile info yüklenirken hata:", error);
+        // Keep default stats on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileInfo();
+  }, [propsStats]);
+
   return (
     <div className="mb-6">
       {/* Main Section - Profile Picture, Name, Badge and Statistics all in one row */}
@@ -81,47 +119,58 @@ export default function ProfileHeader({
         </div>
 
         {/* Right Side - Statistics */}
-        <div className="flex items-center gap-8">
-          {/* Toplam İş */}
-          <div className="text-center">
-            <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
-              {stats.totalJobs}
-            </div>
-            <div className="text-sm" style={{ color: "#4C226A" }}>
-              Toplam İş
-            </div>
+        {isLoading ? (
+          <div className="flex items-center gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="text-center">
+                <div className="w-12 h-10 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
           </div>
+        ) : (
+          <div className="flex items-center gap-8">
+            {/* Toplam İş */}
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
+                {stats.totalJobs}
+              </div>
+              <div className="text-sm" style={{ color: "#4C226A" }}>
+                Toplam İş
+              </div>
+            </div>
 
-          {/* Tamamlanan İş */}
-          <div className="text-center">
-            <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
-              {stats.completedJobs}
+            {/* Tamamlanan İş */}
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
+                {stats.completedJobs}
+              </div>
+              <div className="text-sm" style={{ color: "#4C226A" }}>
+                Tamamlanan İş
+              </div>
             </div>
-            <div className="text-sm" style={{ color: "#4C226A" }}>
-              Tamamlanan İş
-            </div>
-          </div>
 
-          {/* Bekleyen İşler */}
-          <div className="text-center">
-            <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
-              {stats.pendingJobs}
+            {/* Bekleyen İşler */}
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
+                {stats.pendingJobs}
+              </div>
+              <div className="text-sm" style={{ color: "#4C226A" }}>
+                Bekleyen İşler
+              </div>
             </div>
-            <div className="text-sm" style={{ color: "#4C226A" }}>
-              Bekleyen İşler
-            </div>
-          </div>
 
-          {/* İptal Olan İşler */}
-          <div className="text-center">
-            <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
-              {stats.cancelledJobs}
-            </div>
-            <div className="text-sm" style={{ color: "#4C226A" }}>
-              İptal Olan İşler
+            {/* İptal Olan İşler */}
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>
+                {stats.cancelledJobs}
+              </div>
+              <div className="text-sm" style={{ color: "#4C226A" }}>
+                İptal Olan İşler
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Horizontal Line */}

@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
+import { addAdvertisement } from "@/src/api/advertisements/advertisements.service";
 
 interface AddAdFormProps {
   onClose?: () => void;
@@ -130,6 +132,8 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -150,9 +154,70 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
       image: null,
       imagePreview: "",
     },
-    onSubmit: (values) => {
-      console.log("Form submitted:", values);
-      // API call will be here
+    onSubmit: async (values) => {
+      // Validate dateRange
+      if (!values.dateRange || !Array.isArray(values.dateRange) || values.dateRange.length < 2 || !values.dateRange[1]) {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: "Lütfen geçerli bir tarih aralığı seçiniz",
+          life: 3000,
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        // Convert dateRange to startDate and endDate (ISO 8601 format)
+        const startDate = values.dateRange[0].toISOString();
+        const endDate = values.dateRange[1].toISOString();
+
+        const response = await addAdvertisement({
+          title: values.title,
+          description: values.description,
+          startDate,
+          endDate,
+          city: values.city,
+          district: values.district,
+          address: values.address,
+          sector: values.sector,
+          category: values.category,
+          services: values.services,
+          guestCount: values.guestCount,
+          platformPreference: values.platformPreference,
+          followerRange: values.followerRange,
+          contentType: values.contentType,
+          businessType: values.businessType,
+          image: values.image || undefined,
+        });
+
+        if (response.success) {
+          toastRef.current?.show({
+            severity: "success",
+            summary: "Başarılı",
+            detail: response.message || "İlan başarıyla eklendi",
+            life: 3000,
+          });
+
+          // Redirect after success
+          setTimeout(() => {
+            if (onClose) {
+              onClose();
+            } else {
+              router.push("/ad-management");
+            }
+          }, 1500);
+        }
+      } catch (error: any) {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: error.message || "İlan eklenirken bir hata oluştu",
+          life: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
@@ -260,7 +325,9 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
   };
 
   return (
-    <div className="bg-white min-h-screen p-6">
+    <>
+      <Toast ref={toastRef} />
+      <div className="bg-white min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header - Outside form div */}
         <div className="flex items-center gap-3 mb-2">
@@ -561,10 +628,11 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
               <Button
                 type="button"
                 onClick={() => formik.handleSubmit()}
+                disabled={isLoading}
                 className="bg-primary text-white"
                 style={{ backgroundColor: "#4C226A" }}
               >
-                İlan Ekle
+                {isLoading ? "Ekleniyor..." : "İlan Ekle"}
               </Button>
             )}
           </div>
@@ -687,16 +755,18 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
             <Button
               type="button"
               onClick={() => formik.handleSubmit()}
+              disabled={isLoading}
               className="w-full text-white py-3 rounded-lg"
               style={{ backgroundColor: "#4C226A" }}
             >
-              İlan Ekle
+              {isLoading ? "Ekleniyor..." : "İlan Ekle"}
             </Button>
           </div>
         </div>
-      </div>
+        </div>
       </div>
     </div>
+    </>
   );
 }
 

@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
+import { addGiftKit } from "@/src/api/advertisements/giftKits.service";
 
 interface AddGiftKitFormProps {
   onClose?: () => void;
@@ -82,6 +84,8 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -96,9 +100,48 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       image: null,
       imagePreview: "",
     },
-    onSubmit: (values) => {
-      console.log("Gift Kit form submitted:", values);
-      // API call will be here
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      try {
+        const response = await addGiftKit({
+          title: values.title,
+          content: values.content,
+          category: values.category,
+          targetAudience: values.targetAudience,
+          followerRange: values.followerRange,
+          platformPreference: values.platformPreference,
+          businessType: values.businessType,
+          contentType: values.contentType,
+          image: values.image || undefined,
+        });
+
+        if (response.success) {
+          toastRef.current?.show({
+            severity: "success",
+            summary: "Başarılı",
+            detail: response.message || "Hediye kiti başarıyla eklendi",
+            life: 3000,
+          });
+
+          // Redirect after success
+          setTimeout(() => {
+            if (onClose) {
+              onClose();
+            } else {
+              router.push("/ad-management");
+            }
+          }, 1500);
+        }
+      } catch (error: any) {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: error.message || "Hediye kiti eklenirken bir hata oluştu",
+          life: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
@@ -166,7 +209,9 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   };
 
   return (
-    <div className="bg-white min-h-screen p-6">
+    <>
+      <Toast ref={toastRef} />
+      <div className="bg-white min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header - Outside form div */}
         <div className="flex items-center gap-3 mb-2">
@@ -368,10 +413,11 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
               <Button
                 type="button"
                 onClick={() => formik.handleSubmit()}
+                disabled={isLoading}
                 className="bg-primary text-white"
                 style={{ backgroundColor: "#4C226A" }}
               >
-                Hediye Kiti Ekle
+                {isLoading ? "Ekleniyor..." : "Hediye Kiti Ekle"}
               </Button>
             )}
           </div>
@@ -505,16 +551,18 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
             <Button
               type="button"
               onClick={() => formik.handleSubmit()}
+              disabled={isLoading}
               className="w-full text-white py-3 rounded-lg"
               style={{ backgroundColor: "#4C226A" }}
             >
-              Hediye Kiti Ekle
+              {isLoading ? "Ekleniyor..." : "Hediye Kiti Ekle"}
             </Button>
           </div>
         </div>
       </div>
       </div>
     </div>
+    </>
   );
 }
 

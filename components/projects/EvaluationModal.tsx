@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EvaluationData } from "@/src/mocks/projects";
+import { createEvaluation, getEvaluation } from "@/src/api/applications/evaluation.service";
+import { Toast } from "@/components/ui/toast";
+import { useRef } from "react";
 
 interface EvaluationModalProps {
   isOpen: boolean;
@@ -9,6 +12,9 @@ interface EvaluationModalProps {
   onSubmit?: (data: EvaluationData) => void;
   initialData?: EvaluationData;
   isViewOnly?: boolean;
+  applicationId?: string;
+  influencerId?: string;
+  evaluationId?: string; // For viewing existing evaluation
 }
 
 export default function EvaluationModal({
@@ -17,7 +23,14 @@ export default function EvaluationModal({
   onSubmit,
   initialData,
   isViewOnly = false,
+  applicationId,
+  influencerId,
+  evaluationId,
 }: EvaluationModalProps) {
+  const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  
   const [serviceSatisfaction, setServiceSatisfaction] = useState(
     initialData?.serviceSatisfaction || 0
   );
@@ -37,19 +50,122 @@ export default function EvaluationModal({
     viewIncrease: initialData?.effects.viewIncrease || false,
   });
 
+  // Fetch evaluation data when viewing
+  useEffect(() => {
+    if (isOpen && isViewOnly && evaluationId) {
+      const fetchEvaluation = async () => {
+        try {
+          setIsFetching(true);
+          const response = await getEvaluation(evaluationId);
+          if (response.success && response.data) {
+            const evalData = response.data;
+            setServiceSatisfaction(evalData.serviceSatisfaction);
+            setCollaborationEffectiveness(evalData.collaborationEffectiveness);
+            setAgreementAdherence(evalData.agreementAdherence);
+            setAgreementExplanation(evalData.agreementExplanation || "");
+            setEffects(evalData.effects);
+          }
+        } catch (error: any) {
+          console.error("Error fetching evaluation:", error);
+          toastRef.current?.show({
+            severity: "error",
+            summary: "Hata",
+            detail: error.message || "Değerlendirme yüklenirken bir hata oluştu",
+            life: 3000,
+          });
+        } finally {
+          setIsFetching(false);
+        }
+      };
+
+      fetchEvaluation();
+    }
+  }, [isOpen, isViewOnly, evaluationId]);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setServiceSatisfaction(initialData?.serviceSatisfaction || 0);
+      setCollaborationEffectiveness(initialData?.collaborationEffectiveness || 0);
+      setAgreementAdherence(initialData?.agreementAdherence || null);
+      setAgreementExplanation(initialData?.agreementExplanation || "");
+      setEffects({
+        followerIncrease: initialData?.effects.followerIncrease || false,
+        similarCollaborations: initialData?.effects.similarCollaborations || false,
+        likeIncrease: initialData?.effects.likeIncrease || false,
+        viewIncrease: initialData?.effects.viewIncrease || false,
+      });
+    }
+  }, [isOpen, initialData]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
-    if (onSubmit) {
-      onSubmit({
+  const handleSubmit = async () => {
+    // Validate required fields
+    if (!applicationId || !influencerId) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: "Application ID ve Influencer ID gereklidir",
+        life: 3000,
+      });
+      return;
+    }
+
+    if (agreementAdherence === null) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: "Lütfen anlaşmaya uyum durumunu seçiniz",
+        life: 3000,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await createEvaluation({
+        applicationId,
+        influencerId,
         serviceSatisfaction,
         collaborationEffectiveness,
         agreementAdherence,
-        agreementExplanation,
+        agreementExplanation: agreementAdherence === "no" ? agreementExplanation : undefined,
         effects,
       });
+
+      if (response.success) {
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: response.message || "Değerlendirme başarıyla oluşturuldu",
+          life: 3000,
+        });
+
+        if (onSubmit) {
+          onSubmit({
+            serviceSatisfaction,
+            collaborationEffectiveness,
+            agreementAdherence,
+            agreementExplanation,
+            effects,
+          });
+        }
+
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      }
+    } catch (error: any) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: error.message || "Değerlendirme oluşturulurken bir hata oluştu",
+        life: 3000,
+      });
+    } finally {
+      setIsLoading(false);
     }
-    onClose();
   };
 
   const StarRating = ({
@@ -88,24 +204,34 @@ export default function EvaluationModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold" style={{ color: "#4C226A" }}>
-            Değerlendirme
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <i className="pi pi-times text-xl" />
-          </button>
-        </div>
+    <>
+      <Toast ref={toastRef} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h2 className="text-xl font-bold" style={{ color: "#4C226A" }}>
+              Değerlendirme
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              disabled={isFetching}
+            >
+              <i className="pi pi-times text-xl" />
+            </button>
+          </div>
 
-        {/* Content */}
-        <div className="p-6">
-          <div className="grid grid-cols-2 gap-6">
+          {isFetching ? (
+            <div className="p-6 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="mt-2 text-sm text-lightGray">Değerlendirme yükleniyor...</p>
+            </div>
+          ) : (
+            <>
+              {/* Content */}
+              <div className="p-6">
+                <div className="grid grid-cols-2 gap-6">
           {/* Question 1 */}
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">
@@ -261,23 +387,27 @@ export default function EvaluationModal({
               </div>
             </div>
           </div>
-          </div>
-        </div>
+                </div>
+              </div>
 
-        {/* Footer */}
-        {!isViewOnly && (
-          <div className="p-6 border-t border-gray-200 flex justify-end">
-            <button
-              onClick={handleSubmit}
-              className="px-8 py-3 rounded-lg font-medium text-white hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "#4C226A" }}
-            >
-              Değerlendir
-            </button>
-          </div>
-        )}
+              {/* Footer */}
+              {!isViewOnly && (
+                <div className="p-6 border-t border-gray-200 flex justify-end">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isLoading}
+                    className="px-8 py-3 rounded-lg font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                    style={{ backgroundColor: "#4C226A" }}
+                  >
+                    {isLoading ? "Kaydediliyor..." : "Değerlendir"}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

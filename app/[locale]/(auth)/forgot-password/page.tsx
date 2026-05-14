@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { Link, useRouter } from "@/src/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFormik } from "formik";
 import { forgotPasswordSchema } from "@/src/yups/auth";
+import { sendPasswordMail } from "@/src/api/auth/auth.service";
 import circles from "@/src/images/circles.png";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,26 +14,44 @@ import { Toast } from "@/components/ui/toast";
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: { email: "", oldPassword: "" },
     validationSchema: forgotPasswordSchema,
-    onSubmit: (values) => {
-      // Doğrulama kodu gönderme işlemi
-      console.log("forgot password", values);
-      
-      // Toast göster
-      toastRef.current?.show({
-        severity: "success",
-        summary: "Başarılı",
-        detail: "Doğrulama kodu gönderildi",
-        life: 3000,
-      });
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      try {
+        const response = await sendPasswordMail({
+          email: values.email,
+          oldPassword: values.oldPassword,
+        });
 
-      // 1.5 saniye sonra reset-password sayfasına yönlendir
-      setTimeout(() => {
-        router.push("/reset-password");
-      }, 1500);
+        if (response.success) {
+          // Toast göster
+          toastRef.current?.show({
+            severity: "success",
+            summary: "Başarılı",
+            detail: response.message || "Doğrulama kodu gönderildi",
+            life: 3000,
+          });
+
+          // 1.5 saniye sonra reset-password sayfasına yönlendir
+          setTimeout(() => {
+            router.push("/reset-password");
+          }, 1500);
+        }
+      } catch (error: any) {
+        // Hata durumunda toast göster
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: error.message || "Doğrulama kodu gönderilirken bir hata oluştu",
+          life: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
@@ -81,10 +100,10 @@ export default function ForgotPasswordPage() {
 
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
               className="w-full bg-primary border-primary hover:bg-primary/90 hover:border-primary/90 text-white"
             >
-              Doğrulama Kodu Gönder
+              {isLoading ? "Gönderiliyor..." : "Doğrulama Kodu Gönder"}
             </Button>
           </form>
 

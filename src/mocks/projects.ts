@@ -15,6 +15,9 @@ export interface Project {
   overlayText?: string;
   overlayIcon?: "star-yellow" | "star-green";
   overlayAction?: OverlayAction;
+  applicationId?: string; // For evaluation
+  influencerId?: string; // For evaluation
+  evaluationId?: string; // For viewing existing evaluation
 }
 
 export const mockProjects: Project[] = [

@@ -50,6 +50,9 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
         onSubmit={handleSubmit}
         initialData={isViewOnly ? mockEvaluation : undefined}
         isViewOnly={isViewOnly}
+        applicationId={selectedProject?.applicationId || selectedProject?.id}
+        influencerId={selectedProject?.influencerId || selectedProject?.id}
+        evaluationId={selectedProject?.evaluationId}
       />
     </>
   );

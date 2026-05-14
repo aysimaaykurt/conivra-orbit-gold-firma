@@ -1,12 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { Link } from "@/src/navigation";
+import { Link, useRouter } from "@/src/navigation";
 import { useFormik } from "formik";
 import { registerSchema } from "@/src/yups/auth";
+import { register } from "@/src/api/auth/auth.service";
 import { Input } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
+import { useRef, useState } from "react";
 import circles from "@/src/images/circles.png";
 
 const sectorOptions = [
@@ -28,6 +31,10 @@ const sectorOptions = [
 ];
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       company: "",
@@ -44,15 +51,63 @@ export default function RegisterPage() {
       kvkk: false,
     },
     validationSchema: registerSchema,
-    onSubmit: (values) => {
-      console.log("register", values);
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      try {
+        const response = await register({
+          company: values.company,
+          sector: values.sector,
+          fullName: values.fullName,
+          email: values.email,
+          gender: values.gender,
+          birthDate: values.birthDate,
+          city: values.city,
+          district: values.district,
+          password: values.password,
+          referral: values.referral || undefined,
+          branchConfirm: values.branchConfirm,
+          kvkk: values.kvkk,
+        });
+
+        if (response.success) {
+          toastRef.current?.show({
+            severity: "success",
+            summary: "Başarılı",
+            detail: response.message || "Kayıt başarılı",
+            life: 3000,
+          });
+
+          // Eğer token dönerse otomatik login yapılmış olur, dashboard'a yönlendir
+          if (response.data?.token) {
+            setTimeout(() => {
+              router.push("/dashboard");
+            }, 1000);
+          } else {
+            // Token yoksa login sayfasına yönlendir
+            setTimeout(() => {
+              router.push("/login");
+            }, 1000);
+          }
+        }
+      } catch (error: any) {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: error.message || "Kayıt yapılırken bir hata oluştu",
+          life: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
   const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = formik;
 
   return (
-    <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2">
+    <>
+      <Toast ref={toastRef} />
+      <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2">
       <div className="hidden md:flex flex-col items-center justify-center bg-[#F7F6F9]">
         <div className="max-w-[520px] w-full px-8">
           <div className="mb-8">
@@ -109,10 +164,10 @@ export default function RegisterPage() {
             <div className="md:col-span-2 mt-16">
               <Button 
                 type="submit" 
-                disabled={isSubmitting}
+                disabled={isSubmitting || isLoading}
                 className="w-full bg-primary border-primary hover:bg-primary/90 hover:border-primary/90 text-white"
               >
-                Kaydol
+                {isLoading ? "Kaydediliyor..." : "Kaydol"}
               </Button>
             </div>
           </form>
@@ -123,6 +178,7 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

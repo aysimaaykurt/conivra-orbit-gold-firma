@@ -1,0 +1,189 @@
+import apiClient from '../axios';
+import type {
+  AddWorkshopRequest,
+  UpdateWorkshopRequest,
+  AddWorkshopResponse,
+  UpdateWorkshopResponse,
+  GetWorkshopResponse,
+  GetWorkshopsListResponse,
+  ApiErrorResponse,
+} from './workshops.models';
+
+/**
+ * Add Workshop Service
+ * POST /api/v1/Advertisements/addWorkshop
+ */
+export const addWorkshop = async (
+  data: AddWorkshopRequest
+): Promise<AddWorkshopResponse> => {
+  try {
+    // Create FormData for file upload
+    const formData = new FormData();
+    
+    // Add all text fields
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('startDate', data.startDate);
+    formData.append('endDate', data.endDate);
+    formData.append('duration', data.duration);
+    formData.append('city', data.city);
+    formData.append('district', data.district);
+    formData.append('address', data.address);
+    formData.append('category', data.category);
+    formData.append('targetAudience', data.targetAudience);
+    formData.append('participantCount', data.participantCount);
+    formData.append('participationCondition', data.participationCondition);
+    formData.append('fee', data.fee);
+    formData.append('contentType', data.contentType);
+    formData.append('workshopGoal', data.workshopGoal);
+    formData.append('workshopContent', data.workshopContent);
+    
+    // Add image if provided
+    if (data.image) {
+      formData.append('image', data.image);
+    }
+
+    const response = await apiClient.post<AddWorkshopResponse>(
+      '/api/v1/Advertisements/addWorkshop',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Workshop eklenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Update Workshop Service
+ * PUT /api/v1/Advertisements/addWorkshop/:id
+ */
+export const updateWorkshop = async (
+  id: string,
+  data: UpdateWorkshopRequest
+): Promise<UpdateWorkshopResponse> => {
+  try {
+    // Create FormData for file upload
+    const formData = new FormData();
+    
+    // Add all text fields
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('startDate', data.startDate);
+    formData.append('endDate', data.endDate);
+    formData.append('duration', data.duration);
+    formData.append('city', data.city);
+    formData.append('district', data.district);
+    formData.append('address', data.address);
+    formData.append('category', data.category);
+    formData.append('targetAudience', data.targetAudience);
+    formData.append('participantCount', data.participantCount);
+    formData.append('participationCondition', data.participationCondition);
+    formData.append('fee', data.fee);
+    formData.append('contentType', data.contentType);
+    formData.append('workshopGoal', data.workshopGoal);
+    formData.append('workshopContent', data.workshopContent);
+    
+    // Add image if provided
+    if (data.image) {
+      formData.append('image', data.image);
+    }
+
+    const response = await apiClient.put<UpdateWorkshopResponse>(
+      `/api/v1/Advertisements/addWorkshop/${id}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Workshop güncellenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Get Workshop Service (Single)
+ * GET /api/v1/Advertisements/addWorkshop/:id
+ */
+export const getWorkshop = async (
+  id: string
+): Promise<GetWorkshopResponse> => {
+  try {
+    const response = await apiClient.get<GetWorkshopResponse>(
+      `/api/v1/Advertisements/addWorkshop/${id}`
+    );
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Workshop alınırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Get Workshops List Service
+ * GET /api/v1/Advertisements/addWorkshop
+ * @param page - Sayfa numarası (opsiyonel)
+ * @param pageSize - Sayfa başına kayıt sayısı (opsiyonel)
+ * @param searchTerm - Arama terimi (opsiyonel)
+ */
+export const getWorkshops = async (
+  page?: number,
+  pageSize?: number,
+  searchTerm?: string
+): Promise<GetWorkshopsListResponse> => {
+  try {
+    const params: any = {};
+    if (page !== undefined) {
+      params.page = page;
+    }
+    if (pageSize !== undefined) {
+      params.pageSize = pageSize;
+    }
+    if (searchTerm !== undefined && searchTerm.trim() !== '') {
+      params.searchTerm = searchTerm;
+    }
+
+    const response = await apiClient.get<GetWorkshopsListResponse>(
+      '/api/v1/Advertisements/addWorkshop',
+      { params }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Workshoplar alınırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+

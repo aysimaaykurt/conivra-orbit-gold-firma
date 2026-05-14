@@ -1,29 +1,67 @@
 "use client";
 
 import Image from "next/image";
-import { Link } from "@/src/navigation";
+import { Link, useRouter } from "@/src/navigation";
+import { useRef, useState } from "react";
 import { useFormik } from "formik";
 import { resetPasswordSchema } from "@/src/yups/auth";
+import { changePassword } from "@/src/api/auth/auth.service";
 import circles from "@/src/images/circles.png";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+  const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const formik = useFormik({
     initialValues: { verificationCode: "", newPassword: "", confirmPassword: "" },
     validationSchema: resetPasswordSchema,
-    onSubmit: (values) => {
-      // Şifre değiştirme işlemi
-      console.log("reset password", values);
-      // Şifre değiştirildikten sonra login sayfasına yönlendirilebilir
-      // router.push("/login");
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      try {
+        const response = await changePassword({
+          verificationCode: values.verificationCode,
+          newPassword: values.newPassword,
+          confirmPassword: values.confirmPassword,
+        });
+
+        if (response.success) {
+          // Toast göster
+          toastRef.current?.show({
+            severity: "success",
+            summary: "Başarılı",
+            detail: response.message || "Şifre başarıyla değiştirildi",
+            life: 3000,
+          });
+
+          // 1.5 saniye sonra login sayfasına yönlendir
+          setTimeout(() => {
+            router.push("/login");
+          }, 1500);
+        }
+      } catch (error: any) {
+        // Hata durumunda toast göster
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: error.message || "Şifre değiştirilirken bir hata oluştu",
+          life: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
   const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = formik;
 
   return (
-    <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2">
+    <>
+      <Toast ref={toastRef} />
+      <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2">
       <div className="hidden md:flex flex-col items-center justify-center bg-[#F7F6F9]">
         <div className="max-w-[520px] w-full px-8">
           <div className="mb-8">
@@ -84,10 +122,10 @@ export default function ResetPasswordPage() {
 
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
               className="w-full bg-primary border-primary hover:bg-primary/90 hover:border-primary/90 text-white"
             >
-              Şifre Değiştir
+              {isLoading ? "Değiştiriliyor..." : "Şifre Değiştir"}
             </Button>
           </form>
 
@@ -97,6 +135,7 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

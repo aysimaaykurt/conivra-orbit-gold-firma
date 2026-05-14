@@ -7,15 +7,20 @@ import { Link, useRouter, usePathname } from "@/src/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useFormik } from "formik";
 import { loginSchema } from "@/src/yups/auth";
+import { login } from "@/src/api/auth/auth.service";
 import circles from "@/src/images/circles.png";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
+import { useRef, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("header");
+  const toastRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   const languageOptions = useMemo(
     () => [
@@ -35,18 +40,46 @@ export default function LoginPage() {
   const formik = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema: loginSchema,
-    onSubmit: (values) => {
-      // submit handler placeholder
-      console.log("login", values);
-      // Giriş başarılı olduğunda dashboard'a yönlendir
-      router.push("/dashboard");
+    onSubmit: async (values) => {
+      setIsLoading(true);
+      try {
+        const response = await login({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (response.success) {
+          toastRef.current?.show({
+            severity: "success",
+            summary: "Başarılı",
+            detail: response.message || "Giriş başarılı",
+            life: 3000,
+          });
+
+          // Giriş başarılı olduğunda dashboard'a yönlendir
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 500);
+        }
+      } catch (error: any) {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: error.message || "Giriş yapılırken bir hata oluştu",
+          life: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
   const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = formik;
 
   return (
-    <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2 relative">
+    <>
+      <Toast ref={toastRef} />
+      <div className="grid min-h-[100dvh] grid-cols-1 md:grid-cols-2 relative">
       {/* Language Dropdown - Top Right */}
       <div className="absolute top-4 right-4 z-10">
         <PrimeDropdown
@@ -125,10 +158,10 @@ export default function LoginPage() {
 
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoading}
               className="w-full bg-primary border-lightGray/20 hover:bg-primary/90 hover:border-primary/90 text-white"
             >
-              Giriş Yap
+              {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
             </Button>
           </form>
 
@@ -138,6 +171,7 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

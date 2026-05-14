@@ -1,3 +1,5 @@
+import { ApplicationStatus } from "@/src/api/applications/applicationStatus.enum";
+
 export type AdType = "soiree-menu" | "beach-cocktail" | "soiree-breakfast";
 
 export interface ApplicationListItem {
@@ -12,6 +14,7 @@ export interface ApplicationListItem {
     tiktok?: boolean;
     youtube?: boolean;
   };
+  status: ApplicationStatus; // 1: Bekliyor, 2: Onaylandı, 3: Reddedildi
 }
 
 export const adTypeTabs: { id: AdType; label: string }[] = [
@@ -32,6 +35,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.PENDING,
   },
   {
     id: "2",
@@ -44,6 +48,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.APPROVED,
   },
   {
     id: "3",
@@ -56,6 +61,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.REJECTED,
   },
   {
     id: "4",
@@ -68,6 +74,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.PENDING,
   },
   {
     id: "5",
@@ -80,6 +87,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.APPROVED,
   },
   {
     id: "6",
@@ -92,6 +100,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.PENDING,
   },
   {
     id: "7",
@@ -104,6 +113,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.PENDING,
   },
   {
     id: "8",
@@ -116,6 +126,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.APPROVED,
   },
   {
     id: "9",
@@ -128,6 +139,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.REJECTED,
   },
   {
     id: "10",
@@ -140,6 +152,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.PENDING,
   },
   // Daha fazla veri için tekrarlananlar
   ...Array.from({ length: 36 }, (_, i) => ({
@@ -153,6 +166,7 @@ export const applicationsList: ApplicationListItem[] = [
       tiktok: true,
       youtube: true,
     },
+    status: ApplicationStatus.PENDING,
   })),
 ];
 

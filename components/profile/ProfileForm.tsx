@@ -13,6 +13,7 @@ import { cityOptions, districtOptions, ProfileFormValues, sectorOptions } from "
 interface ProfileFormProps {
   initialValues: ProfileFormValues;
   onSubmit: (values: ProfileFormValues) => void;
+  isSaving?: boolean;
 }
 
 const validationSchema = Yup.object({
@@ -29,6 +30,7 @@ const validationSchema = Yup.object({
 export default function ProfileForm({
   initialValues,
   onSubmit,
+  isSaving = false,
 }: ProfileFormProps) {
   const t = useTranslations("profile");
   
@@ -197,10 +199,11 @@ export default function ProfileForm({
        <div className="flex justify-center pt-4">
         <Button
           type="submit"
-          className="px-12 py-3 rounded-lg font-medium text-white hover:opacity-90 transition-opacity"
+          disabled={isSaving}
+          className="px-12 py-3 rounded-lg font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           style={{ backgroundColor: "#4C226A" }}
         >
-          Profili Kaydet
+          {isSaving ? "Kaydediliyor..." : "Profili Kaydet"}
         </Button>
       </div>
     </form>
