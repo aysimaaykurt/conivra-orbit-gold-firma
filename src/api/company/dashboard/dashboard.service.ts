@@ -8,14 +8,18 @@ import type {
  * Get Dashboard Stats Service
  * GET company/dashboard/stats
  */
-import { infoCards } from '@/src/mocks/dashboard';
-
 export const getDashboardStats = async (): Promise<DashboardStatsResponse> => {
-  // Geliştirme/arayüz kontrolü için mock verisi dönülüyor
-  return {
-    success: true,
-    data: infoCards,
-    message: "Başarılı",
-  };
+  try {
+    const response = await apiClient.get<DashboardStatsResponse>('company/dashboard/stats');
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Dashboard istatistikleri yüklenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
 };
 

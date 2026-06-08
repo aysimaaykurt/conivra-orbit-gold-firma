@@ -33,19 +33,23 @@ export const getApplications = async (
   };
 };
 
-import { applications } from '@/src/mocks/dashboard';
-
 /**
  * Get Dashboard Applications Service (Basit liste için)
  * GET company/dashboard/applications
  */
 export const getDashboardApplications = async (): Promise<DashboardApplicationsResponse> => {
-  // Geliştirme ve kontrol için doğrudan mock dönülüyor
-  return {
-    success: true,
-    data: applications,
-    message: "Başarılı",
-  };
+  try {
+    const response = await apiClient.get<DashboardApplicationsResponse>('company/dashboard/applications');
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Başvurular yüklenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
 };
 
 /**

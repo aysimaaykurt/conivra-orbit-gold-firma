@@ -1,37 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { getDashboardStats } from "@/src/api/company/dashboard/dashboard.service";
+import { useDashboardStats } from "@/src/hooks/useDashboardStats";
 import type { DashboardStatsItem } from "@/src/api/company/dashboard/dashboard.models";
 
 export default function InfoCards() {
-  const [cards, setCards] = useState<DashboardStatsItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await getDashboardStats();
-        if (response.success && response.data) {
-          setCards(response.data);
-        } else {
-          setError("Veriler yüklenemedi");
-        }
-      } catch (error: any) {
-        console.error("Dashboard stats yüklenirken hata:", error);
-        setError(error.message || "Veriler yüklenirken bir hata oluştu");
-        setCards([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
+  const { data: cards, isLoading, error } = useDashboardStats();
 
   if (isLoading) {
     return (
@@ -88,8 +62,6 @@ export default function InfoCards() {
 }
 
 function InfoCard({ card }: { card: DashboardStatsItem }) {
-  const t = useTranslations("dashboard.infoCards");
-  
   return (
     <div className="bg-white rounded-lg p-4 shadow-sm h-full">
        <div className="mb-4">
@@ -100,8 +72,8 @@ function InfoCard({ card }: { card: DashboardStatsItem }) {
 
        <div className="flex items-center justify-between gap-2">
          <div className="flex flex-col flex-1 min-w-0">
-          <h3 className="text-base font-bold text-dark mb-1">{t(`${card.id}.title`)}</h3>
-          <p className="text-xs text-lightGray">{t(`${card.id}.description`)}</p>
+          <h3 className="text-base font-bold text-dark mb-1">{card.title}</h3>
+          <p className="text-xs text-lightGray">{card.description}</p>
         </div>
 
          <div

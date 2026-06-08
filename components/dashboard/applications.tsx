@@ -1,38 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { getDashboardApplications } from "@/src/api/applications/applications.service";
+import { useDashboardApplications } from "@/src/hooks/useDashboardApplications";
 import type { Application } from "@/src/api/applications/applications.models";
 
 export default function ApplicationList() {
   const t = useTranslations("dashboard.applications");
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await getDashboardApplications();
-        if (response.success && response.data) {
-          setApplications(response.data);
-        } else {
-          setError("Başvurular yüklenemedi");
-        }
-      } catch (error: any) {
-        console.error("Applications yüklenirken hata:", error);
-        setError(error.message || "Başvurular yüklenirken bir hata oluştu");
-        setApplications([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchApplications();
-  }, []);
+  const { data: applications, isLoading, error } = useDashboardApplications();
 
   if (isLoading) {
     return (
@@ -75,7 +49,7 @@ export default function ApplicationList() {
         </div>
       ) : (
         <p className="text-sm text-lightGray text-center py-4">
-          {t("noApplications") || "Henüz başvuru bulunmamaktadır."}
+          Henüz başvuru bulunmamaktadır.
         </p>
       )}
     </div>

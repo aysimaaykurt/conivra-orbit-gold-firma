@@ -19,39 +19,46 @@ import type {
 export const login = async (
   credentials: LoginRequest
 ): Promise<LoginResponse> => {
-  // Geliştirme ve kontrol amacıyla login endpointi devre dışı bırakıldı.
-  // Doğrudan başarılı mock verisi dönülüyor.
-  const mockUser = {
-    id: 1,
-    tenantId: 1,
-    firstName: "Test",
-    lastName: "Kullanıcı",
-    email: credentials.email || "test@conivra.com",
-    phone: "05555555555",
-    status: true,
-    subscriptionStatus: "gold",
-  };
+  try {
+    const response = await apiClient.post<LoginResponse>(
+      'auth/login',
+      credentials
+    );
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('authToken', "mock-jwt-token-12345");
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    localStorage.setItem('currentTenantId', "1");
-    localStorage.setItem('tenantName', "Conivra Orbit Gold Firma");
+    if (
+      response.data.success &&
+      response.data.data?.token &&
+      typeof window !== 'undefined'
+    ) {
+      const token = response.data.data.token.token;
+      localStorage.setItem('authToken', token);
+
+      if (response.data.data.user) {
+        localStorage.setItem(
+          'user',
+          JSON.stringify(response.data.data.user)
+        );
+      }
+      
+      if (response.data.data.tenantId) {
+        localStorage.setItem('currentTenantId', response.data.data.tenantId.toString());
+      }
+      
+      if (response.data.data.tenantName) {
+        localStorage.setItem('tenantName', response.data.data.tenantName);
+      }
+    }
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Giriş işlemi sırasında bir hata oluştu',
+    } as ApiErrorResponse;
   }
-
-  return {
-    success: true,
-    message: "Giriş başarılı (Kontrol Modu)",
-    data: {
-      token: {
-        token: "mock-jwt-token-12345",
-        expiration: new Date(Date.now() + 86400000).toISOString(),
-      },
-      user: mockUser,
-      tenantId: 1,
-      tenantName: "Conivra Orbit Gold Firma",
-    },
-  };
 };
 
 /**
