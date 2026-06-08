@@ -8,14 +8,14 @@ import type {
 
 /**
  * Create Evaluation Service
- * POST /api/v1/applications/Evaluation
+ * POST applications/Evaluation
  */
 export const createEvaluation = async (
   data: CreateEvaluationRequest
 ): Promise<CreateEvaluationResponse> => {
   try {
     const response = await apiClient.post<CreateEvaluationResponse>(
-      '/api/v1/applications/Evaluation',
+      'applications/Evaluation',
       data
     );
     return response.data;
@@ -32,14 +32,14 @@ export const createEvaluation = async (
 
 /**
  * Get Evaluation Service
- * GET /api/v1/applications/Evaluation/:id
+ * GET applications/Evaluation/:id
  */
 export const getEvaluation = async (
   id: string
 ): Promise<GetEvaluationResponse> => {
   try {
     const response = await apiClient.get<GetEvaluationResponse>(
-      `/api/v1/applications/Evaluation/${id}`
+      `applications/Evaluation/${id}`
     );
     return response.data;
   } catch (error: any) {

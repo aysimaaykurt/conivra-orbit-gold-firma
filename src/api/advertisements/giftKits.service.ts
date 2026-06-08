@@ -11,7 +11,7 @@ import type {
 
 /**
  * Add Gift Kit Service
- * POST /api/v1/Advertisements/addGiftKit
+ * POST Advertisements/addGiftKit
  */
 export const addGiftKit = async (
   data: AddGiftKitRequest
@@ -19,7 +19,7 @@ export const addGiftKit = async (
   try {
     // Create FormData for file upload
     const formData = new FormData();
-    
+
     // Add all text fields
     formData.append('title', data.title);
     formData.append('content', data.content);
@@ -29,14 +29,14 @@ export const addGiftKit = async (
     formData.append('platformPreference', data.platformPreference);
     formData.append('businessType', data.businessType);
     formData.append('contentType', data.contentType);
-    
+
     // Add image if provided
     if (data.image) {
       formData.append('image', data.image);
     }
 
     const response = await apiClient.post<AddGiftKitResponse>(
-      '/api/v1/Advertisements/addGiftKit',
+      'Advertisements/addGiftKit',
       formData,
       {
         headers: {
@@ -59,7 +59,7 @@ export const addGiftKit = async (
 
 /**
  * Update Gift Kit Service
- * PUT /api/v1/Advertisements/addGiftKit/:id
+ * PUT Advertisements/addGiftKit/:id
  */
 export const updateGiftKit = async (
   id: string,
@@ -68,7 +68,7 @@ export const updateGiftKit = async (
   try {
     // Create FormData for file upload
     const formData = new FormData();
-    
+
     // Add all text fields
     formData.append('title', data.title);
     formData.append('content', data.content);
@@ -78,14 +78,14 @@ export const updateGiftKit = async (
     formData.append('platformPreference', data.platformPreference);
     formData.append('businessType', data.businessType);
     formData.append('contentType', data.contentType);
-    
+
     // Add image if provided
     if (data.image) {
       formData.append('image', data.image);
     }
 
     const response = await apiClient.put<UpdateGiftKitResponse>(
-      `/api/v1/Advertisements/addGiftKit/${id}`,
+      `Advertisements/addGiftKit/${id}`,
       formData,
       {
         headers: {
@@ -108,14 +108,14 @@ export const updateGiftKit = async (
 
 /**
  * Get Gift Kit Service (Single)
- * GET /api/v1/Advertisements/addGiftKit/:id
+ * GET Advertisements/addGiftKit/:id
  */
 export const getGiftKit = async (
   id: string
 ): Promise<GetGiftKitResponse> => {
   try {
     const response = await apiClient.get<GetGiftKitResponse>(
-      `/api/v1/Advertisements/addGiftKit/${id}`
+      `Advertisements/addGiftKit/${id}`
     );
 
     return response.data;
@@ -132,7 +132,7 @@ export const getGiftKit = async (
 
 /**
  * Get Gift Kits List Service
- * GET /api/v1/Advertisements/addGiftKit
+ * GET Advertisements/addGiftKit
  * @param page - Sayfa numarası (opsiyonel)
  * @param pageSize - Sayfa başına kayıt sayısı (opsiyonel)
  * @param searchTerm - Arama terimi (opsiyonel)
@@ -155,7 +155,7 @@ export const getGiftKits = async (
     }
 
     const response = await apiClient.get<GetGiftKitsListResponse>(
-      '/api/v1/Advertisements/addGiftKit',
+      'Advertisements/addGiftKit',
       { params }
     );
 

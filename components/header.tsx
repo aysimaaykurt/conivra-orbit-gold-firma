@@ -54,23 +54,22 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-20 w-full bg-white" style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
-       <div className="absolute left-0 top-0 h-full w-5 bg-primary"></div>
-      
+
       <div className="ml-5 flex h-16 items-center justify-between px-6">
-         <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <Image src={goldStatue} alt="Gold Statue" width={32} height={32} className="object-contain" />
           <span className="text-sm font-semibold" style={{ color: "#D99B2B" }}>
             {getStatusLabel(company.status)}
           </span>
         </div>
 
-         <div className="flex items-center gap-3">
-           <button className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors overflow-visible">
+        <div className="flex items-center gap-3">
+          <button className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors overflow-visible">
             <i className="pi pi-bell text-xl text-lightGray relative z-0"></i>
             {notificationCount > 0 && (
-              <span 
+              <span
                 className="absolute top-1 right-1 bg-error text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none z-20 pointer-events-none"
-                style={{ 
+                style={{
                   transform: "translate(30%, -30%)",
                   backgroundColor: "#E53935",
                 }}
@@ -80,7 +79,7 @@ export default function Header() {
             )}
           </button>
 
-           <PrimeDropdown
+          <PrimeDropdown
             value={languageOptions.find((opt) => opt.value === locale) || languageOptions[0]}
             onChange={(e) => handleLanguageChange(e.value)}
             options={languageOptions}
@@ -102,7 +101,7 @@ export default function Header() {
             }}
             className="header-language-dropdown !border-lightGray rounded-full"
             panelClassName="rounded-lg shadow-lg border border-lightGray/20"
-            style={{ 
+            style={{
               backgroundColor: "white",
               borderColor: "#A5A5A5",
               borderWidth: "0.5px",
@@ -112,10 +111,10 @@ export default function Header() {
             }}
           />
 
-           <button
+          <button
             onClick={copyReferralCode}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-lightGray rounded-full hover:bg-gray-50 transition-colors"
-            style={{ 
+            style={{
               borderWidth: "0.5px",
               height: "40px",
             }}

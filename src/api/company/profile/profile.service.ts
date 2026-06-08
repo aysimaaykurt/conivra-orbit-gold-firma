@@ -8,74 +8,56 @@ import type {
 
 /**
  * Update Profile Service (POST - Create or Update)
- * POST /api/v1/company/profile
+ * POST company/profile
  */
 export const updateProfile = async (
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
-  try {
-    const response = await apiClient.post<UpdateProfileResponse>(
-      '/api/v1/company/profile',
-      data
-    );
-
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Profil güncellenirken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+  // Şimdilik API bağlantısı iptal edildi, doğrudan başarılı simüle ediliyor
+  return {
+    success: true,
+    message: "Profil başarıyla güncellendi (Kontrol Modu)",
+    data: {
+      id: "prof-mock",
+      companyName: data.companyName,
+    },
+  };
 };
 
 /**
  * Update Profile Service (PUT - Update by ID)
- * PUT /api/v1/company/profile/:id
+ * PUT company/profile/:id
  */
 export const updateProfileById = async (
   id: string,
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
-  try {
-    const response = await apiClient.put<UpdateProfileResponse>(
-      `/api/v1/company/profile/${id}`,
-      data
-    );
-
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Profil güncellenirken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+  return {
+    success: true,
+    message: "Profil başarıyla güncellendi",
+    data: { id, companyName: data.companyName },
+  };
 };
 
 /**
  * Get Profile Service
- * GET /api/v1/company/profile
+ * GET company/profile
  */
 export const getProfile = async (): Promise<GetProfileResponse> => {
-  try {
-    const response = await apiClient.get<GetProfileResponse>(
-      '/api/v1/company/profile'
-    );
-
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Profil alınırken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+  // Arayüzün sorunsuz açılması için mock veri dönülüyor
+  return {
+    success: true,
+    data: {
+      id: "prof-mock",
+      companyName: "Conivra Orbit Gold Firma",
+      aboutCompany: "Eşsiz lezzetlerimiz ve kaliteli kahve sunumlarımızla öne çıkan premium mekanımız için içerik üreticileriyle iş birliği yapıyoruz.",
+      city: "izmir",
+      district: "konak",
+      address: "Kültür Mah. Şehitler Cad. No: 42 Alsancak",
+      sector: "restaurant",
+      createDate: new Date().toISOString(),
+    },
+    message: "Başarılı",
+  };
 };
 

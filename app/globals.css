@@ -12,6 +12,12 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-cairo);
+  --color-primary: #4C226A;
+  --color-dark: #202020;
+  --color-lightGray: #A5A5A5;
+  --color-success: #2ECC71;
+  --color-warning: #FFB020;
+  --color-error: #E53935;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -287,4 +293,98 @@ header .header-language-dropdown .p-dropdown-trigger i {
 header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
   transform: rotate(180deg);
   transition: transform 0.2s;
+}
+
+/* PrimeReact Calendar / DatePicker Modernization */
+.p-datepicker {
+  background-color: white !important;
+  border: 1.5px solid #F1ECEB !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(76, 34, 106, 0.1), 0 8px 10px -6px rgba(76, 34, 106, 0.05) !important;
+  padding: 0.85rem !important;
+  font-family: inherit !important;
+}
+
+.p-datepicker .p-datepicker-header {
+  padding: 0 0 0.5rem 0 !important;
+  border-bottom: 1px solid #E5E7EB !important;
+  background: transparent !important;
+}
+
+.p-datepicker .p-datepicker-header button {
+  color: #4C226A !important;
+  border-radius: 9999px !important;
+  transition: background-color 0.2s;
+}
+
+.p-datepicker .p-datepicker-header button:hover {
+  background-color: rgba(76, 34, 106, 0.08) !important;
+}
+
+.p-datepicker .p-datepicker-title .p-datepicker-month,
+.p-datepicker .p-datepicker-title .p-datepicker-year {
+  font-weight: 600 !important;
+  color: #202020 !important;
+}
+
+.p-datepicker table th {
+  padding: 0.5rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #A5A5A5 !important;
+}
+
+.p-datepicker table td {
+  padding: 0.15rem !important;
+}
+
+.p-datepicker table td > span {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s !important;
+}
+
+.p-datepicker table td > span:not(.p-highlight):not(.p-disabled):hover {
+  background-color: rgba(76, 34, 106, 0.08) !important;
+  color: #4C226A !important;
+}
+
+/* Datepicker active date highlight - purple theme */
+.p-datepicker table td > span.p-highlight {
+  background-color: #4C226A !important;
+  color: white !important;
+  box-shadow: 0 4px 6px -1px rgba(76, 34, 106, 0.2) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .p-datepicker {
+    background-color: #1e1e24 !important; /* soft dark mode slate */
+    border-color: #2e2e38 !important;
+    color: #e2e8f0 !important;
+  }
+  .p-datepicker .p-datepicker-header {
+    border-bottom: 1px solid #2e2e38 !important;
+  }
+  .p-datepicker .p-datepicker-title .p-datepicker-month,
+  .p-datepicker .p-datepicker-title .p-datepicker-year {
+    color: #e2e8f0 !important;
+  }
+  .p-datepicker .p-datepicker-header button {
+    color: #c084fc !important; /* purple-400 */
+  }
+  .p-datepicker .p-datepicker-header button:hover {
+    background-color: rgba(192, 132, 252, 0.1) !important;
+  }
+  .p-datepicker table td > span {
+    color: #e2e8f0 !important;
+  }
+  .p-datepicker table td > span:not(.p-highlight):not(.p-disabled):hover {
+    background-color: rgba(192, 132, 252, 0.1) !important;
+    color: #c084fc !important;
+  }
+  .p-datepicker table td > span.p-disabled {
+    color: #4b5563 !important;
+  }
 }

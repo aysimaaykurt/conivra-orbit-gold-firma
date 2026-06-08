@@ -6,12 +6,12 @@ import type {
 
 /**
  * Get Profile Info Service
- * GET /api/v1/company/profileInfo
+ * GET company/profileInfo
  */
 export const getProfileInfo = async (): Promise<GetProfileInfoResponse> => {
   try {
     const response = await apiClient.get<GetProfileInfoResponse>(
-      '/api/v1/company/profileInfo'
+      'company/profileInfo'
     );
     return response.data;
   } catch (error: any) {

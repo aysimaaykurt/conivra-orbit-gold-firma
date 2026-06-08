@@ -99,7 +99,7 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
         {label ? (
           <label
             htmlFor={dropdownId}
-            className="mb-1 block text-sm font-medium text-dark"
+            className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             {label}
           </label>

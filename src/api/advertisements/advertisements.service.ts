@@ -11,7 +11,7 @@ import type {
 
 /**
  * Add Advertisement Service
- * POST /api/v1/Advertisements/addAd
+ * POST Advertisements/addAd
  */
 export const addAdvertisement = async (
   data: AddAdvertisementRequest
@@ -19,7 +19,7 @@ export const addAdvertisement = async (
   try {
     // Create FormData for file upload
     const formData = new FormData();
-    
+
     // Add all text fields
     formData.append('title', data.title);
     formData.append('description', data.description);
@@ -36,14 +36,14 @@ export const addAdvertisement = async (
     formData.append('followerRange', data.followerRange);
     formData.append('contentType', data.contentType);
     formData.append('businessType', data.businessType);
-    
+
     // Add image if provided
     if (data.image) {
       formData.append('image', data.image);
     }
 
     const response = await apiClient.post<AddAdvertisementResponse>(
-      '/api/v1/Advertisements/addAd',
+      'Advertisements/addAd',
       formData,
       {
         headers: {
@@ -66,7 +66,7 @@ export const addAdvertisement = async (
 
 /**
  * Update Advertisement Service
- * PUT /api/v1/Advertisements/addAd/:id
+ * PUT Advertisements/addAd/:id
  */
 export const updateAdvertisement = async (
   id: string,
@@ -75,7 +75,7 @@ export const updateAdvertisement = async (
   try {
     // Create FormData for file upload
     const formData = new FormData();
-    
+
     // Add all text fields
     formData.append('title', data.title);
     formData.append('description', data.description);
@@ -92,14 +92,14 @@ export const updateAdvertisement = async (
     formData.append('followerRange', data.followerRange);
     formData.append('contentType', data.contentType);
     formData.append('businessType', data.businessType);
-    
+
     // Add image if provided
     if (data.image) {
       formData.append('image', data.image);
     }
 
     const response = await apiClient.put<UpdateAdvertisementResponse>(
-      `/api/v1/Advertisements/addAd/${id}`,
+      `Advertisements/addAd/${id}`,
       formData,
       {
         headers: {
@@ -122,14 +122,14 @@ export const updateAdvertisement = async (
 
 /**
  * Get Advertisement Service (Single)
- * GET /api/v1/Advertisements/addAd/:id
+ * GET Advertisements/addAd/:id
  */
 export const getAdvertisement = async (
   id: string
 ): Promise<GetAdvertisementResponse> => {
   try {
     const response = await apiClient.get<GetAdvertisementResponse>(
-      `/api/v1/Advertisements/addAd/${id}`
+      `Advertisements/addAd/${id}`
     );
 
     return response.data;
@@ -146,7 +146,7 @@ export const getAdvertisement = async (
 
 /**
  * Get Advertisements List Service
- * GET /api/v1/Advertisements/addAd
+ * GET Advertisements/addAd
  * @param page - Sayfa numarası (opsiyonel)
  * @param pageSize - Sayfa başına kayıt sayısı (opsiyonel)
  * @param searchTerm - Arama terimi (opsiyonel)
@@ -169,7 +169,7 @@ export const getAdvertisements = async (
     }
 
     const response = await apiClient.get<GetAdvertisementsListResponse>(
-      '/api/v1/Advertisements/addAd',
+      'Advertisements/addAd',
       { params }
     );
 

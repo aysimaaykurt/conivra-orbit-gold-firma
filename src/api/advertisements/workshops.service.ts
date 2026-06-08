@@ -11,7 +11,7 @@ import type {
 
 /**
  * Add Workshop Service
- * POST /api/v1/Advertisements/addWorkshop
+ * POST Advertisements/addWorkshop
  */
 export const addWorkshop = async (
   data: AddWorkshopRequest
@@ -19,7 +19,7 @@ export const addWorkshop = async (
   try {
     // Create FormData for file upload
     const formData = new FormData();
-    
+
     // Add all text fields
     formData.append('title', data.title);
     formData.append('description', data.description);
@@ -37,14 +37,14 @@ export const addWorkshop = async (
     formData.append('contentType', data.contentType);
     formData.append('workshopGoal', data.workshopGoal);
     formData.append('workshopContent', data.workshopContent);
-    
+
     // Add image if provided
     if (data.image) {
       formData.append('image', data.image);
     }
 
     const response = await apiClient.post<AddWorkshopResponse>(
-      '/api/v1/Advertisements/addWorkshop',
+      'Advertisements/addWorkshop',
       formData,
       {
         headers: {
@@ -67,7 +67,7 @@ export const addWorkshop = async (
 
 /**
  * Update Workshop Service
- * PUT /api/v1/Advertisements/addWorkshop/:id
+ * PUT Advertisements/addWorkshop/:id
  */
 export const updateWorkshop = async (
   id: string,
@@ -76,7 +76,7 @@ export const updateWorkshop = async (
   try {
     // Create FormData for file upload
     const formData = new FormData();
-    
+
     // Add all text fields
     formData.append('title', data.title);
     formData.append('description', data.description);
@@ -94,14 +94,14 @@ export const updateWorkshop = async (
     formData.append('contentType', data.contentType);
     formData.append('workshopGoal', data.workshopGoal);
     formData.append('workshopContent', data.workshopContent);
-    
+
     // Add image if provided
     if (data.image) {
       formData.append('image', data.image);
     }
 
     const response = await apiClient.put<UpdateWorkshopResponse>(
-      `/api/v1/Advertisements/addWorkshop/${id}`,
+      `Advertisements/addWorkshop/${id}`,
       formData,
       {
         headers: {
@@ -124,14 +124,14 @@ export const updateWorkshop = async (
 
 /**
  * Get Workshop Service (Single)
- * GET /api/v1/Advertisements/addWorkshop/:id
+ * GET Advertisements/addWorkshop/:id
  */
 export const getWorkshop = async (
   id: string
 ): Promise<GetWorkshopResponse> => {
   try {
     const response = await apiClient.get<GetWorkshopResponse>(
-      `/api/v1/Advertisements/addWorkshop/${id}`
+      `Advertisements/addWorkshop/${id}`
     );
 
     return response.data;
@@ -148,7 +148,7 @@ export const getWorkshop = async (
 
 /**
  * Get Workshops List Service
- * GET /api/v1/Advertisements/addWorkshop
+ * GET Advertisements/addWorkshop
  * @param page - Sayfa numarası (opsiyonel)
  * @param pageSize - Sayfa başına kayıt sayısı (opsiyonel)
  * @param searchTerm - Arama terimi (opsiyonel)
@@ -171,7 +171,7 @@ export const getWorkshops = async (
     }
 
     const response = await apiClient.get<GetWorkshopsListResponse>(
-      '/api/v1/Advertisements/addWorkshop',
+      'Advertisements/addWorkshop',
       { params }
     );
 

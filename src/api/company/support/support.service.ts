@@ -8,66 +8,49 @@ import type {
 
 /**
  * Create Support Service
- * POST /api/v1/company/support
+ * POST company/support
  */
+import { SupportStatus } from './supportStatus.enum';
+
 export const createSupport = async (
   data: CreateSupportRequest
 ): Promise<CreateSupportResponse> => {
-  try {
-    const response = await apiClient.post<CreateSupportResponse>(
-      '/api/v1/company/support',
-      data
-    );
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Destek oluşturulurken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+  // Şimdilik API bağlantısı iptal edildi
+  return {
+    success: true,
+    message: "Destek talebi başarıyla oluşturuldu (Kontrol Modu)",
+    data: { id: "sup-mock", title: data.title, type: data.type },
+  };
 };
 
-/**
- * Get Supports List Service
- * GET /api/v1/company/support
- * @param page - Sayfa numarası (opsiyonel)
- * @param pageSize - Sayfa başına kayıt sayısı (opsiyonel)
- * @param searchTerm - Arama terimi (opsiyonel)
- */
 export const getSupports = async (
   page?: number,
   pageSize?: number,
   searchTerm?: string
 ): Promise<GetSupportsListResponse> => {
-  try {
-    const params: any = {};
-    if (page !== undefined) {
-      params.page = page;
-    }
-    if (pageSize !== undefined) {
-      params.pageSize = pageSize;
-    }
-    if (searchTerm !== undefined && searchTerm.trim() !== '') {
-      params.searchTerm = searchTerm;
-    }
+  const mockSupports = [
+    {
+      id: "sup-1",
+      title: "Gold Statü Avantajları Nelerdir?",
+      type: "Genel Soru",
+      description: "Gold pakete geçiş yaptık, influencer aramalarında öne çıkma kuralı nasıl işliyor?",
+      status: SupportStatus.ANSWERED,
+      createDate: "2026-05-11T11:20:00Z",
+    },
+    {
+      id: "sup-2",
+      title: "Hediye Kiti Kargo Entegrasyonu",
+      type: "Entegrasyon",
+      description: "Tanımladığımız hediye kitleri için otomatik kargo barkodu veriliyor mu?",
+      status: SupportStatus.PENDING,
+      createDate: "2026-05-13T08:45:00Z",
+    },
+  ];
 
-    const response = await apiClient.get<GetSupportsListResponse>(
-      '/api/v1/company/support',
-      { params }
-    );
-
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Destekler alınırken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+  return {
+    success: true,
+    data: mockSupports,
+    message: "Başarılı",
+  };
 };
 

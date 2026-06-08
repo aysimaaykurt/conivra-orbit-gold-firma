@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL - environment variable'dan alınabilir
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://inform-helen-manual-overseas.trycloudflare.com/api/v1/';
 
 // Axios instance oluştur
 const apiClient = axios.create({
@@ -39,13 +39,16 @@ apiClient.interceptors.response.use(
     // 401 Unauthorized - Token geçersiz veya süresi dolmuş
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
+        // Kontrol/test modunda sayfalardan dışarı atmaması için yoruma alındı:
+        /*
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
         localStorage.removeItem('currentTenantId');
         localStorage.removeItem('tenantName');
         localStorage.removeItem('organizations');
-        // Login sayfasına yönlendir
         window.location.href = '/login';
+        */
+        console.warn("401 Unauthorized alındı, ancak kontrol modu aktif olduğu için çıkış yapılmadı.");
       }
     }
     return Promise.reject(error);

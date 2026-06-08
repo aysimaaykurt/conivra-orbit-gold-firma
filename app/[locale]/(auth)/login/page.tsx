@@ -102,7 +102,7 @@ export default function LoginPage() {
               </div>
             );
           }}
-          className="!border-lightGray rounded-full"
+          className="!border-lightGray/40 rounded-full"
           panelClassName="rounded-lg shadow-lg border border-lightGray/20"
           style={{ 
             backgroundColor: "white",
@@ -115,21 +115,22 @@ export default function LoginPage() {
         />
       </div>
 
-      <div className="hidden md:flex flex-col items-center justify-center bg-[#F7F6F9]">
+      <div className="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 via-slate-50 to-indigo-50/70 border-r border-slate-200/60 dark:border-zinc-800">
         <div className="max-w-[520px] w-full px-8">
           <div className="mb-8">
             <div className="text-3xl font-bold text-primary">Conivra Orbit Gold</div>
-            <p className="mt-4 text-lg text-lightGray">Conivra Orbit Gold ile erişimi, etkileşimi ve iş akışınızı tek ekranda yönetin</p>
+            <p className="mt-4 text-lg text-slate-700">Conivra Orbit Gold ile erişimi, etkileşimi ve iş akışınızı tek ekranda yönetin</p>
           </div>
-          <Image src={circles} alt="circles" className="w-full h-auto" priority />
+          <Image src={circles} alt="circles" className="w-full h-auto opacity-90" priority />
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-6">
-        <div className="w-full max-w-xl">
-          <h1 className="mb-8 text-3xl font-bold text-center">Hoşgeldin!</h1>
+      <div className="flex items-center justify-center p-6 bg-white dark:bg-zinc-900">
+        <div className="w-full max-w-md">
+          <h1 className="mb-2 text-3xl font-bold text-center text-slate-900 dark:text-white">Hoşgeldin!</h1>
+          <p className="mb-8 text-center text-sm text-slate-500 dark:text-slate-400">Devam etmek için lütfen giriş yapın.</p>
 
-          <form onSubmit={handleSubmit} autoComplete="off" noValidate className="space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" noValidate className="space-y-5">
             <Input
               label="Email"
               name="email"
@@ -153,20 +154,20 @@ export default function LoginPage() {
             />
 
             <div className="text-right text-sm">
-              <Link href="/forgot-password" className="text-primary">Şifremi Unuttum</Link>
+              <Link href="/forgot-password" className="text-primary dark:text-purple-400 hover:text-primary/90 dark:hover:text-purple-300 hover:underline font-medium transition-colors">Şifremi Unuttum</Link>
             </div>
 
             <Button 
               type="submit" 
               disabled={isSubmitting || isLoading}
-              className="w-full bg-primary border-lightGray/20 hover:bg-primary/90 hover:border-primary/90 text-white"
+              className="w-full h-10 bg-primary dark:bg-purple-700 hover:bg-primary/90 dark:hover:bg-purple-600 text-white rounded-lg font-medium shadow-md shadow-purple-500/10 transition-all cursor-pointer flex items-center justify-center"
             >
               {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
             </Button>
           </form>
 
-          <div className="mt-8 text-center text-sm">
-            Hesabın yok mu? <Link href="/register" className="text-primary font-semibold">Kaydol</Link>
+          <div className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
+            Hesabın yok mu? <Link href="/register" className="text-primary dark:text-purple-400 font-semibold hover:underline">Kaydol</Link>
           </div>
         </div>
       </div>

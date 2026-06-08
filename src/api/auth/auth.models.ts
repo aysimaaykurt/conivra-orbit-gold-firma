@@ -10,6 +10,7 @@ export interface RegisterRequest {
   sector: string;
   fullName: string;
   email: string;
+  phone: string;
   gender: string;
   birthDate: string;
   city: string;

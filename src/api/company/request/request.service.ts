@@ -8,66 +8,57 @@ import type {
 
 /**
  * Create Request Service
- * POST /api/v1/company/request
+ * POST company/request
  */
+import { RequestStatus } from './requestStatus.enum';
+
 export const createRequest = async (
   data: CreateRequestRequest
 ): Promise<CreateRequestResponse> => {
-  try {
-    const response = await apiClient.post<CreateRequestResponse>(
-      '/api/v1/company/request',
-      data
-    );
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Talep oluşturulurken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+  // Şimdilik API bağlantısı iptal edildi
+  return {
+    success: true,
+    message: "Talep başarıyla oluşturuldu (Kontrol Modu)",
+    data: { id: "req-mock", title: data.title, type: data.type },
+  };
 };
 
-/**
- * Get Requests List Service
- * GET /api/v1/company/request
- * @param page - Sayfa numarası (opsiyonel)
- * @param pageSize - Sayfa başına kayıt sayısı (opsiyonel)
- * @param searchTerm - Arama terimi (opsiyonel)
- */
 export const getRequests = async (
   page?: number,
   pageSize?: number,
   searchTerm?: string
 ): Promise<GetRequestsListResponse> => {
-  try {
-    const params: any = {};
-    if (page !== undefined) {
-      params.page = page;
-    }
-    if (pageSize !== undefined) {
-      params.pageSize = pageSize;
-    }
-    if (searchTerm !== undefined && searchTerm.trim() !== '') {
-      params.searchTerm = searchTerm;
-    }
+  const mockRequests = [
+    {
+      id: "req-1",
+      title: "Mekan İçi Ekran Arızası",
+      type: "Teknik Destek",
+      description: "Ana salondaki dijital menü ekranında bağlantı kopukluğu var.",
+      status: RequestStatus.PENDING,
+      createDate: "2026-05-10T10:00:00Z",
+    },
+    {
+      id: "req-2",
+      title: "İçerik Üreticisi Ödeme Teyidi",
+      type: "Finans",
+      description: "Geçen haftaki lansman etkinliği ödemesi hakkında bilgi.",
+      status: RequestStatus.IN_PROGRESS,
+      createDate: "2026-05-12T14:30:00Z",
+    },
+    {
+      id: "req-3",
+      title: "Yeni Menü Fotoğraf Çekimi Talebi",
+      type: "Pazarlama",
+      description: "Yaz menüsü görselleri için profesyonel çekim ekibi talebi.",
+      status: RequestStatus.RESOLVED,
+      createDate: "2026-05-01T09:15:00Z",
+    },
+  ];
 
-    const response = await apiClient.get<GetRequestsListResponse>(
-      '/api/v1/company/request',
-      { params }
-    );
-
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Talepler alınırken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+  return {
+    success: true,
+    data: mockRequests,
+    message: "Başarılı",
+  };
 };
 

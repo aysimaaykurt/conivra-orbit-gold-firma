@@ -6,24 +6,16 @@ import type {
 
 /**
  * Get Dashboard Stats Service
- * GET /api/v1/company/dashboard/stats
+ * GET company/dashboard/stats
  */
-export const getDashboardStats = async (): Promise<DashboardStatsResponse> => {
-  try {
-    const response = await apiClient.get<DashboardStatsResponse>(
-      '/api/v1/company/dashboard/stats'
-    );
+import { infoCards } from '@/src/mocks/dashboard';
 
-    return response.data;
-  } catch (error: any) {
-    // Axios error handling
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Dashboard istatistikleri alınırken bir hata oluştu',
-    } as ApiErrorResponse;
-  }
+export const getDashboardStats = async (): Promise<DashboardStatsResponse> => {
+  // Geliştirme/arayüz kontrolü için mock verisi dönülüyor
+  return {
+    success: true,
+    data: infoCards,
+    message: "Başarılı",
+  };
 };
 

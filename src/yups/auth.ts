@@ -10,6 +10,9 @@ export const registerSchema = Yup.object({
   sector: Yup.string().required("Sektör zorunludur"),
   fullName: Yup.string().required("Ad Soyad zorunludur"),
   email: Yup.string().email("Geçerli bir e-posta giriniz").required("E-posta zorunludur"),
+  phone: Yup.string()
+    .matches(/^\+90[5][0-9]{9}$/, "Telefon numarası +905 ile başlamalı ve 13 haneli olmalıdır")
+    .required("Telefon numarası zorunludur"),
   gender: Yup.string().required("Cinsiyet zorunludur"),
   birthDate: Yup.date().typeError("Tarih geçersiz").required("Doğum tarihi zorunludur"),
   city: Yup.string().required("İl zorunludur"),

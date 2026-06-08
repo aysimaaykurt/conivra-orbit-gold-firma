@@ -123,46 +123,26 @@ export default function AdManagementPage() {
       setIsLoading(true);
       setError(null);
 
-      try {
-        let response;
-        let category: AdCategory;
-
-        switch (active) {
-          case "ilan":
-            response = await getAdvertisements();
-            if (response.success && response.data) {
-              const adEvents = response.data
-                .map((item) => convertToAdEvent(item, "ilan"))
-                .filter((event): event is AdEvent => event !== null);
-              setEvents(adEvents);
-            }
-            break;
-          case "workshop":
-            response = await getWorkshops();
-            if (response.success && response.data) {
-              const adEvents = response.data
-                .map((item) => convertToAdEvent(item, "workshop"))
-                .filter((event): event is AdEvent => event !== null);
-              setEvents(adEvents);
-            }
-            break;
-          case "hediye_kiti":
-            response = await getGiftKits();
-            if (response.success && response.data) {
-              const adEvents = response.data
-                .map((item) => convertToAdEvent(item, "hediye_kiti"))
-                .filter((event): event is AdEvent => event !== null);
-              setEvents(adEvents);
-            }
-            break;
-        }
-      } catch (error: any) {
-        console.error("Error fetching data:", error);
-        setError(error.message || "Veriler yüklenirken bir hata oluştu");
-        setEvents([]);
-      } finally {
+      // Şimdilik API bağlantıları iptal edildi, her alanın arayüzünün görünmesi için mock veri dolduruluyor
+      setTimeout(() => {
+        const baseEvents = mockAdEvents.map((evt, idx) => ({
+          ...evt,
+          id: `${active}-${idx}`,
+          category: active,
+          title: active === "ilan" 
+            ? "Soiree Menü Tanıtım" 
+            : active === "workshop" 
+            ? "Influencer İçerik Üretimi Workshop" 
+            : "Özel Premium Hediye Kiti Dağıtımı",
+          type: active === "ilan" 
+            ? "Reklam" 
+            : active === "workshop" 
+            ? "Workshop" 
+            : "Hediye Kiti",
+        }));
+        setEvents(baseEvents);
         setIsLoading(false);
-      }
+      }, 200);
     };
 
     fetchData();

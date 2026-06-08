@@ -32,6 +32,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
       const classArray = className?.split(" ") || [];
       const hasBgPrimary = classArray.some(cls => cls.includes("bg-primary"));
       const hasBorderPrimary = classArray.some(cls => cls.includes("border-primary"));
+      const hasBorderNone = classArray.some(cls => cls === "border-none");
       
       const newStyle: React.CSSProperties = {
         ...style,
@@ -46,6 +47,8 @@ export const Button = React.forwardRef<any, ButtonProps>(
         newStyle.borderColor = "#4C226A";
         newStyle.borderWidth = "1px";
         newStyle.borderStyle = "solid";
+      } else if (hasBorderNone || hasBgPrimary) {
+        newStyle.border = "none";
       }
 
       // Remove bg-primary and border-primary variants from className as we handle them via style

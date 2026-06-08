@@ -19,49 +19,51 @@ import type {
 export const login = async (
   credentials: LoginRequest
 ): Promise<LoginResponse> => {
-  try {
-    const response = await apiClient.post<LoginResponse>(
-      '/api/v2/auth/login',
-      credentials
-    );
+  // Geliştirme ve kontrol amacıyla login endpointi devre dışı bırakıldı.
+  // Doğrudan başarılı mock verisi dönülüyor.
+  const mockUser = {
+    id: 1,
+    tenantId: 1,
+    firstName: "Test",
+    lastName: "Kullanıcı",
+    email: credentials.email || "test@conivra.com",
+    phone: "05555555555",
+    status: true,
+    subscriptionStatus: "gold",
+  };
 
-    if (response.data.success && typeof window !== 'undefined') {
-      // Token'ı localStorage'a kaydet
-      const token = response.data.data.token.token;
-      localStorage.setItem('authToken', token);
-
-      // User bilgilerini kaydet
-      localStorage.setItem('user', JSON.stringify(response.data.data.user));
-      localStorage.setItem(
-        'currentTenantId',
-        response.data.data.tenantId.toString()
-      );
-      localStorage.setItem('tenantName', response.data.data.tenantName);
-    }
-
-    return response.data;
-  } catch (error: any) {
-    // Axios error handling
-    if (error.response?.data) {
-      throw error.response.data as ApiErrorResponse;
-    }
-    throw {
-      success: false,
-      message: error.message || 'Giriş işlemi sırasında bir hata oluştu',
-    } as ApiErrorResponse;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('authToken', "mock-jwt-token-12345");
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    localStorage.setItem('currentTenantId', "1");
+    localStorage.setItem('tenantName', "Conivra Orbit Gold Firma");
   }
+
+  return {
+    success: true,
+    message: "Giriş başarılı (Kontrol Modu)",
+    data: {
+      token: {
+        token: "mock-jwt-token-12345",
+        expiration: new Date(Date.now() + 86400000).toISOString(),
+      },
+      user: mockUser,
+      tenantId: 1,
+      tenantName: "Conivra Orbit Gold Firma",
+    },
+  };
 };
 
 /**
  * Register Service
- * POST /api/v1/auth/register
+ * POST auth/register
  */
 export const register = async (
   registerData: RegisterRequest
 ): Promise<RegisterResponse> => {
   try {
     const response = await apiClient.post<RegisterResponse>(
-      '/api/v1/auth/register',
+      'auth/register',
       registerData
     );
 
@@ -97,12 +99,12 @@ export const register = async (
 
 /**
  * Get Current User Service
- * GET /api/v1/auth/me
+ * GET auth/me
  */
 export const getCurrentUser = async (): Promise<GetCurrentUserResponse> => {
   try {
     const response = await apiClient.get<GetCurrentUserResponse>(
-      '/api/v1/auth/me'
+      'auth/me'
     );
 
     if (response.data.success && typeof window !== 'undefined') {
@@ -176,14 +178,14 @@ export const isAuthenticated = (): boolean => {
 
 /**
  * Send Password Mail Service
- * POST /api/v1/auth/sendPasswordMail
+ * POST auth/sendPasswordMail
  */
 export const sendPasswordMail = async (
   data: SendPasswordMailRequest
 ): Promise<SendPasswordMailResponse> => {
   try {
     const response = await apiClient.post<SendPasswordMailResponse>(
-      '/api/v1/auth/sendPasswordMail',
+      'auth/sendPasswordMail',
       data
     );
 
@@ -202,14 +204,14 @@ export const sendPasswordMail = async (
 
 /**
  * Change Password Service
- * POST /api/v1/auth/changePassword
+ * POST auth/changePassword
  */
 export const changePassword = async (
   data: ChangePasswordRequest
 ): Promise<ChangePasswordResponse> => {
   try {
     const response = await apiClient.post<ChangePasswordResponse>(
-      '/api/v1/auth/changePassword',
+      'auth/changePassword',
       data
     );
 
