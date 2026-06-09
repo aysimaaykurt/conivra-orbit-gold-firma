@@ -9,8 +9,8 @@ export default function InfoCards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
           <div key={i} className="bg-white rounded-lg p-4 shadow-sm h-full animate-pulse">
             <div className="mb-4">
               <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
@@ -30,8 +30,8 @@ export default function InfoCards() {
 
   if (error) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-3 bg-white rounded-lg p-4 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="col-span-4 bg-white rounded-lg p-4 shadow-sm">
           <p className="text-sm text-lightGray text-center py-4">
             {error}
           </p>
@@ -42,8 +42,8 @@ export default function InfoCards() {
 
   if (cards.length === 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-3 bg-white rounded-lg p-4 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="col-span-4 bg-white rounded-lg p-4 shadow-sm">
           <p className="text-sm text-lightGray text-center py-4">
             Henüz istatistik bulunmamaktadır.
           </p>
@@ -53,7 +53,7 @@ export default function InfoCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {cards.map((card) => (
         <InfoCard key={card.id} card={card} />
       ))}

@@ -23,7 +23,7 @@ export default function SupportsTable({ supports, isLoading }: SupportsTableProp
     );
   }
 
-  if (supports.length === 0) {
+  if (!Array.isArray(supports) || supports.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
         <p className="text-sm text-lightGray text-center py-8">

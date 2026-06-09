@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL - environment variable'dan alınabilir
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://increasingly-fragrances-recommend-growth.trycloudflare.com/api/v1/';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://song-cartridges-missile-amplifier.trycloudflare.com/api/v1/';
 
 // Axios instance oluştur
 const apiClient = axios.create({

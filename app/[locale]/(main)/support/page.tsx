@@ -39,18 +39,23 @@ export default function SupportPage() {
       try {
         if (activeTab === "taleplerim") {
           const response = await getRequests(currentPage, itemsPerPage);
-          if (response.success && response.data) {
-            setRequests(response.data);
-            // Backend'den pagination bilgisi gelirse kullan, yoksa hesapla
-            setTotalItems(response.data.length);
-            setTotalPages(Math.ceil(response.data.length / itemsPerPage));
+          if (response && response.success) {
+            const items = Array.isArray(response.data) ? response.data : ((response.data as any)?.items || []);
+            setRequests(items);
+            setTotalItems((response.data as any)?.totalCount || items.length);
+            setTotalPages((response.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
+          } else {
+            setRequests([]);
           }
         } else {
           const response = await getSupports(currentPage, itemsPerPage);
-          if (response.success && response.data) {
-            setSupports(response.data);
-            setTotalItems(response.data.length);
-            setTotalPages(Math.ceil(response.data.length / itemsPerPage));
+          if (response && response.success) {
+            const items = Array.isArray(response.data) ? response.data : ((response.data as any)?.items || []);
+            setSupports(items);
+            setTotalItems((response.data as any)?.totalCount || items.length);
+            setTotalPages((response.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
+          } else {
+            setSupports([]);
           }
         }
       } catch (error: any) {
@@ -95,10 +100,14 @@ export default function SupportPage() {
         });
 
         setIsRequestModalOpen(false);
+        setActiveTab("taleplerim");
         // Refresh data
         const refreshResponse = await getRequests(currentPage, itemsPerPage);
-        if (refreshResponse.success && refreshResponse.data) {
-          setRequests(refreshResponse.data);
+        if (refreshResponse && refreshResponse.success) {
+          const items = Array.isArray(refreshResponse.data) ? refreshResponse.data : ((refreshResponse.data as any)?.items || []);
+          setRequests(items);
+          setTotalItems((refreshResponse.data as any)?.totalCount || items.length);
+          setTotalPages((refreshResponse.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
         }
       }
     } catch (error: any) {
@@ -131,10 +140,14 @@ export default function SupportPage() {
         });
 
         setIsSupportModalOpen(false);
+        setActiveTab("desteklerim");
         // Refresh data
         const refreshResponse = await getSupports(currentPage, itemsPerPage);
-        if (refreshResponse.success && refreshResponse.data) {
-          setSupports(refreshResponse.data);
+        if (refreshResponse && refreshResponse.success) {
+          const items = Array.isArray(refreshResponse.data) ? refreshResponse.data : ((refreshResponse.data as any)?.items || []);
+          setSupports(items);
+          setTotalItems((refreshResponse.data as any)?.totalCount || items.length);
+          setTotalPages((refreshResponse.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
         }
       }
     } catch (error: any) {
