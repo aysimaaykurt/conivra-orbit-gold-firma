@@ -15,12 +15,18 @@ import { SupportStatus } from './supportStatus.enum';
 export const createSupport = async (
   data: CreateSupportRequest
 ): Promise<CreateSupportResponse> => {
-  // Şimdilik API bağlantısı iptal edildi
-  return {
-    success: true,
-    message: "Destek talebi başarıyla oluşturuldu (Kontrol Modu)",
-    data: { id: "sup-mock", title: data.title, type: data.type },
-  };
+  try {
+    const response = await apiClient.post<CreateSupportResponse>('company/support', data);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Destek talebi oluşturulurken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
 };
 
 export const getSupports = async (
@@ -28,29 +34,22 @@ export const getSupports = async (
   pageSize?: number,
   searchTerm?: string
 ): Promise<GetSupportsListResponse> => {
-  const mockSupports = [
-    {
-      id: "sup-1",
-      title: "Gold Statü Avantajları Nelerdir?",
-      type: "Genel Soru",
-      description: "Gold pakete geçiş yaptık, influencer aramalarında öne çıkma kuralı nasıl işliyor?",
-      status: SupportStatus.ANSWERED,
-      createDate: "2026-05-11T11:20:00Z",
-    },
-    {
-      id: "sup-2",
-      title: "Hediye Kiti Kargo Entegrasyonu",
-      type: "Entegrasyon",
-      description: "Tanımladığımız hediye kitleri için otomatik kargo barkodu veriliyor mu?",
-      status: SupportStatus.PENDING,
-      createDate: "2026-05-13T08:45:00Z",
-    },
-  ];
+  try {
+    const params: any = {};
+    if (page) params.page = page;
+    if (pageSize) params.pageSize = pageSize;
+    if (searchTerm) params.searchTerm = searchTerm;
 
-  return {
-    success: true,
-    data: mockSupports,
-    message: "Başarılı",
-  };
+    const response = await apiClient.get<GetSupportsListResponse>('company/support', { params });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Destek talepleri alınırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
 };
 
