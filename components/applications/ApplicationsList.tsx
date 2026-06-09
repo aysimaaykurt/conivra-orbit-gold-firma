@@ -3,31 +3,37 @@
 import { useState } from "react";
 import { Link } from "@/src/navigation";
 import { useTranslations } from "next-intl";
-import { adTypeTabs, ApplicationListItem, applicationsList, AdType } from "@/src/mocks/applications";
+import { adTypeTabs, ApplicationListItem, AdType } from "@/src/mocks/applications";
+import { useApplications } from "@/src/hooks/useApplications";
+import { useEffect } from "react";
 
 export default function ApplicationsList() {
   const t = useTranslations("applications.adTypes");
   const [activeTab, setActiveTab] = useState<AdType>("soiree-menu");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const itemsPerPage = 10;
 
-  // Filter by active tab and search
-  const filteredApplications = applicationsList.filter((app) => {
-    const matchesTab = app.adType === activeTab;
-    const matchesSearch =
-      searchQuery === "" ||
-      app.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const { data: currentApplications, totalItems, totalPages, isLoading } = useApplications({
+    page: currentPage,
+    pageSize: itemsPerPage,
+    searchTerm: debouncedSearch,
+    adType: activeTab,
+    sortOrder: sortOrder,
+    sortBy: "createDate",
   });
 
-  // Pagination
-  const totalItems = filteredApplications.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentApplications = filteredApplications.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
   const handleApprove = (id: string) => {
     console.log("Approve:", id);
@@ -63,14 +69,20 @@ export default function ApplicationsList() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
           {/* Sort */}
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button 
+            onClick={() => {
+              setSortOrder(prev => prev === "desc" ? "asc" : "desc");
+              setCurrentPage(1);
+            }}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
             <i className="pi pi-list text-gray-600" />
-            <span className="text-gray-700">En Yeni</span>
-            <i className="pi pi-chevron-down text-gray-400 text-xs" />
+            <span className="text-gray-700 w-[55px] text-left">{sortOrder === "asc" ? "En Eski" : "En Yeni"}</span>
+            <i className="pi pi-sort-alt text-gray-400 text-xs ml-1" />
           </button>
         </div>
       </div>
@@ -126,15 +138,22 @@ export default function ApplicationsList() {
             </tr>
           </thead>
           <tbody>
-            {currentApplications.map((app) => (
+            {Array.isArray(currentApplications) && currentApplications.map((app) => (
               <ApplicationTableRow
-                key={app.id}
+                key={app.id || Math.random().toString()}
                 application={app}
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onShare={handleShare}
               />
             ))}
+            {Array.isArray(currentApplications) && currentApplications.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-center py-8 text-gray-500">
+                  Bu filtrelere uygun başvuru bulunamadı.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
