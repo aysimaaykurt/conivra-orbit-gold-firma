@@ -7,9 +7,11 @@ import { AdEvent } from "@/src/mocks/adManagement";
 
 interface EventCalendarSectionProps {
   event: AdEvent;
+  onEdit?: (id: string, category: string) => void;
+  onDelete?: (id: string, category: string) => void;
 }
 
-export default function EventCalendarSection({ event }: EventCalendarSectionProps) {
+export default function EventCalendarSection({ event, onEdit, onDelete }: EventCalendarSectionProps) {
   const t = useTranslations("adManagement");
   const { calendarRange, month } = event;
   
@@ -58,23 +60,22 @@ export default function EventCalendarSection({ event }: EventCalendarSectionProp
   
   // Get translated month
   const translatedMonth = t(`months.${getMonthKey(month)}`);
-  const timeSlots = ["09:00", "10:00"];
+  // Use the actual event start time so it matches and renders correctly
+  const timeSlots = Array.from(new Set([event.startTime, "10:00"]));
 
-  // Generate day headers based on range
-  // Assuming startDay (7) = Pazartesi (index 0)
-  const weekDays = Array.from(
-    { length: calendarRange.endDay - calendarRange.startDay + 1 },
-    (_, i) => {
-      const dayNumber = calendarRange.startDay + i;
-      const dayIndex = (dayNumber - calendarRange.startDay) % 7;
-      return {
-        key: `day-${dayNumber}`,
-        labelTop: dayNumber.toString().padStart(2, "0"),
-        day: dayNames[dayIndex],
-        dayNumber,
-      };
-    }
-  );
+  // Generate day headers based on range (always 7 days starting from Monday)
+  const startOfWeekDate = new Date(calendarRange.startOfWeekIso || new Date());
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const currentDay = new Date(startOfWeekDate);
+    currentDay.setDate(startOfWeekDate.getDate() + i);
+    const dayNumber = currentDay.getDate();
+    return {
+      key: `day-${dayNumber}-${i}`,
+      labelTop: dayNumber.toString().padStart(2, "0"),
+      day: dayNames[i], // i=0 is Monday
+      dayNumber,
+    };
+  });
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
@@ -135,7 +136,13 @@ export default function EventCalendarSection({ event }: EventCalendarSectionProp
                     isHighlightedDay ? "border-l-4 border-l-primary" : ""
                   }`}
                 >
-                  {hasEvent && <EventCard event={event} />}
+                  {hasEvent && (
+                    <EventCard 
+                      event={event} 
+                      onEdit={onEdit} 
+                      onDelete={onDelete} 
+                    />
+                  )}
                 </div>
               );
             })}

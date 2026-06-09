@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useFormik } from "formik";
 import { useRouter } from "@/src/navigation";
+import { useSearchParams } from "next/navigation";
 import { Calendar } from "primereact/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
-import { addWorkshop } from "@/src/api/advertisements/workshops.service";
+import { addWorkshop, getWorkshop, updateWorkshop } from "@/src/api/advertisements/workshops.service";
 
 interface AddWorkshopFormProps {
   onClose?: () => void;
@@ -130,6 +131,8 @@ const contentTypeOptions = [
 
 export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("editId");
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
@@ -173,7 +176,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
         const startDate = values.dateRange[0].toISOString();
         const endDate = values.dateRange[1].toISOString();
 
-        const response = await addWorkshop({
+        const requestData = {
           title: values.title,
           description: values.description,
           startDate,
@@ -191,7 +194,14 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
           workshopGoal: values.workshopGoal,
           workshopContent: values.workshopContent,
           image: values.image || undefined,
-        });
+        };
+
+        let response;
+        if (editId) {
+          response = await updateWorkshop(editId, requestData);
+        } else {
+          response = await addWorkshop(requestData);
+        }
 
         if (response.success) {
           toastRef.current?.show({
@@ -214,7 +224,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
         toastRef.current?.show({
           severity: "error",
           summary: "Hata",
-          detail: error.message || "Workshop eklenirken bir hata oluştu",
+          detail: error.message || (editId ? "Workshop güncellenirken bir hata oluştu" : "Workshop eklenirken bir hata oluştu"),
           life: 3000,
         });
       } finally {
@@ -222,6 +232,54 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       }
     },
   });
+
+  useEffect(() => {
+    if (editId) {
+      const fetchAd = async () => {
+        setIsLoading(true);
+        try {
+          const response = await getWorkshop(editId);
+          if (response.success && response.data) {
+            const ad = response.data;
+            const startDate = ad.startDate ? new Date(ad.startDate) : new Date();
+            const endDate = ad.endDate ? new Date(ad.endDate) : new Date();
+            
+            formik.setValues({
+              title: ad.title || "",
+              description: ad.description || "",
+              dateRange: [startDate, endDate],
+              duration: ad.duration || "",
+              city: ad.city || "",
+              district: ad.district || "",
+              address: ad.address || "",
+              category: ad.category || "",
+              targetAudience: ad.targetAudience || "",
+              participantCount: ad.participantCount || "",
+              participationCondition: ad.participationCondition || "",
+              fee: ad.fee || "",
+              contentType: ad.contentType || "",
+              workshopGoal: ad.workshopGoal || "",
+              workshopContent: ad.workshopContent || "",
+              image: null,
+              imagePreview: ad.imageUrl ? (ad.imageUrl.startsWith('http') || ad.imageUrl.startsWith('/images/') ? ad.imageUrl : `https://increasingly-fragrances-recommend-growth.trycloudflare.com/${ad.imageUrl.replace(/^\//, '')}`) : "",
+            });
+          }
+        } catch (error) {
+          console.error("Workshop detayı alınamadı:", error);
+          if (toastRef.current) {
+            toastRef.current.show({
+              severity: "error",
+              summary: "Hata",
+              detail: "Workshop bilgileri yüklenemedi.",
+            });
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchAd();
+    }
+  }, [editId]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 

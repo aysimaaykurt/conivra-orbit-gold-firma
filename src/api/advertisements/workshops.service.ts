@@ -154,20 +154,16 @@ export const getWorkshop = async (
  * @param searchTerm - Arama terimi (opsiyonel)
  */
 export const getWorkshops = async (
-  page?: number,
-  pageSize?: number,
-  searchTerm?: string
+  paramsObj?: import('./workshops.models').GetWorkshopsParams
 ): Promise<GetWorkshopsListResponse> => {
   try {
-    const params: any = {};
-    if (page !== undefined) {
-      params.page = page;
-    }
-    if (pageSize !== undefined) {
-      params.pageSize = pageSize;
-    }
-    if (searchTerm !== undefined && searchTerm.trim() !== '') {
-      params.searchTerm = searchTerm;
+    const params: Record<string, any> = {};
+    if (paramsObj) {
+      Object.entries(paramsObj).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params[key] = value;
+        }
+      });
     }
 
     const response = await apiClient.get<GetWorkshopsListResponse>(

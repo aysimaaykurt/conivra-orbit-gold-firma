@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useFormik } from "formik";
 import { useRouter } from "@/src/navigation";
+import { useSearchParams } from "next/navigation";
 import { Calendar } from "primereact/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
-import { addAdvertisement } from "@/src/api/advertisements/advertisements.service";
+import { addAdvertisement, getAdvertisement, updateAdvertisement } from "@/src/api/advertisements/advertisements.service";
 
 interface AddAdFormProps {
   onClose?: () => void;
@@ -130,6 +131,8 @@ const businessTypeOptions = [
 
 export default function AddAdForm({ onClose }: AddAdFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("editId");
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
@@ -172,7 +175,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
         const startDate = values.dateRange[0].toISOString();
         const endDate = values.dateRange[1].toISOString();
 
-        const response = await addAdvertisement({
+        const requestData = {
           title: values.title,
           description: values.description,
           startDate,
@@ -189,7 +192,14 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
           contentType: values.contentType,
           businessType: values.businessType,
           image: values.image || undefined,
-        });
+        };
+
+        let response;
+        if (editId) {
+          response = await updateAdvertisement(editId, requestData);
+        } else {
+          response = await addAdvertisement(requestData);
+        }
 
         if (response.success) {
           toastRef.current?.show({
@@ -220,6 +230,53 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
       }
     },
   });
+
+  useEffect(() => {
+    if (editId) {
+      const fetchAd = async () => {
+        setIsLoading(true);
+        try {
+          const response = await getAdvertisement(editId);
+          if (response.success && response.data) {
+            const ad = response.data;
+            const startDate = ad.startDate ? new Date(ad.startDate) : new Date();
+            const endDate = ad.endDate ? new Date(ad.endDate) : new Date();
+            
+            formik.setValues({
+              title: ad.title || "",
+              description: ad.description || "",
+              dateRange: [startDate, endDate],
+              city: ad.city || "",
+              district: ad.district || "",
+              address: ad.address || "",
+              sector: ad.sector || "",
+              category: ad.category || "",
+              services: ad.services || "",
+              guestCount: ad.guestCount || "",
+              platformPreference: ad.platformPreference || "",
+              followerRange: ad.followerRange || "",
+              contentType: ad.contentType || "",
+              businessType: ad.businessType || "",
+              image: null,
+              imagePreview: ad.imageUrl ? (ad.imageUrl.startsWith('http') || ad.imageUrl.startsWith('/images/') ? ad.imageUrl : `https://increasingly-fragrances-recommend-growth.trycloudflare.com/${ad.imageUrl.replace(/^\//, '')}`) : "",
+            });
+          }
+        } catch (error) {
+          console.error("İlan detayı alınamadı:", error);
+          if (toastRef.current) {
+            toastRef.current.show({
+              severity: "error",
+              summary: "Hata",
+              detail: "İlan bilgileri yüklenemedi.",
+            });
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchAd();
+    }
+  }, [editId]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 

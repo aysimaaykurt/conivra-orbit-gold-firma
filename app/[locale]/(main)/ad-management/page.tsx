@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Tabs from "@/components/ad-management/Tabs";
 import Toolbar from "@/components/ad-management/Toolbar";
 import CalendarGrid from "@/components/ad-management/CalendarGrid";
+import EventCard from "@/components/ad-management/EventCard";
 import { getAdvertisements } from "@/src/api/advertisements/advertisements.service";
 import { getWorkshops } from "@/src/api/advertisements/workshops.service";
 import { getGiftKits } from "@/src/api/advertisements/giftKits.service";
@@ -11,12 +12,23 @@ import type { Advertisement } from "@/src/api/advertisements/advertisements.mode
 import type { Workshop } from "@/src/api/advertisements/workshops.models";
 import type { GiftKit } from "@/src/api/advertisements/giftKits.models";
 import { AdEvent, AdCategory } from "@/src/mocks/adManagement";
+import { useAdManagement } from "@/src/hooks/useAdManagement";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 export default function AdManagementPage() {
+  const router = useRouter();
+  const locale = useLocale();
   const [active, setActive] = useState<AdCategory>("ilan");
+  const [filters, setFilters] = useState<Record<string, any>>({
+    page: 1,
+    pageSize: 10,
+    searchTerm: "",
+    sortBy: "createDate",
+    sortOrder: "desc"
+  });
+  const { data: rawData, isLoading, error } = useAdManagement(active, filters);
   const [events, setEvents] = useState<AdEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Helper function to convert API data to AdEvent format
   const convertToAdEvent = (
@@ -30,11 +42,13 @@ export default function AdManagementPage() {
 
       if ("startDate" in item && "endDate" in item) {
         // Advertisement or Workshop
-        startDate = new Date(item.startDate);
-        endDate = new Date(item.endDate);
-      } else if ("createDate" in item) {
-        // GiftKit - use createDate as startDate, and add 1 day for endDate
-        startDate = new Date(item.createDate);
+        startDate = new Date(item.startDate as string);
+        endDate = new Date(item.endDate as string);
+      } else if (category === "hediye_kiti") {
+        // GiftKit - try createDate or fallback to current date
+        const anyItem = item as any;
+        const kitDate = anyItem.createDate || anyItem.createdAt || new Date().toISOString();
+        startDate = new Date(kitDate);
         endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 1);
       } else {
@@ -80,14 +94,10 @@ export default function AdManagementPage() {
 
       // Calculate calendar range (week containing the event)
       const startOfWeek = new Date(startDate);
-      startOfWeek.setDate(startDate.getDate() - startDate.getDay() + 1); // Monday
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+      const dayOfWeekIndex = startDate.getDay() || 7; // Convert 0 (Sunday) to 7
+      startOfWeek.setDate(startDate.getDate() - dayOfWeekIndex + 1); // Monday
 
-      const startDay = startOfWeek.getDate();
-      const endDay = endOfWeek.getDate();
-
-      // Generate time slots (simplified - you may want to calculate based on start/end times)
+      // Generate time slots
       const timeSlots = [startTime, endTime];
 
       return {
@@ -98,17 +108,19 @@ export default function AdManagementPage() {
         formattedDate,
         startTime,
         endTime,
-        coverImageUrl: item.imageUrl,
+        coverImageUrl: item.imageUrl || "/images/sample-1.jpg",
         type: category === "ilan" ? "Reklam" : category === "workshop" ? "Workshop" : "Hediye Kiti",
         views: 0, // API'den gelmiyorsa varsayılan değer
         comments: 0, // API'den gelmiyorsa varsayılan değer
+        subCategory: (item as any).category || "",
+        platform: (item as any).platformPreference || "",
+        targetAudience: (item as any).targetAudience || "",
         month,
         dayOfWeek,
         dayNumber,
         timeSlots,
         calendarRange: {
-          startDay,
-          endDay,
+          startOfWeekIso: startOfWeek.toISOString(),
           highlightedDay: dayNumber,
         },
       };
@@ -119,34 +131,45 @@ export default function AdManagementPage() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
+    if (rawData) {
+      // Backend sometimes wraps arrays in objects or pagination data
+      const dataArray = Array.isArray(rawData) ? rawData : (rawData as any).items || (rawData as any).data || [];
 
-      // Şimdilik API bağlantıları iptal edildi, her alanın arayüzünün görünmesi için mock veri dolduruluyor
-      setTimeout(() => {
-        const baseEvents = mockAdEvents.map((evt, idx) => ({
-          ...evt,
-          id: `${active}-${idx}`,
-          category: active,
-          title: active === "ilan" 
-            ? "Soiree Menü Tanıtım" 
-            : active === "workshop" 
-            ? "Influencer İçerik Üretimi Workshop" 
-            : "Özel Premium Hediye Kiti Dağıtımı",
-          type: active === "ilan" 
-            ? "Reklam" 
-            : active === "workshop" 
-            ? "Workshop" 
-            : "Hediye Kiti",
-        }));
-        setEvents(baseEvents);
-        setIsLoading(false);
-      }, 200);
-    };
+      if (Array.isArray(dataArray)) {
+        const parsedEvents = dataArray
+          .map((item) => convertToAdEvent(item, active))
+          .filter((evt): evt is AdEvent => evt !== null);
+        setEvents(parsedEvents);
+      } else {
+        console.error('Expected an array but got:', rawData);
+      }
+    }
+  }, [rawData, active]);
 
-    fetchData();
-  }, [active]);
+  const handleEdit = (id: string, category: string) => {
+    // Navigate to the correct form page with editId query parameter
+    let route = `/${locale}/ad-management/add?editId=${id}`;
+    if (category === "workshop") {
+      route = `/${locale}/ad-management/workshop/add?editId=${id}`;
+    } else if (category === "hediye_kiti") {
+      route = `/${locale}/ad-management/gift-kit/add?editId=${id}`;
+    }
+    router.push(route);
+  };
+
+  const handleDelete = async (id: string, category: string) => {
+    if (window.confirm("Bu kaydı silmek istediğinize emin misiniz? (Pasif duruma çekilecektir)")) {
+      try {
+        // TODO: Backend DELETE veya status inactive PUT isteği atılacak
+        // Geçici olarak listeden siliyoruz
+        setEvents((prev) => prev.filter((e) => e.id !== id));
+        alert("Kayıt başarıyla silindi (pasif yapıldı). Lütfen backend DELETE/PUT endpoint'i gelince gerçek bağlamayı yapın.");
+      } catch (error) {
+        console.error("Silme hatası:", error);
+        alert("Silinirken bir hata oluştu.");
+      }
+    }
+  };
 
   return (
     <div className="p-6 bg-[#F7F6F9] min-h-screen">
@@ -154,7 +177,7 @@ export default function AdManagementPage() {
         <h1 className="text-2xl font-bold" style={{ color: "#4C226A" }}>
           İlan Listesi
         </h1>
-        <Toolbar />
+        <Toolbar filters={filters} setFilters={setFilters} />
       </div>
 
       <div className="mb-4">
@@ -177,8 +200,19 @@ export default function AdManagementPage() {
             Henüz {active === "ilan" ? "ilan" : active === "workshop" ? "workshop" : "hediye kiti"} bulunmamaktadır.
           </p>
         </div>
+      ) : active === "hediye_kiti" ? (
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {events.map((event) => (
+            <EventCard 
+              key={event.id} 
+              event={event} 
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
       ) : (
-        <CalendarGrid events={events} />
+        <CalendarGrid events={events} onEdit={handleEdit} onDelete={handleDelete} />
       )}
     </div>
   );

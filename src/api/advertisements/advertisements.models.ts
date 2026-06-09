@@ -98,6 +98,17 @@ export interface GetAdvertisementsListResponse {
   message?: string;
 }
 
+export interface GetAdvertisementsParams {
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  city?: string;
+  district?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
 // API Error Response
 export interface ApiErrorResponse {
   success: false;

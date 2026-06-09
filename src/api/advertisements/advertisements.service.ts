@@ -152,20 +152,16 @@ export const getAdvertisement = async (
  * @param searchTerm - Arama terimi (opsiyonel)
  */
 export const getAdvertisements = async (
-  page?: number,
-  pageSize?: number,
-  searchTerm?: string
+  paramsObj?: import('./advertisements.models').GetAdvertisementsParams
 ): Promise<GetAdvertisementsListResponse> => {
   try {
-    const params: any = {};
-    if (page !== undefined) {
-      params.page = page;
-    }
-    if (pageSize !== undefined) {
-      params.pageSize = pageSize;
-    }
-    if (searchTerm !== undefined && searchTerm.trim() !== '') {
-      params.searchTerm = searchTerm;
+    const params: Record<string, any> = {};
+    if (paramsObj) {
+      Object.entries(paramsObj).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params[key] = value;
+        }
+      });
     }
 
     const response = await apiClient.get<GetAdvertisementsListResponse>(

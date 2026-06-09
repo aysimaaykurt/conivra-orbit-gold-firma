@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useFormik } from "formik";
 import { useRouter } from "@/src/navigation";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
-import { addGiftKit } from "@/src/api/advertisements/giftKits.service";
+import { addGiftKit, getGiftKit, updateGiftKit } from "@/src/api/advertisements/giftKits.service";
 
 interface AddGiftKitFormProps {
   onClose?: () => void;
@@ -82,6 +83,8 @@ const contentTypeOptions = [
 
 export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("editId");
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
@@ -103,7 +106,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const response = await addGiftKit({
+        const requestData = {
           title: values.title,
           content: values.content,
           category: values.category,
@@ -113,7 +116,14 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
           businessType: values.businessType,
           contentType: values.contentType,
           image: values.image || undefined,
-        });
+        };
+
+        let response;
+        if (editId) {
+          response = await updateGiftKit(editId, requestData);
+        } else {
+          response = await addGiftKit(requestData);
+        }
 
         if (response.success) {
           toastRef.current?.show({
@@ -136,7 +146,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
         toastRef.current?.show({
           severity: "error",
           summary: "Hata",
-          detail: error.message || "Hediye kiti eklenirken bir hata oluştu",
+          detail: error.message || (editId ? "Hediye kiti güncellenirken bir hata oluştu" : "Hediye kiti eklenirken bir hata oluştu"),
           life: 3000,
         });
       } finally {
@@ -144,6 +154,45 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       }
     },
   });
+
+  useEffect(() => {
+    if (editId) {
+      const fetchAd = async () => {
+        setIsLoading(true);
+        try {
+          const response = await getGiftKit(editId);
+          if (response.success && response.data) {
+            const ad = response.data;
+            
+            formik.setValues({
+              title: ad.title || "",
+              content: ad.description || ad.content || "", // Assuming the API might use description instead of content
+              category: ad.category || "",
+              targetAudience: ad.targetAudience || "",
+              followerRange: ad.followerRange || "",
+              platformPreference: ad.platformPreference || "",
+              businessType: ad.businessType || "",
+              contentType: ad.contentType || "",
+              image: null,
+              imagePreview: ad.imageUrl ? (ad.imageUrl.startsWith('http') || ad.imageUrl.startsWith('/images/') ? ad.imageUrl : `https://increasingly-fragrances-recommend-growth.trycloudflare.com/${ad.imageUrl.replace(/^\//, '')}`) : "",
+            });
+          }
+        } catch (error) {
+          console.error("Hediye kiti detayı alınamadı:", error);
+          if (toastRef.current) {
+            toastRef.current.show({
+              severity: "error",
+              summary: "Hata",
+              detail: "Hediye kiti bilgileri yüklenemedi.",
+            });
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchAd();
+    }
+  }, [editId]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
@@ -254,7 +303,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touched.title ? errors.title : undefined}
-                  placeholder="Workshop başlığı giriniz"
+                  placeholder="Hediye kiti başlığı giriniz"
                 />
 
                 <Textarea

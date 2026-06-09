@@ -12,14 +12,18 @@ export interface AdEvent {
   type: string; // "Reklam" gibi
   views: number;
   comments: number;
+  subCategory?: string; // e.g. "restaurant-cafe"
+  platform?: string; // e.g. "instagram"
+  targetAudience?: string; // e.g. "teens"
   month: string; // "Eylül", "Ekim" gibi - Calendar section'ında gösterilecek ay
   dayOfWeek: string; // "Pazartesi", "Salı" gibi
   dayNumber: number; // 7, 8, 9 gibi - Event'in gösterileceği gün
   timeSlots: string[]; // ["09:00", "10:00"] gibi
   calendarRange: {
     // Bu event için gösterilecek takvim aralığı
-    startDay: number; // 7
-    endDay: number; // 13
+    startOfWeekIso?: string; // Monday of the week
+    startDay?: number; // legacy
+    endDay?: number; // legacy
     highlightedDay?: number; // Vurgulanacak gün (event'in olduğu gün)
   };
 }

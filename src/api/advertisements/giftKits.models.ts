@@ -77,6 +77,16 @@ export interface GetGiftKitsListResponse {
   message?: string;
 }
 
+export interface GetGiftKitsParams {
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  category?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
 // API Error Response
 export interface ApiErrorResponse {
   success: false;

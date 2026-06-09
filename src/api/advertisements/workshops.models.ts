@@ -101,6 +101,15 @@ export interface GetWorkshopsListResponse {
   message?: string;
 }
 
+export interface GetWorkshopsParams {
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  city?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
 // API Error Response
 export interface ApiErrorResponse {
   success: false;
