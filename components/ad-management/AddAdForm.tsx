@@ -311,7 +311,9 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
 
   useEffect(() => {
     if (values.city) {
-      fetchDistricts(values.city).then(setDistrictOptions);
+      fetchDistricts(values.city).then(districts => {
+        setDistrictOptions(districts);
+      });
     } else {
       setDistrictOptions([]);
       if (values.district) {
@@ -452,7 +454,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                         placeholder="İl Seçiniz"
                       />
 
-                      <Dropdown
+                        <Dropdown
                         label="İlçe"
                         name="district"
                         value={values.district}
@@ -461,7 +463,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                         error={touched.district ? errors.district : undefined}
                         options={districtOptions}
                         placeholder="İlçe Seçiniz"
-                        disabled={!values.city || districtOptions.length === 0}
+                        disabled={!values.city || isLoading}
                       />
                     </div>
 

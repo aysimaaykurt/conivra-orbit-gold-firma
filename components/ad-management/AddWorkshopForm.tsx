@@ -475,7 +475,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                         error={touched.district ? errors.district : undefined}
                         options={districtOptions}
                         placeholder="İlçe Seçiniz"
-                        disabled={!values.city || districtOptions.length === 0}
+                        disabled={!values.city || isLoading}
                       />
                     </div>
 
