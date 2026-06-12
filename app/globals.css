@@ -262,11 +262,8 @@ header .p-dropdown[class*="rounded-full"] .p-dropdown-label {
   border-radius: 9999px !important;
 }
 
-/* Header language dropdown - single chevron, fixed width */
+/* Header language dropdown - single chevron */
 header .header-language-dropdown {
-  width: 140px !important;
-  max-width: 140px !important;
-  min-width: 140px !important;
 }
 
 header .header-language-dropdown .p-dropdown-label {
