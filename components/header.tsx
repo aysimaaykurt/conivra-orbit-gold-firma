@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Dropdown as PrimeDropdown } from "primereact/dropdown";
+import { Menu } from "primereact/menu";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/src/navigation";
 import goldStatue from "@/src/images/goldStatue.png";
 import { mockCompany, type CompanyProfile } from "@/src/mocks/user";
+import { logout } from "@/src/api/auth/auth.service";
 
 const mockReferralCode = "REF123456";
 
@@ -17,6 +19,18 @@ export default function Header() {
   const pathname = usePathname();
   const t = useTranslations("header");
   const [notificationCount] = useState(4);
+  const profileMenu = useRef<Menu>(null);
+
+  const profileItems = [
+    {
+      label: 'Çıkış Yap',
+      icon: 'pi pi-sign-out',
+      command: () => {
+        logout();
+        router.push('/login');
+      }
+    }
+  ];
 
   function getStatusLabel(status: CompanyProfile["status"]) {
     switch (status) {
@@ -138,7 +152,13 @@ export default function Header() {
           </button>
 
           {/* User Profile */}
-          <button className="flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1.5 hover:bg-gray-50 rounded transition-colors">
+          <Menu model={profileItems} popup ref={profileMenu} id="popup_profile_menu" />
+          <button 
+            onClick={(event) => profileMenu.current?.toggle(event)}
+            aria-controls="popup_profile_menu"
+            aria-haspopup
+            className="flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1.5 hover:bg-gray-50 rounded transition-colors"
+          >
             <div className="w-7 h-7 md:w-8 md:h-8 bg-gray-300 rounded flex items-center justify-center flex-shrink-0">
               <i className="pi pi-user text-dark text-xs"></i>
             </div>
