@@ -92,13 +92,13 @@ export default function Header() {
 
           <PrimeDropdown
             value={languageOptions.find((opt) => opt.value === locale) || languageOptions[0]}
-            onChange={(e) => handleLanguageChange(e.value)}
+            onChange={(e) => handleLanguageChange(e.value.value || e.value)}
             options={languageOptions}
             optionLabel="label"
             itemTemplate={(option) => (
               <div className="flex items-center gap-2 py-1">
                 <span className="text-base">{option.flag}</span>
-                <span className="font-semibold text-sm text-inherit">{option.label}</span>
+                <span className="font-semibold text-sm" style={{ color: '#202020' }}>{option.label}</span>
               </div>
             )}
             valueTemplate={(option) => {
@@ -106,11 +106,11 @@ export default function Header() {
               return (
                 <div className="flex items-center gap-1 md:gap-2 px-1">
                   <span className="text-base">{option.flag}</span>
-                  <span className="hidden md:inline font-semibold text-sm text-dark">{option.label}</span>
+                  <span className="font-semibold text-xs md:text-sm" style={{ color: '#202020' }}>{option.label}</span>
                 </div>
               );
             }}
-            className="header-language-dropdown !border-lightGray rounded-full !w-[70px] md:!w-[140px]"
+            className="header-language-dropdown !border-lightGray rounded-full !w-[90px] md:!w-[130px]"
             panelClassName="rounded-lg shadow-lg border border-lightGray/20"
             style={{
               backgroundColor: "white",
