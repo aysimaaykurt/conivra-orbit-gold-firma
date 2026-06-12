@@ -83,22 +83,24 @@ export default function LoginPage() {
       {/* Language Dropdown - Top Right */}
       <div className="absolute top-4 right-4 z-10">
         <PrimeDropdown
-          value={languageOptions.find((opt) => opt.value === locale) || languageOptions[0]}
+          value={locale}
           onChange={(e) => handleLanguageChange(e.value)}
           options={languageOptions}
           optionLabel="label"
+          optionValue="value"
           itemTemplate={(option) => (
-            <div className="flex items-center gap-2 py-2">
+            <div className="flex items-center gap-2 py-1">
               <span className="text-base">{option.flag}</span>
-              <span className="font-semibold text-sm text-dark">{option.label}</span>
+              <span className="font-semibold text-sm" style={{ color: '#202020' }}>{option.label}</span>
             </div>
           )}
-          valueTemplate={(option) => {
-            if (!option) return null;
+          valueTemplate={(option, props) => {
+            const currentOption = option || languageOptions.find(opt => opt.value === props.value) || languageOptions[0];
+            if (!currentOption) return null;
             return (
               <div className="flex items-center gap-2 px-1">
-                <span className="text-base">{option.flag}</span>
-                <span className="font-semibold text-sm text-dark">{option.label}</span>
+                <span className="text-base">{currentOption.flag}</span>
+                <span className="font-semibold text-sm" style={{ color: '#202020' }}>{currentOption.label}</span>
               </div>
             );
           }}
