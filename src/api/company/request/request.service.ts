@@ -53,3 +53,38 @@ export const getRequests = async (
   }
 };
 
+export const updateRequest = async (
+  id: string,
+  data: CreateRequestRequest
+): Promise<CreateRequestResponse> => {
+  try {
+    const numericId = id.replace(/^(req-|sup-)/, '');
+    const response = await apiClient.put<CreateRequestResponse>(`company/support/${numericId}`, data);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Talep güncellenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+export const deleteRequest = async (id: string): Promise<CreateRequestResponse> => {
+  try {
+    const numericId = id.replace(/^(req-|sup-)/, '');
+    const response = await apiClient.delete<CreateRequestResponse>(`company/support/${numericId}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Talep silinirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+

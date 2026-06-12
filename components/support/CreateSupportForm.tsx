@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 interface CreateSupportFormProps {
   onSubmit: (values: SupportFormValues) => void;
   onCancel?: () => void;
+  initialData?: SupportFormValues;
 }
 
 export interface SupportFormValues {
@@ -40,12 +41,13 @@ const validationSchema = Yup.object({
 export default function CreateSupportForm({
   onSubmit,
   onCancel,
+  initialData,
 }: CreateSupportFormProps) {
   const formik = useFormik<SupportFormValues>({
     initialValues: {
-      title: "",
-      type: "",
-      description: "",
+      title: initialData?.title || "",
+      type: initialData?.type || "",
+      description: initialData?.description || "",
     },
     validationSchema,
     enableReinitialize: true,
@@ -110,7 +112,7 @@ export default function CreateSupportForm({
           className="flex-1 text-white py-3 rounded-lg font-medium"
           style={{ backgroundColor: "#4C226A" }}
         >
-          Gönder
+          {initialData ? "Güncelle" : "Gönder"}
         </Button>
         {onCancel && (
           <Button

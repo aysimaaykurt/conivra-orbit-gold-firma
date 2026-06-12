@@ -9,6 +9,7 @@ interface SupportModalProps {
   onClose: () => void;
   onSubmit: (values: SupportFormValues) => void;
   isLoading?: boolean;
+  initialData?: SupportFormValues;
 }
 
 export default function SupportModal({
@@ -16,15 +17,16 @@ export default function SupportModal({
   onClose,
   onSubmit,
   isLoading = false,
+  initialData,
 }: SupportModalProps) {
   return (
     <Sidebar
       visible={isOpen}
       onHide={onClose}
       position="right"
-      title="Destek Ekle"
+      title={initialData ? "Destek Düzenle" : "Destek Ekle"}
     >
-      <CreateSupportForm onSubmit={onSubmit} onCancel={onClose} />
+      <CreateSupportForm onSubmit={onSubmit} onCancel={onClose} initialData={initialData} />
     </Sidebar>
   );
 }

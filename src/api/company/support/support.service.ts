@@ -3,6 +3,8 @@ import type {
   CreateSupportRequest,
   CreateSupportResponse,
   GetSupportsListResponse,
+  UpdateSupportRequest,
+  BasicResponse,
   ApiErrorResponse,
 } from './support.models';
 
@@ -49,6 +51,51 @@ export const getSupports = async (
     throw {
       success: false,
       message: error.message || 'Destek talepleri alınırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Update Support Service
+ * PUT company/support/{id}
+ */
+export const updateSupport = async (
+  id: string,
+  data: UpdateSupportRequest
+): Promise<BasicResponse> => {
+  try {
+    const numericId = id.replace(/^(req-|sup-)/, '');
+    const response = await apiClient.put<BasicResponse>(`company/support/${numericId}`, data);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Destek talebi güncellenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Delete Support Service
+ * DELETE company/support/{id}
+ */
+export const deleteSupport = async (
+  id: string
+): Promise<BasicResponse> => {
+  try {
+    const numericId = id.replace(/^(req-|sup-)/, '');
+    const response = await apiClient.delete<BasicResponse>(`company/support/${numericId}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Destek talebi silinirken bir hata oluştu',
     } as ApiErrorResponse;
   }
 };
