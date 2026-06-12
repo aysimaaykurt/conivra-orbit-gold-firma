@@ -48,39 +48,7 @@ const steps = [
   { id: 3, label: "Workshop Görseli" },
 ];
 
-// Mock options
-const cityOptions = [
-  { label: "İstanbul", value: "istanbul" },
-  { label: "Ankara", value: "ankara" },
-  { label: "İzmir", value: "izmir" },
-  { label: "Bursa", value: "bursa" },
-  { label: "Antalya", value: "antalya" },
-];
-
-const districtOptions = {
-  izmir: [
-    { label: "Konak", value: "konak" },
-    { label: "Karşıyaka", value: "karsiyaka" },
-    { label: "Bornova", value: "bornova" },
-  ],
-  istanbul: [
-    { label: "Kadıköy", value: "kadikoy" },
-    { label: "Beşiktaş", value: "besiktas" },
-    { label: "Şişli", value: "sisli" },
-  ],
-  ankara: [
-    { label: "Çankaya", value: "cankaya" },
-    { label: "Keçiören", value: "kecioren" },
-  ],
-  bursa: [
-    { label: "Osmangazi", value: "osmangazi" },
-    { label: "Nilüfer", value: "nilufer" },
-  ],
-  antalya: [
-    { label: "Muratpaşa", value: "muratpasa" },
-    { label: "Konyaaltı", value: "konyaalti" },
-  ],
-};
+import { useLocations } from "@/src/hooks/useLocations";
 
 const durationOptions = [
   { label: "1 Saat", value: "1" },
@@ -132,6 +100,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   const toastRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories();
+  const { cities: cityOptions, fetchDistricts } = useLocations();
+  const [districtOptions, setDistrictOptions] = useState<{label: string, value: string | number}[]>([]);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -342,11 +312,16 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
     }
   };
 
-  // Get district options based on selected city
-  const getDistrictOptions = () => {
-    if (!values.city) return [];
-    return districtOptions[values.city as keyof typeof districtOptions] || [];
-  };
+  useEffect(() => {
+    if (values.city) {
+      fetchDistricts(values.city).then(setDistrictOptions);
+    } else {
+      setDistrictOptions([]);
+      if (values.district) {
+        setFieldValue("district", "");
+      }
+    }
+  }, [values.city]);
 
   // Format date range for preview
   const formatDateRange = (dateRange: Date[] | null) => {
@@ -491,16 +466,16 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                         placeholder="İl Seçiniz"
                       />
 
-                      <Dropdown
+                        <Dropdown
                         label="İlçe"
                         name="district"
                         value={values.district}
                         onChange={handleChange}
                         onBlur={handleBlur}
                         error={touched.district ? errors.district : undefined}
-                        options={getDistrictOptions()}
+                        options={districtOptions}
                         placeholder="İlçe Seçiniz"
-                        disabled={!values.city}
+                        disabled={!values.city || districtOptions.length === 0}
                       />
                     </div>
 
