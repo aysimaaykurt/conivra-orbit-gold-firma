@@ -53,8 +53,8 @@
     },
     "shortcutItems": {
       "create-ad": "Yeni ilan oluştur",
-      "go-to-favorites": "Favorilere git",
-      "search-influencer": "Influencer ara",
+      "go-to-profile": "Profilime git",
+      "go-to-projects": "Projelerime git",
       "go-to-applications": "Başvurularıma git"
     },
     "timeAgo": {

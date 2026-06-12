@@ -29,11 +29,11 @@ function ShortcutItemComponent({ shortcut }: { shortcut: ShortcutItem }) {
       case "create-ad":
         router.push("/ad-management");
         break;
-      case "go-to-favorites":
-        router.push("/favorites");
+      case "go-to-profile":
+        router.push("/profile");
         break;
-      case "search-influencer":
-        router.push("/influencers");
+      case "go-to-projects":
+        router.push("/projects");
         break;
       case "go-to-applications":
         router.push("/applications");
