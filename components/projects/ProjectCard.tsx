@@ -79,30 +79,30 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
         <h3 className="font-bold text-dark mb-3 text-base line-clamp-1">{title}</h3>
 
         {/* Details Grid (2x2) */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
           {/* Row 1 - Left: Location */}
-          <div className="flex items-center gap-2 bg-white rounded-lg px-2.5 py-1">
-            <i className="pi pi-map-marker text-sm" style={{ color: "#4C226A" }} />
-            <span className="text-xs text-gray-800 font-medium">{location}</span>
+          <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+            <i className="pi pi-map-marker text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+            <span className="text-[11px] text-gray-800 font-medium truncate">{location}</span>
           </div>
           
           {/* Row 1 - Right: Date */}
-          <div className="flex items-center gap-2 bg-white rounded-lg px-2.5 py-1">
-            <i className="pi pi-calendar text-sm" style={{ color: "#4C226A" }} />
-            <span className="text-xs text-gray-800 font-medium">{date}</span>
+          <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+            <i className="pi pi-calendar text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+            <span className="text-[11px] text-gray-800 font-medium truncate">{date}</span>
           </div>
 
           {/* Row 2 - Left: Type */}
-          <div className="flex items-center gap-2 bg-white rounded-lg px-2.5 py-1">
-            <i className="pi pi-tag text-sm" style={{ color: "#4C226A" }} />
-            <span className="text-xs text-gray-800 font-medium">{t("type.ad")}</span>
+          <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+            <i className="pi pi-tag text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+            <span className="text-[11px] text-gray-800 font-medium truncate">{t("type.ad")}</span>
           </div>
 
           {/* Row 2 - Right: Assignee */}
           {assignee && (
-            <div className="flex items-center gap-2 bg-white rounded-lg px-2.5 py-1">
-              <i className="pi pi-user text-sm" style={{ color: "#4C226A" }} />
-              <span className="text-xs text-gray-800 font-medium">{assignee}</span>
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+              <i className="pi pi-user text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+              <span className="text-[11px] text-gray-800 font-medium truncate">{assignee}</span>
             </div>
           )}
         </div>
