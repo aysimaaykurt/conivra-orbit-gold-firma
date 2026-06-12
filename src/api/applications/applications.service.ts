@@ -16,21 +16,29 @@ import { applicationsList } from '@/src/mocks/applications';
  * @param pageSize - Sayfa başına kayıt sayısı (opsiyonel, varsayılan: tümü)
  */
 export const getApplications = async (
-  page?: number,
-  pageSize?: number
+  paramsObj?: import('./applications.models').GetApplicationsParams
 ): Promise<ApplicationsResponse> => {
-  // Geliştirme ve arayüz kontrolü için doğrudan mock dönülüyor
-  let resData = applicationsList;
-  if (page && pageSize) {
-    const start = (page - 1) * pageSize;
-    resData = applicationsList.slice(start, start + pageSize);
-  }
+  try {
+    const params: Record<string, any> = {};
+    if (paramsObj) {
+      Object.entries(paramsObj).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params[key] = value;
+        }
+      });
+    }
 
-  return {
-    success: true,
-    data: resData,
-    message: "Başarılı",
-  };
+    const response = await apiClient.get<ApplicationsResponse>('applications', { params });
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Başvurular yüklenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
 };
 
 /**
@@ -79,3 +87,50 @@ export const updateApplicationStatus = async (
   }
 };
 
+/**
+ * Get Application Detail Service
+ * GET applications/{id}
+ */
+export const getApplicationDetail = async (
+  id: string
+): Promise<import('./applications.models').ApplicationDetailResponse> => {
+  try {
+    const response = await apiClient.get<import('./applications.models').ApplicationDetailResponse>(
+      `applications/${id}`
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Başvuru detayı yüklenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Evaluate Application Service
+ * POST applications/Evaluation/{id}
+ */
+export const evaluateApplication = async (
+  id: string,
+  data: import('./applications.models').EvaluateApplicationRequest
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `applications/Evaluation/${id}`,
+      data
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Değerlendirme gönderilirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};

@@ -8,9 +8,11 @@ import StatusBadge from "./StatusBadge";
 interface RequestsTableProps {
   requests: Request[];
   isLoading?: boolean;
+  onEdit?: (request: Request) => void;
+  onDelete?: (request: Request) => void;
 }
 
-export default function RequestsTable({ requests, isLoading }: RequestsTableProps) {
+export default function RequestsTable({ requests, isLoading, onEdit, onDelete }: RequestsTableProps) {
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
@@ -51,6 +53,9 @@ export default function RequestsTable({ requests, isLoading }: RequestsTableProp
               <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                 Durum
               </th>
+              <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 w-24">
+                İşlemler
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -63,6 +68,28 @@ export default function RequestsTable({ requests, isLoading }: RequestsTableProp
                 </td>
                 <td className="py-3 px-4">
                   <StatusBadge status={request.status as RequestStatus} type="request" />
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    {onEdit && (
+                      <button
+                        onClick={() => onEdit(request)}
+                        className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="Düzenle"
+                      >
+                        <i className="pi pi-pencil" style={{ fontSize: '1rem' }}></i>
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        onClick={() => onDelete(request)}
+                        className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        title="Sil"
+                      >
+                        <i className="pi pi-trash" style={{ fontSize: '1rem' }}></i>
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

@@ -38,6 +38,8 @@ export interface DashboardApplicationsResponse {
 export interface ApplicationsResponse {
   success: boolean;
   data: ApplicationListItem[];
+  totalItems?: number;
+  totalPages?: number;
   message?: string;
 }
 
@@ -53,6 +55,40 @@ export interface UpdateApplicationStatusResponse {
   data?: {
     id: string;
     status: ApplicationStatus;
+  };
+}
+
+// Get Applications Query Parameters
+export interface GetApplicationsParams {
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  adType?: string;
+  status?: number;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+// Application Detail Response
+export interface ApplicationDetailResponse {
+  success: boolean;
+  data: any; // We'll refine this later if needed
+  message?: string;
+}
+
+// Evaluate Application Request Body
+export interface EvaluateApplicationRequest {
+  applicationId: string;
+  influencerId: string;
+  serviceSatisfaction: number;
+  collaborationEffectiveness: number;
+  agreementAdherence: string;
+  agreementExplanation: string;
+  effects: {
+    followerIncrease: boolean;
+    similarCollaborations: boolean;
+    likeIncrease: boolean;
+    viewIncrease: boolean;
   };
 }
 

@@ -7,6 +7,13 @@ export interface CreateSupportRequest {
   description: string;
 }
 
+// Update Support Request Models (PUT)
+export interface UpdateSupportRequest {
+  title: string;
+  type: string;
+  description: string;
+}
+
 // Support Response Models (GET)
 export interface Support {
   id: string;
@@ -39,6 +46,12 @@ export interface GetSupportsListResponse {
 // API Error Response
 export interface ApiErrorResponse {
   success: false;
+  message: string;
+}
+
+// Basic Response for PUT and DELETE
+export interface BasicResponse {
+  success: boolean;
   message: string;
 }
 

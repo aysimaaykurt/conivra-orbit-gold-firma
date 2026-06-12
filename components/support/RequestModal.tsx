@@ -9,6 +9,7 @@ interface RequestModalProps {
   onClose: () => void;
   onSubmit: (values: RequestFormValues) => void;
   isLoading?: boolean;
+  initialData?: RequestFormValues;
 }
 
 export default function RequestModal({
@@ -16,19 +17,21 @@ export default function RequestModal({
   onClose,
   onSubmit,
   isLoading = false,
+  initialData,
 }: RequestModalProps) {
   return (
     <Sidebar
       visible={isOpen}
       onHide={onClose}
       position="right"
-      title="Talep Ekle"
+      title={initialData ? "Talep Düzenle" : "Talep Ekle"}
     >
       <CreateRequestForm 
         onSubmit={(values) => {
           onSubmit(values);
         }} 
         onCancel={onClose} 
+        initialData={initialData}
       />
     </Sidebar>
   );
