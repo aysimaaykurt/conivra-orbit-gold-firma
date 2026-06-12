@@ -26,7 +26,8 @@
     "pendingReviews": {
       "title": "Pending Reviews",
       "subtitle": "Evaluate the service you received",
-      "evaluate": "Evaluate"
+      "evaluate": "Evaluate",
+      "noItems": "You have no pending reviews."
     },
     "mostPreferred": {
       "title": "Most Preferred",

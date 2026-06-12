@@ -26,7 +26,8 @@
     "pendingReviews": {
       "title": "Bekleyen Değerlendirmeler",
       "subtitle": "Aldığınız hizmeti değerlendirin",
-      "evaluate": "Değerlendir"
+      "evaluate": "Değerlendir",
+      "noItems": "Bekleyen değerlendirmeniz bulunmamaktadır."
     },
     "mostPreferred": {
       "title": "En Popüler İlanlar",
