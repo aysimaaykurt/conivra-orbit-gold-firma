@@ -25,7 +25,7 @@ export default function RequestsTable({ requests, isLoading, onEdit, onDelete }:
     );
   }
 
-  if (requests.length === 0) {
+  if (!Array.isArray(requests) || requests.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
         <p className="text-sm text-lightGray text-center py-8">

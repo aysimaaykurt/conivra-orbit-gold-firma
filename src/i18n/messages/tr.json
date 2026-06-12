@@ -29,8 +29,8 @@
       "evaluate": "Değerlendir"
     },
     "mostPreferred": {
-      "title": "En çok tercih edilenler",
-      "subtitle": "En çok tercih edilen influencerlar"
+      "title": "En Popüler İlanlar",
+      "subtitle": "En çok başvuru alan ilanlarınız"
     },
     "applications": {
       "title": "Son Gelen Başvurular",
@@ -53,8 +53,8 @@
     },
     "shortcutItems": {
       "create-ad": "Yeni ilan oluştur",
-      "go-to-favorites": "Favorilere git",
-      "search-influencer": "Influencer ara",
+      "go-to-profile": "Profilime git",
+      "go-to-projects": "Projelerime git",
       "go-to-applications": "Başvurularıma git"
     },
     "timeAgo": {

@@ -43,37 +43,23 @@ export default function SupportPage() {
       try {
         if (activeTab === "taleplerim") {
           const response = await getRequests(currentPage, itemsPerPage);
-          if (response.success && response.data) {
-            // Backend might return data as an array or an object with items
-            const dataArray = Array.isArray(response.data) 
-              ? response.data 
-              : ((response.data as any).items || []);
-            
-            setRequests(dataArray);
-            
-            // If totalCount is provided use it, otherwise use array length
-            const total = (response.data as any).totalCount !== undefined 
-              ? (response.data as any).totalCount 
-              : dataArray.length;
-              
-            setTotalItems(total);
-            setTotalPages(Math.ceil(total / itemsPerPage));
+          if (response && response.success) {
+            const items = Array.isArray(response.data) ? response.data : ((response.data as any)?.items || []);
+            setRequests(items);
+            setTotalItems((response.data as any)?.totalCount || items.length);
+            setTotalPages((response.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
+          } else {
+            setRequests([]);
           }
         } else {
           const response = await getSupports(currentPage, itemsPerPage);
-          if (response.success && response.data) {
-            const dataArray = Array.isArray(response.data) 
-              ? response.data 
-              : ((response.data as any).items || []);
-              
-            setSupports(dataArray);
-            
-            const total = (response.data as any).totalCount !== undefined 
-              ? (response.data as any).totalCount 
-              : dataArray.length;
-              
-            setTotalItems(total);
-            setTotalPages(Math.ceil(total / itemsPerPage));
+          if (response && response.success) {
+            const items = Array.isArray(response.data) ? response.data : ((response.data as any)?.items || []);
+            setSupports(items);
+            setTotalItems((response.data as any)?.totalCount || items.length);
+            setTotalPages((response.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
+          } else {
+            setSupports([]);
           }
         }
       } catch (error: any) {
@@ -199,14 +185,14 @@ export default function SupportPage() {
         });
 
         setIsRequestModalOpen(false);
-        setSelectedRequest(null);
+        setActiveTab("taleplerim");
         // Refresh data
         const refreshResponse = await getRequests(currentPage, itemsPerPage);
-        if (refreshResponse.success && refreshResponse.data) {
-          const dataArray = Array.isArray(refreshResponse.data) 
-            ? refreshResponse.data 
-            : ((refreshResponse.data as any).items || []);
-          setRequests(dataArray);
+        if (refreshResponse && refreshResponse.success) {
+          const items = Array.isArray(refreshResponse.data) ? refreshResponse.data : ((refreshResponse.data as any)?.items || []);
+          setRequests(items);
+          setTotalItems((refreshResponse.data as any)?.totalCount || items.length);
+          setTotalPages((refreshResponse.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
         }
       }
     } catch (error: any) {
@@ -248,14 +234,14 @@ export default function SupportPage() {
         });
 
         setIsSupportModalOpen(false);
-        setSelectedSupport(null);
+        setActiveTab("desteklerim");
         // Refresh data
         const refreshResponse = await getSupports(currentPage, itemsPerPage);
-        if (refreshResponse.success && refreshResponse.data) {
-          const dataArray = Array.isArray(refreshResponse.data) 
-            ? refreshResponse.data 
-            : ((refreshResponse.data as any).items || []);
-          setSupports(dataArray);
+        if (refreshResponse && refreshResponse.success) {
+          const items = Array.isArray(refreshResponse.data) ? refreshResponse.data : ((refreshResponse.data as any)?.items || []);
+          setSupports(items);
+          setTotalItems((refreshResponse.data as any)?.totalCount || items.length);
+          setTotalPages((refreshResponse.data as any)?.totalPages || Math.ceil(items.length / itemsPerPage) || 1);
         }
       }
     } catch (error: any) {

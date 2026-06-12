@@ -104,16 +104,16 @@ export const shortcuts: ShortcutItem[] = [
     iconColor: "white",
   },
   {
-    id: "go-to-favorites",
-    label: "Favorilere git",
-    iconClass: "pi pi-heart",
+    id: "go-to-profile",
+    label: "Profilime git",
+    iconClass: "pi pi-id-card",
     bgColor: "#C3B1E1", // Light purple/lavender
     iconColor: "#4C226A", // Primary purple
   },
   {
-    id: "search-influencer",
-    label: "Influencer ara",
-    iconClass: "pi pi-angle-double-right",
+    id: "go-to-projects",
+    label: "Projelerime git",
+    iconClass: "pi pi-check-circle",
     bgColor: "#A7F3D0", // Light green
     iconColor: "#A3E635", // Lime green/yellow
   },

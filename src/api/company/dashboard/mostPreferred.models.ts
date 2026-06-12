@@ -1,8 +1,11 @@
 // Most Preferred Models
 export interface MostPreferredItem {
   id: string;
-  name: string;
-  status: string;
+  name?: string;
+  status?: string;
+  title?: string;
+  type?: string;
+  imageUrl?: string;
 }
 
 // Most Preferred Response Models

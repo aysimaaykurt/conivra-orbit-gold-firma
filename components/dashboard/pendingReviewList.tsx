@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/src/navigation";
-import { getApplications } from "@/src/api/applications/applications.service";
+import { getPendingReviews } from "@/src/api/company/dashboard/dashboard.service";
 import type { ApplicationListItem } from "@/src/api/applications/applications.models";
 import PendingReviewItemComponent from "./pendingReviewItem";
 
@@ -19,8 +19,8 @@ export default function PendingReviewList() {
       try {
         setIsLoading(true);
         setError(null);
-        // Son 4 başvuruyu çek (page: 1, pageSize: 4)
-        const response = await getApplications(1, 4);
+        // Dashboard API'den bekleyen değerlendirmeleri çek
+        const response = await getPendingReviews();
         if (response.success && response.data) {
           setApplications(response.data);
         } else {

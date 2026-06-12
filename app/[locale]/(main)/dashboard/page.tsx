@@ -10,15 +10,15 @@ export default async function DashboardPage() {
   
   return (
     <div className="p-4 bg-[#F7F6F9] min-h-screen">
+      {/* Top Row: Info Cards spanning full 12 columns */}
+      <div className="mb-4">
+        <InfoCards />
+      </div>
+
       {/* Main Grid: 12 columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left Section: col-span-8 */}
         <div className="lg:col-span-8 grid grid-cols-12 gap-4">
-          {/* Info Cards: col-span-12 */}
-          <div className="col-span-12">
-            <InfoCards />
-          </div>
-
           {/* Bottom row */}
           <div className="col-span-12 grid grid-cols-12 gap-4">
             {/* Son Gelen Başvurular: col-span-8 */}
