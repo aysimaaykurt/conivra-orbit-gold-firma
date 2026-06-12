@@ -152,7 +152,19 @@ export default function Header() {
           </button>
 
           {/* User Profile */}
-          <Menu model={profileItems} popup ref={profileMenu} id="popup_profile_menu" />
+          <Menu 
+            model={profileItems} 
+            popup 
+            ref={profileMenu} 
+            id="popup_profile_menu"
+            className="w-36 mt-1 shadow-lg border border-lightGray/20 rounded-lg"
+            pt={{
+              root: { className: "p-1" },
+              action: { className: "flex items-center px-3 py-2 rounded hover:bg-red-50 text-error transition-colors" },
+              icon: { className: "text-error text-xs mr-2" },
+              label: { className: "text-error text-sm font-semibold" }
+            }}
+          />
           <button 
             onClick={(event) => profileMenu.current?.toggle(event)}
             aria-controls="popup_profile_menu"
