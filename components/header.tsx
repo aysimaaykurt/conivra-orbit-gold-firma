@@ -155,6 +155,7 @@ export default function Header() {
           <Menu 
             model={profileItems} 
             popup 
+            popupAlignment="right"
             ref={profileMenu} 
             id="popup_profile_menu"
             className="w-36 mt-1 shadow-lg border border-lightGray/20 rounded-lg"
