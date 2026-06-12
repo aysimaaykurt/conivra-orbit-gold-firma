@@ -183,3 +183,22 @@ export const getWorkshops = async (
   }
 };
 
+/**
+ * Delete Workshop Service
+ * DELETE Advertisements/deleteWorkshop/:id
+ */
+export const deleteWorkshop = async (id: string): Promise<any> => {
+  try {
+    const response = await apiClient.delete(`Advertisements/deleteWorkshop/${id}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Workshop silinirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+

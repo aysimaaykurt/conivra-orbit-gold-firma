@@ -4,6 +4,7 @@ import { AdEvent } from "@/src/mocks/adManagement";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
+import { useCategories } from "@/src/hooks/useCategories";
 
 interface EventCardProps {
   event: AdEvent;
@@ -15,6 +16,7 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
   const t = useTranslations("adManagement");
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { categories } = useCategories();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -61,15 +63,13 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
   };
 
   const translateValue = (key: string, type: 'category' | 'audience' | 'platform') => {
+    if (type === 'category') {
+      const found = categories.find(c => c.value === key || c.label === key);
+      if (found) return found.label;
+      return key;
+    }
+
     const maps: Record<string, Record<string, string>> = {
-      category: {
-        "restaurant-cafe": "Restoran / Cafe",
-        "food-drink": "Yemek & İçecek",
-        "art": "Sanat",
-        "music": "Müzik",
-        "fashion": "Moda",
-        "technology": "Teknoloji",
-      },
       audience: {
         "adults": "Yetişkinler",
         "teens": "Gençler",
@@ -87,122 +87,144 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
     return maps[type][key] || key;
   };
 
+  // Helper to handle backslashes and relative paths from .NET
+  const getImageUrl = (url?: string) => {
+    if (!url) return '/images/soiree.png';
+    if (url.startsWith('http') || url.startsWith('/images/')) return url;
+    const cleanPath = url.replace(/\\/g, '/').replace(/^\//, '');
+    
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com';
+      const origin = new URL(baseUrl).origin;
+      return `${origin}/${cleanPath}`;
+    } catch {
+      return `https://complexity-cloud-awarded-mug.trycloudflare.com/${cleanPath}`;
+    }
+  };
+
   return (
-    <div className="rounded-lg bg-[#EED7EF] p-3 cursor-pointer hover:shadow-md transition-shadow h-full flex flex-col">
-      <div className="flex items-start gap-3 relative flex-1">
-         <div className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
+    <div className="group relative rounded-xl bg-white p-3 cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border border-gray-100 shadow-sm overflow-hidden">
+      {/* Subtle accent border */}
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#4C226A] to-[#8A3A99]" />
+      
+      <div className="flex items-start gap-3.5 pl-1 relative flex-1">
+        {/* Image Section */}
+        <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100/50 shadow-inner flex items-center justify-center">
           {event.coverImageUrl ? (
             <img 
-              src={event.coverImageUrl.startsWith('http') || event.coverImageUrl.startsWith('/images/') ? event.coverImageUrl : `https://song-cartridges-missile-amplifier.trycloudflare.com/${event.coverImageUrl.replace(/^\//, '')}`} 
+              src={getImageUrl(event.coverImageUrl)} 
               alt={event.title} 
-              className="w-full h-full object-cover" 
-              onError={(e) => { e.currentTarget.src = "/images/sample-1.jpg"; }}
+              className="w-full h-full object-contain p-1" 
+              onError={(e) => { 
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/images/soiree.png';
+              }}
             />
           ) : (
-            <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-              <i className="pi pi-image text-gray-400 text-xl"></i>
-            </div>
+            <i className="pi pi-image text-gray-300 text-2xl"></i>
           )}
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 pr-8 flex flex-col justify-center">
-          {/* Title */}
-          <h3 className="text-sm font-bold text-dark mb-2 line-clamp-1">{event.title}</h3>
-
-          <div className="flex flex-col gap-1.5">
-            {/* Row 1: Location/Date OR Target Audience */}
-            <div className="flex items-center gap-3">
-              {event.category === "hediye_kiti" ? (
-                event.targetAudience && (
-                  <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                    <i className="pi pi-users text-xs"></i>
-                    <span>{translateValue(event.targetAudience, 'audience')}</span>
-                  </div>
-                )
-              ) : (
-                <>
-                  <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                    <i className="pi pi-map-marker text-xs"></i>
-                    <span className="truncate max-w-[100px]">{event.city}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                    <i className="pi pi-clock text-xs"></i>
-                    <span>{event.formattedDate}</span>
-                  </div>
-                </>
-              )}
+        <div className="flex-1 min-w-0 pr-6 flex flex-col py-0.5 h-full">
+          {/* Badge & Title Row */}
+          <div className="flex flex-col mb-2 gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="bg-[#4C226A]/10 text-[#4C226A] px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase w-fit">
+                {event.type === 'Reklam' ? 'İlan' : event.type}
+              </span>
             </div>
+            <h3 className="text-sm leading-tight font-bold text-gray-800 line-clamp-2 pr-2">
+              {event.title}
+            </h3>
+          </div>
 
-            {/* Row 2: Type and Category/Views */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                <i className="pi pi-tag text-xs"></i>
-                <span>{event.type}</span>
-              </div>
-              {event.subCategory ? (
-                <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                  <i className="pi pi-bookmark text-xs"></i>
-                  <span className="truncate max-w-[120px]">{translateValue(event.subCategory, 'category')}</span>
+          <div className="flex flex-col gap-1.5 mt-auto">
+            {/* Info rows */}
+            {event.category === "hediye_kiti" ? (
+              event.targetAudience && (
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <i className="pi pi-users text-gray-400 text-[10px]"></i>
+                  <span className="truncate font-medium">{translateValue(event.targetAudience, 'audience')}</span>
                 </div>
-              ) : (
-                <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                  <i className="pi pi-eye text-xs"></i>
-                  <span>{event.views}</span>
+              )
+            ) : (
+              <>
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <i className="pi pi-map-marker text-gray-400 text-[10px]"></i>
+                  <span className="truncate font-medium">{event.city}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <i className="pi pi-calendar text-gray-400 text-[10px]"></i>
+                  <span className="truncate font-medium">{event.formattedDate}</span>
+                </div>
+              </>
+            )}
+
+            {/* Views and Comments */}
+            <div className="flex items-center gap-3 text-[11px] text-gray-400 pt-1 border-t border-gray-50 mt-1">
+              {!event.subCategory && (
+                <div className="flex items-center gap-1" title="Görüntülenme">
+                  <i className="pi pi-eye text-[10px]"></i>
+                  <span className="font-medium">{event.views}</span>
                 </div>
               )}
-            </div>
-
-            {/* Row 3: Platform / Comments */}
-            <div className="flex items-center gap-3">
-              {event.platform ? (
-                <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                  <i className={`pi pi-${event.platform.toLowerCase()} text-xs`}></i>
-                  <span>{translateValue(event.platform, 'platform')}</span>
+              {!event.platform && (
+                <div className="flex items-center gap-1" title="Yorumlar">
+                  <i className="pi pi-comment text-[10px]"></i>
+                  <span className="font-medium">{event.comments}</span>
                 </div>
-              ) : (
-                <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "#4C226A" }}>
-                  <i className="pi pi-file text-xs"></i>
-                  <span>{event.comments}</span>
+              )}
+              {event.subCategory && (
+                <div className="flex items-center gap-1" title="Kategori">
+                  <i className="pi pi-tags text-[10px]"></i>
+                  <span className="truncate font-medium">{translateValue(event.subCategory, 'category')}</span>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Instagram Icon - Absolute positioned bottom right */}
-        <div
-          className="absolute bottom-0 right-0 w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
-          style={{
-            background: "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
-          }}
-        >
-          <i className="pi pi-instagram text-white text-xs"></i>
-        </div>
+        {/* Platform Icon - Absolute positioned bottom right */}
+        {event.platform && (
+          <div
+            className={`absolute bottom-0 right-0 w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm ${
+              event.platform.toLowerCase() === 'instagram' ? '' : 'bg-gray-100 border border-gray-200'
+            }`}
+            style={
+              event.platform.toLowerCase() === 'instagram'
+                ? { background: "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" }
+                : {}
+            }
+            title={translateValue(event.platform, 'platform')}
+          >
+            <i className={`pi pi-${event.platform.toLowerCase()} ${event.platform.toLowerCase() === 'instagram' ? 'text-white' : 'text-gray-600'} text-xs`}></i>
+          </div>
+        )}
 
         {/* Options Menu Button - Top Right */}
-        <div className="absolute top-0 right-0" ref={menuRef}>
+        <div className="absolute -top-1 -right-1" ref={menuRef}>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="p-1 text-gray-500 hover:bg-white/50 rounded transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
           >
-            <i className="pi pi-ellipsis-v text-sm"></i>
+            <i className="pi pi-ellipsis-v text-xs"></i>
           </button>
 
           {showMenu && (
-            <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
+            <div className="absolute right-0 mt-1 w-32 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100 overflow-hidden">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowMenu(false);
                   if (onEdit) onEdit(event.id, event.category);
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                className="w-full text-left px-4 py-2.5 text-xs text-gray-700 hover:bg-[#4C226A]/5 hover:text-[#4C226A] flex items-center gap-2 transition-colors"
               >
-                <i className="pi pi-pencil text-primary text-xs"></i>
+                <i className="pi pi-pencil"></i>
                 Düzenle
               </button>
               <button
@@ -211,9 +233,9 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
                   setShowMenu(false);
                   if (onDelete) onDelete(event.id, event.category);
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+                className="w-full text-left px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
               >
-                <i className="pi pi-trash text-xs"></i>
+                <i className="pi pi-trash"></i>
                 Sil
               </button>
             </div>

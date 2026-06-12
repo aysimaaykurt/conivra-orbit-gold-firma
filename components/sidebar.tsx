@@ -4,7 +4,7 @@ import { Link } from "@/src/navigation";
 import Image from "next/image";
 import { usePathname } from "@/src/navigation";
 import { useTranslations } from "next-intl";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import activeTabImage from "@/src/images/ActiveTab.png";
 
 type MenuItemBase = {
@@ -30,6 +30,18 @@ export default function Sidebar() {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleToggle = () => setIsMobileOpen((prev) => !prev);
+    document.addEventListener("toggleSidebar", handleToggle);
+    return () => document.removeEventListener("toggleSidebar", handleToggle);
+  }, []);
+
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
 
   const translatedMenuItems = useMemo<MenuItem[]>(
     () =>
@@ -41,17 +53,41 @@ export default function Sidebar() {
   );
 
   return (
-    <div className={`h-screen bg-primary flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`} style={{ backgroundColor: '#4C226A' }}>
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      <div
+        className={`
+          fixed md:static inset-y-0 left-0 z-50 h-screen bg-primary flex flex-col transition-all duration-300
+          ${isCollapsed ? "md:w-20" : "md:w-64"}
+          ${isMobileOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0"}
+        `}
+        style={{ backgroundColor: "#4C226A" }}
+      >
        <div className="flex items-center justify-between p-6 ">
         {!isCollapsed && (
           <h1 className="text-white text-xl font-bold uppercase tracking-wider">CONIVRA</h1>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-white hover:bg-white/10 p-2 rounded transition-colors"
+          className="hidden md:block text-white hover:bg-white/10 p-2 rounded transition-colors"
           aria-label="Toggle sidebar"
         >
           <i className="pi pi-bars text-xl"></i>
+        </button>
+        {/* Mobile close button */}
+        <button
+          onClick={() => setIsMobileOpen(false)}
+          className="md:hidden text-white hover:bg-white/10 p-2 rounded transition-colors"
+          aria-label="Close sidebar"
+        >
+          <i className="pi pi-times text-xl"></i>
         </button>
       </div>
 
@@ -96,6 +132,7 @@ export default function Sidebar() {
         </ul>
       </nav>
     </div>
+    </>
   );
 }
 

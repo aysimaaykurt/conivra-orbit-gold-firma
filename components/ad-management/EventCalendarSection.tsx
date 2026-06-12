@@ -85,69 +85,71 @@ export default function EventCalendarSection({ event, onEdit, onDelete }: EventC
       </div>
 
       {/* Calendar Grid */}
-      <div>
-        {/* Header Row - Days */}
-        <div className="grid grid-cols-[120px_repeat(7,1fr)] border-b-2 border-gray-300">
-          {/* Empty corner */}
-          <div className="p-4 border-r border-gray-200 bg-gray-50"></div>
-          {/* Day headers */}
-          {weekDays.map((d) => (
-            <div
-              key={d.key}
-              className={`p-4 border-r border-gray-200 last:border-r-0 text-center ${
-                d.dayNumber === calendarRange.highlightedDay
-                  ? "border-b-4 border-b-primary"
-                  : "border-b border-gray-200"
-              }`}
-            >
+      <div className="overflow-x-auto">
+        <div className="min-w-[800px]">
+          {/* Header Row - Days */}
+          <div className="grid grid-cols-[120px_repeat(7,1fr)] border-b-2 border-gray-300">
+            {/* Empty corner */}
+            <div className="p-4 border-r border-gray-200 bg-gray-50"></div>
+            {/* Day headers */}
+            {weekDays.map((d) => (
               <div
-                className={`font-bold ${
-                  d.dayNumber === calendarRange.highlightedDay ? "text-primary" : "text-primary"
+                key={d.key}
+                className={`p-4 border-r border-gray-200 last:border-r-0 text-center ${
+                  d.dayNumber === calendarRange.highlightedDay
+                    ? "border-b-4 border-b-primary"
+                    : "border-b border-gray-200"
                 }`}
               >
-                {d.labelTop}
+                <div
+                  className={`font-bold ${
+                    d.dayNumber === calendarRange.highlightedDay ? "text-primary" : "text-primary"
+                  }`}
+                >
+                  {d.labelTop}
+                </div>
+                <div className="text-sm text-dark">{d.day}</div>
               </div>
-              <div className="text-sm text-dark">{d.day}</div>
+            ))}
+          </div>
+
+          {/* Calendar Rows - Time Slots */}
+          {timeSlots.map((timeSlot, timeIndex) => (
+            <div
+              key={timeSlot}
+              className="grid grid-cols-[120px_repeat(7,1fr)] border-b border-gray-200 last:border-b-0"
+            >
+              {/* Left side: Time slot */}
+              <div className="p-4 border-r border-gray-200 bg-gray-50">
+                <div className="text-sm text-lightGray">{timeSlot}</div>
+              </div>
+
+              {/* Day columns */}
+              {weekDays.map((d) => {
+                const hasEvent =
+                  d.dayNumber === event.dayNumber && timeSlot === event.startTime;
+                const isHighlightedDay = d.dayNumber === calendarRange.highlightedDay;
+
+                return (
+                  <div
+                    key={d.key}
+                    className={`p-2 border-r border-gray-200 last:border-r-0 min-h-[120px] relative ${
+                      isHighlightedDay ? "border-l-4 border-l-primary" : ""
+                    }`}
+                  >
+                    {hasEvent && (
+                      <EventCard 
+                        event={event} 
+                        onEdit={onEdit} 
+                        onDelete={onDelete} 
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
-
-        {/* Calendar Rows - Time Slots */}
-        {timeSlots.map((timeSlot, timeIndex) => (
-          <div
-            key={timeSlot}
-            className="grid grid-cols-[120px_repeat(7,1fr)] border-b border-gray-200 last:border-b-0"
-          >
-            {/* Left side: Time slot */}
-            <div className="p-4 border-r border-gray-200 bg-gray-50">
-              <div className="text-sm text-lightGray">{timeSlot}</div>
-            </div>
-
-            {/* Day columns */}
-            {weekDays.map((d) => {
-              const hasEvent =
-                d.dayNumber === event.dayNumber && timeSlot === event.startTime;
-              const isHighlightedDay = d.dayNumber === calendarRange.highlightedDay;
-
-              return (
-                <div
-                  key={d.key}
-                  className={`p-2 border-r border-gray-200 last:border-r-0 min-h-[120px] relative ${
-                    isHighlightedDay ? "border-l-4 border-l-primary" : ""
-                  }`}
-                >
-                  {hasEvent && (
-                    <EventCard 
-                      event={event} 
-                      onEdit={onEdit} 
-                      onDelete={onDelete} 
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
       </div>
     </div>
   );

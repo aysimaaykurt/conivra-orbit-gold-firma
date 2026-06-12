@@ -16,17 +16,17 @@ const defaultTabs = [
 
 export default function Tabs({ active, onChange, tabs = defaultTabs }: TabsProps) {
   return (
-    <div className="flex gap-2">
+    <div className="flex w-full gap-2 overflow-hidden rounded-lg">
       {tabs.map((t) => {
         const isActive = t.key === active;
         return (
           <button
             key={t.key}
             onClick={() => onChange?.(t.key)}
-            className={`px-5 py-2 rounded-lg transition-colors ${
+            className={`flex-1 text-[13px] sm:text-sm md:text-base py-2.5 px-2 transition-colors font-medium whitespace-nowrap ${
               isActive
-                ? "bg-primary text-white shadow-sm"
-                : "bg-white text-dark hover:bg-gray-50"
+                ? "bg-primary text-white shadow-md rounded-lg"
+                : "bg-white text-dark hover:bg-gray-50 border border-gray-200 rounded-lg"
             }`}
             style={
               isActive

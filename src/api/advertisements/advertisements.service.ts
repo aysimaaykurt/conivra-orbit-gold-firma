@@ -39,7 +39,15 @@ export const addAdvertisement = async (
 
     // Add image if provided
     if (data.image) {
+      console.log('--- UPLOADING IMAGE (Add) ---', data.image.name, data.image.type, data.image.size);
       formData.append('image', data.image);
+    } else {
+      console.log('--- NO IMAGE PROVIDED (Add) ---');
+    }
+
+    console.log('--- FormData Entries (Add) ---');
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ':', pair[1]);
     }
 
     const response = await apiClient.post<AddAdvertisementResponse>(
@@ -52,8 +60,10 @@ export const addAdvertisement = async (
       }
     );
 
+    console.log('--- addAd Response ---', response.data);
     return response.data;
   } catch (error: any) {
+    console.error('--- addAd ERROR ---', error.response?.data || error.message || error);
     if (error.response?.data) {
       throw error.response.data as ApiErrorResponse;
     }
@@ -95,7 +105,15 @@ export const updateAdvertisement = async (
 
     // Add image if provided
     if (data.image) {
+      console.log('--- UPLOADING IMAGE (Update) ---', data.image.name, data.image.type, data.image.size);
       formData.append('image', data.image);
+    } else {
+      console.log('--- NO IMAGE PROVIDED (Update) ---');
+    }
+
+    console.log('--- FormData Entries (Update) ---');
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ':', pair[1]);
     }
 
     const response = await apiClient.put<UpdateAdvertisementResponse>(
@@ -108,8 +126,10 @@ export const updateAdvertisement = async (
       }
     );
 
+    console.log('--- updateAd Response ---', response.data);
     return response.data;
   } catch (error: any) {
+    console.error('--- updateAd ERROR ---', error.response?.data || error.message || error);
     if (error.response?.data) {
       throw error.response.data as ApiErrorResponse;
     }
@@ -177,6 +197,25 @@ export const getAdvertisements = async (
     throw {
       success: false,
       message: error.message || 'İlanlar alınırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Delete Advertisement Service
+ * DELETE Advertisements/deleteAd/:id
+ */
+export const deleteAdvertisement = async (id: string): Promise<any> => {
+  try {
+    const response = await apiClient.delete(`Advertisements/deleteAd/${id}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'İlan silinirken bir hata oluştu',
     } as ApiErrorResponse;
   }
 };

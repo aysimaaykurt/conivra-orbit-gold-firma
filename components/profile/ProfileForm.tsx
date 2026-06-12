@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { cityOptions, districtOptions, ProfileFormValues, sectorOptions } from "@/src/mocks/profile";
+import { cityOptions, districtOptions, ProfileFormValues } from "@/src/mocks/profile";
+import { useSectors } from "@/src/hooks/useSectors";
  
 interface ProfileFormProps {
   initialValues: ProfileFormValues;
@@ -33,6 +34,7 @@ export default function ProfileForm({
   isSaving = false,
 }: ProfileFormProps) {
   const t = useTranslations("profile");
+  const { sectors: dynamicSectors, isLoading: isSectorsLoading } = useSectors();
   
   const formik = useFormik<ProfileFormValues>({
     initialValues,
@@ -65,14 +67,7 @@ export default function ProfileForm({
     [formik.values.city, t]
   );
 
-  const translatedSectorOptions = useMemo(
-    () =>
-      sectorOptions.map((option) => ({
-        ...option,
-        label: t(`sectors.${option.value}`),
-      })),
-    [t]
-  );
+
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-6">
@@ -189,8 +184,9 @@ export default function ProfileForm({
                   ? formik.errors.sector
                   : undefined
               }
-              options={translatedSectorOptions}
-              placeholder="Sektör seçiniz"
+              options={dynamicSectors}
+              placeholder={isSectorsLoading ? "Yükleniyor..." : "Sektör seçiniz"}
+              disabled={isSectorsLoading}
             />
           </div>
         </div>

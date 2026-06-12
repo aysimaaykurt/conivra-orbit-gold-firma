@@ -55,8 +55,19 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-20 w-full bg-white" style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
 
-      <div className="ml-5 flex h-16 items-center justify-between px-6">
-        <div className="flex items-center gap-3">
+      <div className="ml-2 md:ml-5 flex h-16 items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-2 md:gap-3">
+          <button
+            className="md:hidden p-2 text-dark hover:bg-gray-50 rounded-lg transition-colors"
+            onClick={() => {
+              if (typeof document !== "undefined") {
+                document.dispatchEvent(new CustomEvent("toggleSidebar"));
+              }
+            }}
+            aria-label="Toggle Menu"
+          >
+            <i className="pi pi-bars text-xl"></i>
+          </button>
           <Image src={goldStatue} alt="Gold Statue" width={32} height={32} className="object-contain" />
           <span className="text-sm font-semibold" style={{ color: "#D99B2B" }}>
             {getStatusLabel(company.status)}
