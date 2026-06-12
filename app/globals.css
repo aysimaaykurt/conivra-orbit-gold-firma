@@ -388,3 +388,17 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
     color: #4b5563 !important;
   }
 }
+
+/* Dropdown Panel Items Global Fixes */
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: #202020;
+}
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background-color: rgba(76, 34, 106, 0.1) !important;
+  color: #4C226A !important;
+  font-weight: 600 !important;
+}
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+  background-color: rgba(76, 34, 106, 0.04) !important;
+  color: #202020 !important;
+}

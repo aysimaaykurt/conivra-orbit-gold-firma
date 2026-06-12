@@ -96,9 +96,9 @@ export default function Header() {
             options={languageOptions}
             optionLabel="label"
             itemTemplate={(option) => (
-              <div className="flex items-center gap-2 py-2">
+              <div className="flex items-center gap-2 py-1">
                 <span className="text-base">{option.flag}</span>
-                <span className="font-semibold text-sm">{option.label}</span>
+                <span className="font-semibold text-sm text-inherit">{option.label}</span>
               </div>
             )}
             valueTemplate={(option) => {
@@ -109,11 +109,6 @@ export default function Header() {
                   <span className="hidden md:inline font-semibold text-sm text-dark">{option.label}</span>
                 </div>
               );
-            }}
-            pt={{
-              item: ({ context }) => ({
-                className: context.selected ? 'bg-primary/10 text-primary font-bold' : 'text-dark',
-              }),
             }}
             className="header-language-dropdown !border-lightGray rounded-full !w-[70px] md:!w-[140px]"
             panelClassName="rounded-lg shadow-lg border border-lightGray/20"
