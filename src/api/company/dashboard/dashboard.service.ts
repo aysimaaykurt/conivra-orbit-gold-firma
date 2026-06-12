@@ -23,3 +23,22 @@ export const getDashboardStats = async (): Promise<DashboardStatsResponse> => {
   }
 };
 
+/**
+ * Get Pending Reviews Service
+ * GET company/dashboard/pending-review
+ */
+export const getPendingReviews = async (): Promise<any> => {
+  try {
+    const response = await apiClient.get<any>('company/dashboard/pending-review');
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Bekleyen değerlendirmeler yüklenirken bir hata oluştu',
+    };
+  }
+};
+
