@@ -8,14 +8,18 @@ import type {
  * Get Most Preferred Service
  * GET company/dashboard/mostPreferred
  */
-import { mostPreferred } from '@/src/mocks/dashboard';
-
-export const getMostPreferred = async (): Promise<MostPreferredResponse> => {
-  // Geliştirme/kontrol için doğrudan mock dönülüyor
-  return {
-    success: true,
-    data: mostPreferred,
-    message: "Başarılı",
-  };
+export const getMostPreferred = async (): Promise<any> => {
+  try {
+    const response = await apiClient.get<any>('company/dashboard/mostPreferred');
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Veriler yüklenirken bir hata oluştu',
+    };
+  }
 };
 
