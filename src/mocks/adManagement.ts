@@ -11,6 +11,7 @@ export interface AdEvent {
   startDateIso?: string; // Tam başlangıç tarihi (ISO format)
   endDateIso?: string; // Tam bitiş tarihi (ISO format)
   coverImageUrl?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   images?: any[]; // Tüm görseller
   type: string; // "Reklam" gibi
   views: number;

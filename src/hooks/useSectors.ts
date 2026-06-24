@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSectors, Sector } from '../api/sectors/sectors.service';
+import { getSectors } from '../api/sectors/sectors.service';
 
 export interface FormattedSector {
   value: string;
@@ -20,13 +20,16 @@ export const useSectors = () => {
         const data = await getSectors();
         if (mounted) {
           const normalizedSectors = data.map(sec => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             value: String(sec.value ?? sec.id ?? (sec as any).sectorId ?? ''),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             label: String(sec.label || sec.name || (sec as any).sectorName || '')
           }));
           
           if (normalizedSectors.length === 0) {
             setSectors([]);
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setSectors(normalizedSectors as any);
           }
         }

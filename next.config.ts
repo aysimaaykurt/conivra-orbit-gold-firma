@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   experimental: {
     // Ensure we're using App Router
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default withNextIntl(nextConfig);

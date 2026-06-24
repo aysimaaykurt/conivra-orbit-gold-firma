@@ -240,12 +240,16 @@ export default function AdDetailPage() {
                 </div>
               )}
 
-              {ad.platformPreference && (
+              {ad.platformPreference && ad.platformPreference.length > 0 && (
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Platform Tercihi</p>
-                  <div className="flex items-center gap-2 text-gray-800 font-medium capitalize">
-                    <i className={`pi pi-${ad.platformPreference.toLowerCase()} text-[#4C226A]`}></i>
-                    {ad.platformPreference}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {ad.platformPreference.map((platform, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-md text-gray-800 font-medium capitalize text-sm">
+                        <i className={`pi pi-${platform.toLowerCase()} text-[#4C226A]`}></i>
+                        {platform}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
