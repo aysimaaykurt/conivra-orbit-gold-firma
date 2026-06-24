@@ -10,6 +10,7 @@ import { Calendar } from "primereact/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
+import { MultiSelect } from "@/components/ui/multiselect";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { addWorkshop, getWorkshop, updateWorkshop } from "@/src/api/advertisements/workshops.service";
@@ -34,7 +35,7 @@ interface FormValues {
   participantCount: string;
   participationCondition: string;
   fee: string;
-  contentType: string;
+  contentType: string[];
   workshopGoal: string;
   workshopContent: string;
 
@@ -117,7 +118,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       participantCount: "",
       participationCondition: "",
       fee: "",
-      contentType: "",
+      contentType: [],
       workshopGoal: "",
       workshopContent: "",
       images: [],
@@ -138,8 +139,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       targetAudience: Yup.string().required("Hedef kitle zorunludur"),
       participantCount: Yup.string().required("Katılımcı sayısı zorunludur"),
       participationCondition: Yup.string().required("Katılım şartı zorunludur"),
-      fee: Yup.string().required("Ücret bilgisi zorunludur"),
-      contentType: Yup.string().required("İçerik türü zorunludur"),
+      fee: Yup.string().optional(),
+      contentType: Yup.array().min(1, "En az bir içerik türü seçmelisiniz").required("İçerik türü zorunludur"),
       workshopGoal: Yup.string().required("Workshop amacı zorunludur"),
       workshopContent: Yup.string().required("Workshop içeriği zorunludur"),
     }),
@@ -204,7 +205,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
             if (onClose) {
               onClose();
             } else {
-              router.push("/ad-management");
+              router.push("/ad-management?tab=workshop");
             }
           }, 1500);
         }
@@ -245,14 +246,24 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               participantCount: ad.participantCount || "",
               participationCondition: ad.participationCondition || "",
               fee: ad.fee || "",
-              contentType: Array.isArray(ad.contentType as any) ? (ad.contentType as any)[0] : (ad.contentType || ""),
+              contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType as unknown as string] : []),
               workshopGoal: ad.workshopGoal || "",
               workshopContent: ad.workshopContent || "",
               images: [],
               imagePreviews: ad.images && ad.images.length > 0 
-                ? ad.images.map(img => img.imageUrl.startsWith('http') || img.imageUrl.startsWith('/images/') 
-                  ? img.imageUrl 
-                  : `${new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com').origin}/${img.imageUrl.replace(/\\/g, '/').replace(/^\//, '')}`) 
+                ? ad.images.map(img => {
+                    const url = img.imageUrl;
+                    if (!url) return '';
+                    if (url.startsWith('/images/')) return url;
+                    
+                    const tunnelOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://flooring-lets-function-bright.trycloudflare.com/api/v1/').origin;
+                    
+                    if (url.includes('localhost:5100')) {
+                      return url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+                    }
+                    if (url.startsWith('http')) return url;
+                    return `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
+                  })
                 : [],
             });
           }
@@ -403,7 +414,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               <i className="pi pi-arrow-left text-xl" />
             </button>
             <h1 className="text-2xl font-bold" style={{ color: "#4C226A" }}>
-              Workshop Ekle
+              {editId ? "Workshop Güncelle" : "Workshop Ekle"}
             </h1>
           </div>
 
@@ -546,7 +557,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                 {/* Step 2: Özel Alanlar */}
                 {currentStep === 2 && (
                   <div className="space-y-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <Dropdown
                         label="Katılımcı Sayısı"
                         name="participantCount"
@@ -580,13 +591,13 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                       placeholder="Ücret yoksa boş bırakınız"
                     />
 
-                    <Dropdown
+                    <MultiSelect
                       label="İstenen İçerik Türü"
                       name="contentType"
                       value={values.contentType}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.contentType ? errors.contentType : undefined}
+                      error={touched.contentType ? (errors.contentType as string) : undefined}
                       options={contentTypeOptions}
                       placeholder="İçerik Türü seçiniz"
                     />
@@ -697,7 +708,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                                   fileInputRef.current.value = "";
                                 }
                               }}
-                              className="absolute -top-2 -right-2 bg-white text-red-500 border border-gray-100 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors"
+                              className="absolute -top-2 -right-2 bg-white text-red-500 border border-gray-100 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors cursor-pointer"
                               title="Görseli Kaldır"
                             >
                               <i className="pi pi-times text-xs"></i>
@@ -741,7 +752,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                     className="bg-primary text-white"
                     style={{ backgroundColor: "#4C226A" }}
                   >
-                    {isLoading ? "Ekleniyor..." : "Workshop Ekle"}
+                    {isLoading ? (editId ? "Güncelleniyor..." : "Ekleniyor...") : (editId ? "Workshop Güncelle" : "Workshop Ekle")}
                   </Button>
                 )}
               </div>
@@ -778,12 +789,12 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
             </div>
 
             {/* Right Section - Preview */}
-            <div className="w-full lg:w-[400px] bg-[#F5F2F1] rounded-lg p-4 md:p-6 lg:sticky lg:top-6 min-h-0 lg:min-h-[600px] lg:max-h-[800px] overflow-y-auto flex flex-col">
-              <h2 className="text-xl font-bold mb-4" style={{ color: "#4C226A" }}>
+            <div className="w-full lg:w-[400px] bg-[#F5F2F1] rounded-lg p-4 md:p-6 lg:sticky lg:top-6 min-h-0 lg:h-[calc(100vh-3rem)] lg:max-h-[800px] flex flex-col">
+              <h2 className="text-xl font-bold mb-4 flex-shrink-0" style={{ color: "#4C226A" }}>
                 İlan Özeti
               </h2>
 
-              <div className="space-y-4 flex-1">
+              <div className="space-y-4 flex-1 overflow-y-auto pr-2 pb-2">
                 {/* Image */}
                 <div className="w-full aspect-square bg-[#EBE7EC] border-2 border-dashed border-[#D1C9D6] rounded-lg overflow-hidden relative">
                   {values.imagePreviews && values.imagePreviews.length > 0 ? (
@@ -906,7 +917,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               </div>
 
               {/* Submit Button at Bottom */}
-              <div className="mt-auto pt-6 border-t border-gray-300">
+              <div className="mt-4 pt-4 border-t border-gray-300 flex-shrink-0">
                 <Button
                   type="button"
                   onClick={() => formik.handleSubmit()}
@@ -914,7 +925,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                   className="w-full text-white py-3 rounded-lg"
                   style={{ backgroundColor: "#4C226A" }}
                 >
-                  {isLoading ? "Ekleniyor..." : "Workshop Ekle"}
+                  {isLoading ? (editId ? "Güncelleniyor..." : "Ekleniyor...") : (editId ? "Workshop Güncelle" : "Workshop Ekle")}
                 </Button>
               </div>
             </div>

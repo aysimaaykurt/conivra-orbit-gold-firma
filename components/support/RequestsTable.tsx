@@ -69,8 +69,10 @@ export default function RequestsTable({ requests, isLoading, onEdit, onDelete }:
               <tr key={request.id} className="border-b border-gray-200 hover:bg-gray-50">
                 <td className="py-3 px-4 text-sm text-dark">{request.title}</td>
                 <td className="py-3 px-4 text-sm text-dark">{request.type}</td>
-                <td className="py-3 px-4 text-sm text-dark max-w-md truncate">
-                  {request.description}
+                <td className="py-3 px-4 text-sm text-dark">
+                  <div className="max-w-[200px] md:max-w-md truncate" title={request.description}>
+                    {request.description}
+                  </div>
                 </td>
                 <td className="py-3 px-4">
                   <StatusBadge status={request.status as RequestStatus} type="request" />

@@ -53,13 +53,13 @@ export default function ApplicationsList() {
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold" style={{ color: "#4C226A" }}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#4C226A" }}>
           Başvurularım
         </h1>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
           {/* Search */}
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <i className="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -69,7 +69,7 @@ export default function ApplicationsList() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
           {/* Sort */}
@@ -78,7 +78,7 @@ export default function ApplicationsList() {
               setSortOrder(prev => prev === "desc" ? "asc" : "desc");
               setCurrentPage(1);
             }}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex-shrink-0"
           >
             <i className="pi pi-list text-gray-600" />
             <span className="text-gray-700 w-[55px] text-left">{sortOrder === "asc" ? "En Eski" : "En Yeni"}</span>
@@ -88,7 +88,7 @@ export default function ApplicationsList() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
         {adTypeTabs.map((tab) => (
           <button
             key={tab.id}
@@ -96,7 +96,7 @@ export default function ApplicationsList() {
               setActiveTab(tab.id);
               setCurrentPage(1);
             }}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            className={`px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === tab.id
                 ? "text-white"
                 : "text-gray-600 bg-gray-100 hover:bg-gray-200"

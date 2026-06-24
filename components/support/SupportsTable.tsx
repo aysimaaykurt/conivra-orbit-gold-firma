@@ -69,15 +69,17 @@ export default function SupportsTable({ supports, isLoading, onEdit, onDelete }:
               <tr key={support.id} className="border-b border-gray-200 hover:bg-gray-50">
                 <td className="py-3 px-4 text-sm text-dark">{support.title}</td>
                 <td className="py-3 px-4 text-sm text-dark">{support.type}</td>
-                <td className="py-3 px-4 text-sm text-dark max-w-md truncate">
-                  {support.description}
+                <td className="py-3 px-4 text-sm text-dark">
+                  <div className="max-w-[200px] md:max-w-md truncate" title={support.description}>
+                    {support.description}
+                  </div>
                 </td>
                 <td className="py-3 px-4">
                   <StatusBadge status={support.status as SupportStatus} type="support" />
                 </td>
                 <td className="py-3 px-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    {/* {onEdit && (
+                    {onEdit && (
                       <button
                         onClick={() => onEdit(support)}
                         className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
@@ -85,7 +87,7 @@ export default function SupportsTable({ supports, isLoading, onEdit, onDelete }:
                       >
                         <i className="pi pi-pencil" style={{ fontSize: '1rem' }}></i>
                       </button>
-                    )} */}
+                    )}
                     {onDelete && (
                       <button
                         onClick={() => onDelete(support)}

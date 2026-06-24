@@ -9,6 +9,7 @@ import { useCategories } from "@/src/hooks/useCategories";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
+import { MultiSelect } from "@/components/ui/multiselect";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { addGiftKit, getGiftKit, updateGiftKit } from "@/src/api/advertisements/giftKits.service";
@@ -24,9 +25,9 @@ interface FormValues {
   category: string;
   targetAudience: string;
   followerRange: string;
-  platformPreference: string;
+  platformPreference: string[];
   businessType: string;
-  contentType: string;
+  contentType: string[];
 
   images: File[];
   imagePreviews: string[];
@@ -92,9 +93,9 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       category: "",
       targetAudience: "",
       followerRange: "",
-      platformPreference: "",
+      platformPreference: [],
       businessType: "",
-      contentType: "",
+      contentType: [],
       images: [],
       imagePreviews: [],
     },
@@ -104,9 +105,9 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       category: Yup.string().required("Kategori seçimi zorunludur"),
       targetAudience: Yup.string().required("Hedef kitle zorunludur"),
       followerRange: Yup.string().required("Takipçi aralığı zorunludur"),
-      platformPreference: Yup.string().required("Platform tercihi zorunludur"),
+      platformPreference: Yup.array().min(1, "En az bir platform seçmelisiniz").required("Platform tercihi zorunludur"),
       businessType: Yup.string().required("İş tipi zorunludur"),
-      contentType: Yup.string().required("İçerik türü zorunludur"),
+      contentType: Yup.array().min(1, "En az bir içerik türü seçmelisiniz").required("İçerik türü zorunludur"),
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
@@ -143,7 +144,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
             if (onClose) {
               onClose();
             } else {
-              router.push("/ad-management");
+              router.push("/ad-management?tab=hediye_kiti");
             }
           }, 1500);
         }
@@ -175,14 +176,24 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
               category: ad.category ? String(ad.category) : "",
               targetAudience: ad.targetAudience || "",
               followerRange: ad.followerRange || "",
-              platformPreference: ad.platformPreference || "",
+              platformPreference: Array.isArray(ad.platformPreference) ? ad.platformPreference : (ad.platformPreference ? [ad.platformPreference] : []),
               businessType: ad.businessType || "",
-              contentType: Array.isArray(ad.contentType as any) ? (ad.contentType as any)[0] : (ad.contentType || ""),
+              contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType] : []),
               images: [],
               imagePreviews: ad.images && ad.images.length > 0 
-                ? ad.images.map(img => img.imageUrl.startsWith('http') || img.imageUrl.startsWith('/images/') 
-                  ? img.imageUrl 
-                  : `${new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com').origin}/${img.imageUrl.replace(/\\/g, '/').replace(/^\//, '')}`) 
+                ? ad.images.map(img => {
+                    const url = img.imageUrl;
+                    if (!url) return '';
+                    if (url.startsWith('/images/')) return url;
+                    
+                    const tunnelOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://flooring-lets-function-bright.trycloudflare.com/api/v1/').origin;
+                    
+                    if (url.includes('localhost:5100')) {
+                      return url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+                    }
+                    if (url.startsWith('http')) return url;
+                    return `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
+                  })
                 : [],
             });
           }
@@ -290,7 +301,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
               <i className="pi pi-arrow-left text-xl" />
             </button>
             <h1 className="text-2xl font-bold" style={{ color: "#4C226A" }}>
-              Hediye Kiti Ekle
+              {editId ? "Hediye Kiti Güncelle" : "Hediye Kiti Ekle"}
             </h1>
           </div>
 
@@ -354,7 +365,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <Dropdown
                         label="Takipçi Aralığı"
                         name="followerRange"
@@ -367,19 +378,6 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                       />
 
                       <Dropdown
-                        label="Platform Tercihi"
-                        name="platformPreference"
-                        value={values.platformPreference}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={touched.platformPreference ? errors.platformPreference : undefined}
-                        options={platformOptions}
-                        placeholder="Bir kategori seçiniz"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Dropdown
                         label="İş Tipi Seçiniz"
                         name="businessType"
                         value={values.businessType}
@@ -390,13 +388,24 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                         placeholder="Takipçi sayısı aralığı seçiniz"
                       />
 
-                      <Dropdown
+                      <MultiSelect
+                        label="Platform Tercihi"
+                        name="platformPreference"
+                        value={values.platformPreference}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.platformPreference ? (errors.platformPreference as string) : undefined}
+                        options={platformOptions}
+                        placeholder="Platform seçiniz"
+                      />
+
+                      <MultiSelect
                         label="İstenen İçerik Türü"
                         name="contentType"
                         value={values.contentType}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        error={touched.contentType ? errors.contentType : undefined}
+                        error={touched.contentType ? (errors.contentType as string) : undefined}
                         options={contentTypeOptions}
                         placeholder="İçerik Türü seçiniz"
                       />
@@ -486,7 +495,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                                   fileInputRef.current.value = "";
                                 }
                               }}
-                              className="absolute -top-2 -right-2 bg-white text-red-500 border border-gray-100 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors"
+                              className="absolute -top-2 -right-2 bg-white text-red-500 border border-gray-100 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors cursor-pointer"
                               title="Görseli Kaldır"
                             >
                               <i className="pi pi-times text-xs"></i>
@@ -530,7 +539,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                     className="bg-primary text-white"
                     style={{ backgroundColor: "#4C226A" }}
                   >
-                    {isLoading ? "Ekleniyor..." : "Hediye Kiti Ekle"}
+                    {isLoading ? (editId ? "Güncelleniyor..." : "Ekleniyor...") : (editId ? "Hediye Kiti Güncelle" : "Hediye Kiti Ekle")}
                   </Button>
                 )}
               </div>
@@ -567,12 +576,12 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
             </div>
 
             {/* Right Section - Preview */}
-            <div className="w-full lg:w-[400px] bg-[#F5F2F1] rounded-lg p-4 md:p-6 lg:sticky lg:top-6 min-h-0 lg:min-h-[600px] lg:max-h-[800px] overflow-y-auto flex flex-col">
-              <h2 className="text-xl font-bold mb-4" style={{ color: "#4C226A" }}>
+            <div className="w-full lg:w-[400px] bg-[#F5F2F1] rounded-lg p-4 md:p-6 lg:sticky lg:top-6 min-h-0 lg:h-[calc(100vh-3rem)] lg:max-h-[800px] flex flex-col">
+              <h2 className="text-xl font-bold mb-4 flex-shrink-0" style={{ color: "#4C226A" }}>
                 İlan Özeti
               </h2>
 
-              <div className="space-y-4 flex-1">
+              <div className="space-y-4 flex-1 overflow-y-auto pr-2 pb-2">
                 {/* Image */}
                 <div className="w-full aspect-square bg-[#EBE7EC] border-2 border-dashed border-[#D1C9D6] rounded-lg overflow-hidden relative">
                   {values.imagePreviews && values.imagePreviews.length > 0 ? (
@@ -637,9 +646,9 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
 
                   <div className="flex items-center gap-2 text-sm">
                     <i className="pi pi-share-alt text-primary" />
-                    <span className={values.platformPreference ? 'text-gray-700' : 'text-gray-500/90 italic'}>
-                      {values.platformPreference
-                        ? platformOptions.find((opt) => opt.value === values.platformPreference)?.label || values.platformPreference
+                    <span className={values.platformPreference && values.platformPreference.length > 0 ? 'text-gray-700' : 'text-gray-500/90 italic'}>
+                      {values.platformPreference && values.platformPreference.length > 0
+                        ? values.platformPreference.map(val => platformOptions.find((opt) => opt.value === val)?.label || val).join(', ')
                         : "Platform seçilmedi"}
                     </span>
                   </div>
@@ -655,9 +664,9 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
 
                   <div className="flex items-center gap-2 text-sm">
                     <i className="pi pi-image text-primary" />
-                    <span className={values.contentType ? 'text-gray-700' : 'text-gray-500/90 italic'}>
-                      {values.contentType
-                        ? contentTypeOptions.find((opt) => opt.value === values.contentType)?.label || values.contentType
+                    <span className={values.contentType && values.contentType.length > 0 ? 'text-gray-700' : 'text-gray-500/90 italic'}>
+                      {values.contentType && values.contentType.length > 0
+                        ? values.contentType.map(val => contentTypeOptions.find((opt) => opt.value === val)?.label || val).join(', ')
                         : "İçerik türü seçilmedi"}
                     </span>
                   </div>
@@ -665,7 +674,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
               </div>
 
               {/* Submit Button at Bottom */}
-              <div className="mt-auto pt-6 border-t border-gray-300">
+              <div className="mt-4 pt-4 border-t border-gray-300 flex-shrink-0">
                 <Button
                   type="button"
                   onClick={() => formik.handleSubmit()}
@@ -673,7 +682,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                   className="w-full text-white py-3 rounded-lg"
                   style={{ backgroundColor: "#4C226A" }}
                 >
-                  {isLoading ? "Ekleniyor..." : "Hediye Kiti Ekle"}
+                  {isLoading ? (editId ? "Güncelleniyor..." : "Ekleniyor...") : (editId ? "Hediye Kiti Güncelle" : "Hediye Kiti Ekle")}
                 </Button>
               </div>
             </div>

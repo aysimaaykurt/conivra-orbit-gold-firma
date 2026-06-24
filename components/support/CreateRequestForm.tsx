@@ -30,12 +30,14 @@ const requestTypes = [
 const validationSchema = Yup.object({
   title: Yup.string()
     .required("Talep başlığı gereklidir")
-    .min(3, "Talep başlığı en az 3 karakter olmalıdır"),
+    .min(3, "Talep başlığı en az 3 karakter olmalıdır")
+    .max(100, "Talep başlığı en fazla 100 karakter olabilir"),
   type: Yup.string()
     .required("Talep türü seçilmelidir"),
   description: Yup.string()
     .required("Talep açıklaması gereklidir")
-    .min(10, "Talep açıklaması en az 10 karakter olmalıdır"),
+    .min(10, "Talep açıklaması en az 10 karakter olmalıdır")
+    .max(500, "Talep açıklaması en fazla 500 karakter olabilir"),
 });
 
 export default function CreateRequestForm({
@@ -102,6 +104,7 @@ export default function CreateRequestForm({
           error={formik.touched.description && formik.errors.description ? formik.errors.description : undefined}
           placeholder="Talep açıklaması giriniz"
           rows={5}
+          maxLength={500}
         />
       </div>
 

@@ -13,7 +13,7 @@ export interface AddWorkshopRequest {
   participantCount: string;
   participationCondition: string;
   fee: string;
-  contentType: string;
+  contentType: string[];
   workshopGoal: string;
   workshopContent: string;
   images?: File[]; // Multi-image support
@@ -34,7 +34,7 @@ export interface UpdateWorkshopRequest {
   participantCount: string;
   participationCondition: string;
   fee: string;
-  contentType: string;
+  contentType: string[];
   workshopGoal: string;
   workshopContent: string;
   images?: File[]; // Multi-image support
@@ -56,7 +56,7 @@ export interface Workshop {
   participantCount: string;
   participationCondition: string;
   fee: string;
-  contentType: string;
+  contentType: string[];
   workshopGoal: string;
   workshopContent: string;
   images?: { id?: string | number; imageUrl: string; imageId?: string; isMain: boolean; sortOrder?: number }[]; // URL to the uploaded images

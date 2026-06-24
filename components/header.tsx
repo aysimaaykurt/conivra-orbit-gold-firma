@@ -39,12 +39,31 @@ export default function Header() {
 
   const profileItems = [
     {
+      label: 'Profilim',
+      icon: 'pi pi-user',
+      command: () => {
+        router.push('/profile');
+      },
+      template: (item: any, options: any) => (
+        <button onClick={(e) => options.onClick(e)} className="w-full flex items-center px-3 py-2 text-sm font-semibold rounded transition-colors cursor-pointer text-gray-700 hover:bg-gray-50 mb-1">
+          <i className={`${item.icon} text-xs mr-2`}></i>
+          <span>{item.label}</span>
+        </button>
+      )
+    },
+    {
       label: 'Çıkış Yap',
       icon: 'pi pi-sign-out',
       command: () => {
         logout();
         router.push('/login');
-      }
+      },
+      template: (item: any, options: any) => (
+        <button onClick={(e) => options.onClick(e)} className="w-full flex items-center px-3 py-2 text-sm font-semibold rounded transition-colors cursor-pointer text-red-600 hover:bg-red-50 border-t border-gray-100">
+          <i className={`${item.icon} text-xs mr-2`}></i>
+          <span>{item.label}</span>
+        </button>
+      )
     }
   ];
 
@@ -85,11 +104,15 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-20 w-full bg-white" style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
 
-      <div className="ml-2 md:ml-5 flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="ml-1 md:ml-5 flex h-16 items-center justify-between px-3 md:px-6">
         <div className="flex items-center gap-2 md:gap-3">
           <button
             className="md:hidden p-2 text-dark hover:bg-gray-50 rounded-lg transition-colors"
-            onClick={() => {
+            onClick={(e) => {
+              // Menüyü kapat, ki sidebar açılınca üst üste binmesin
+              if (profileMenu.current) {
+                profileMenu.current.hide(e);
+              }
               if (typeof document !== "undefined") {
                 document.dispatchEvent(new CustomEvent("toggleSidebar"));
               }
@@ -99,7 +122,7 @@ export default function Header() {
             <i className="pi pi-bars text-xl"></i>
           </button>
           <Image src={goldStatue} alt="Gold Statue" width={32} height={32} className="object-contain" />
-          <span className="text-sm font-semibold" style={{ color: "#D99B2B" }}>
+          <span className="hidden sm:inline text-sm font-semibold" style={{ color: "#D99B2B" }}>
             {getStatusLabel(user?.subscriptionStatus)}
           </span>
         </div>
@@ -139,11 +162,11 @@ export default function Header() {
               return (
                 <div className="flex items-center gap-1 md:gap-2 px-1">
                   <span className="text-base">{currentOption.flag}</span>
-                  <span className="font-semibold text-xs md:text-sm" style={{ color: '#202020' }}>{currentOption.label}</span>
+                  <span className="hidden sm:inline font-semibold text-xs md:text-sm" style={{ color: '#202020' }}>{currentOption.label}</span>
                 </div>
               );
             }}
-            className="header-language-dropdown !border-lightGray rounded-full !w-[100px] md:!w-[140px]"
+            className="header-language-dropdown !border-lightGray rounded-full !w-[80px] sm:!w-[100px] md:!w-[140px]"
             panelClassName="rounded-lg shadow-lg border border-lightGray/20"
             style={{
               backgroundColor: "white",
@@ -155,7 +178,7 @@ export default function Header() {
 
           <button
             onClick={copyReferralCode}
-            className="flex items-center justify-center gap-2 px-2 md:px-4 py-2 bg-white border border-lightGray rounded-full hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-white border border-lightGray rounded-full hover:bg-gray-50 transition-colors"
             style={{
               borderWidth: "0.5px",
               height: "40px",
@@ -177,10 +200,7 @@ export default function Header() {
             id="popup_profile_menu"
             className="w-36 mt-1 shadow-lg border border-lightGray/20 rounded-lg"
             pt={{
-              root: { className: "p-1" },
-              action: { className: "flex items-center px-3 py-2 rounded hover:bg-red-50 text-error transition-colors" },
-              icon: { className: "text-error text-xs mr-2" },
-              label: { className: "text-error text-sm font-semibold" }
+              root: { className: "p-1" }
             }}
           />
           <button 

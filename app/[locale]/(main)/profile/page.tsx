@@ -8,6 +8,7 @@ import { ProfileFormValues } from "@/src/mocks/profile";
 import { getProfile, updateProfile } from "@/src/api/company/profile/profile.service";
 import { Toast } from "@/components/ui/toast";
 import { useRef } from "react";
+import { BASE_URL } from "@/src/api/axios";
 
 export default function ProfilePage() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -42,10 +43,15 @@ export default function ProfilePage() {
             sector: profile.sector,
           });
 
-          if (profile.logoUrl) {
-            const fullUrl = profile.logoUrl.startsWith('http') 
-              ? profile.logoUrl 
-              : `${new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com').origin}/${profile.logoUrl.replace(/\\/g, '/').replace(/^\//, '')}`;
+          const imagePath = profile.logoUrl || (profile as any).profileImage || (profile as any).logo;
+          if (imagePath) {
+            let fullUrl = imagePath;
+            if (imagePath.includes('localhost:5100')) {
+              const tunnelOrigin = new URL(BASE_URL).origin;
+              fullUrl = imagePath.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+            } else if (!imagePath.startsWith('http')) {
+              fullUrl = `${new URL(BASE_URL).origin}/${imagePath.replace(/\\/g, '/').replace(/^\//, '')}`;
+            }
             setProfileImage(fullUrl);
           }
           // Stats would come from a separate endpoint or be part of profile

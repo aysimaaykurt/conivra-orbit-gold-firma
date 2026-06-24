@@ -30,12 +30,14 @@ const supportTypes = [
 const validationSchema = Yup.object({
   title: Yup.string()
     .required("Destek başlığı gereklidir")
-    .min(3, "Destek başlığı en az 3 karakter olmalıdır"),
+    .min(3, "Destek başlığı en az 3 karakter olmalıdır")
+    .max(100, "Destek başlığı en fazla 100 karakter olabilir"),
   type: Yup.string()
     .required("Destek türü seçilmelidir"),
   description: Yup.string()
     .required("Destek açıklaması gereklidir")
-    .min(10, "Destek açıklaması en az 10 karakter olmalıdır"),
+    .min(10, "Destek açıklaması en az 10 karakter olmalıdır")
+    .max(500, "Destek açıklaması en fazla 500 karakter olabilir"),
 });
 
 export default function CreateSupportForm({
@@ -102,6 +104,7 @@ export default function CreateSupportForm({
           error={formik.touched.description && formik.errors.description ? formik.errors.description : undefined}
           placeholder="Destek açıklaması giriniz"
           rows={5}
+          maxLength={500}
         />
       </div>
 

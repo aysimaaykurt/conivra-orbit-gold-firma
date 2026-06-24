@@ -23,7 +23,7 @@ export const updateProfile = async (
     formData.append('sector', data.sector);
     
     if (data.profileImage) {
-      formData.append('profileImage', data.profileImage);
+      formData.append('ProfileImage', data.profileImage);
     }
 
     const response = await apiClient.put<UpdateProfileResponse>('company/profile', formData, {
@@ -61,7 +61,7 @@ export const updateProfileById = async (
     formData.append('sector', data.sector);
     
     if (data.profileImage) {
-      formData.append('profileImage', data.profileImage);
+      formData.append('ProfileImage', data.profileImage);
     }
 
     const response = await apiClient.put<UpdateProfileResponse>(`company/profile/${id}`, formData, {

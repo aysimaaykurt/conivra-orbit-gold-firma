@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Dropdown as PrimeDropdown } from "primereact/dropdown";
+import { MultiSelect as PrimeMultiSelect } from "primereact/multiselect";
 
-export type DropdownProps = React.ComponentProps<typeof PrimeDropdown> & {
+export type MultiSelectProps = React.ComponentProps<typeof PrimeMultiSelect> & {
   label?: string;
   error?: string;
   containerClassName?: string;
@@ -12,7 +12,7 @@ export type DropdownProps = React.ComponentProps<typeof PrimeDropdown> & {
   placeholder?: string;
 };
 
-export const Dropdown = React.forwardRef<any, DropdownProps>(
+export const MultiSelect = React.forwardRef<any, MultiSelectProps>(
   (
     {
       label,
@@ -31,19 +31,26 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
     },
     ref
   ) => {
-    // Handle PrimeReact Dropdown onChange to work with Formik
+    // Handle PrimeReact MultiSelect onChange to work with Formik
     const handleChange = (e: any) => {
+      let val = e.value;
+      // PrimeReact workaround: Select All sometimes returns objects instead of values despite optionValue
+      if (Array.isArray(val) && val.length > 0 && typeof val[0] === "object" && val[0] !== null && "value" in val[0]) {
+        val = val.map((v: any) => v.value);
+      }
+
       if (onChange && name) {
         // Create synthetic event for Formik compatibility
         const syntheticEvent = {
           target: {
             name,
-            value: e.value,
+            value: val,
           },
         };
         onChange(syntheticEvent as any);
       } else if (onChange) {
-        onChange(e);
+        // Also fix for direct onChange
+        onChange({ ...e, value: val });
       }
     };
 
@@ -62,7 +69,7 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
     const dropdownId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
     
     // Check if dropdown has value (selected)
-    const hasValue = value !== null && value !== undefined && value !== "";
+    const hasValue = value && Array.isArray(value) && value.length > 0;
     
     // Determine border color based on error and value states
     const getBorderColor = () => {
@@ -77,18 +84,6 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
     const getPlaceholder = () => {
       if (placeholder) return placeholder;
       if (label) {
-        if (label.toLowerCase().includes("sektör") || label.toLowerCase().includes("sector")) {
-          return "Sektör Seçiniz";
-        }
-        if (label.toLowerCase().includes("il") || label.toLowerCase().includes("city")) {
-          return "İl Seçiniz";
-        }
-        if (label.toLowerCase().includes("ilçe") || label.toLowerCase().includes("district")) {
-          return "İlçe Seçiniz";
-        }
-        if (label.toLowerCase().includes("cinsiyet") || label.toLowerCase().includes("gender")) {
-          return "Cinsiyet";
-        }
         return label;
       }
       return "";
@@ -106,7 +101,7 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
         ) : null}
 
         <div className="relative">
-          <PrimeDropdown
+          <PrimeMultiSelect
             id={dropdownId}
             ref={ref}
             name={name}
@@ -117,10 +112,15 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
             onBlur={handleBlur}
             optionLabel="label"
             optionValue="value"
+            display="chip"
             className={[
               "w-full",
               "bg-white text-dark",
-              "py-2 px-3 rounded-md border text-sm min-h-[42px]",
+              "rounded-md border text-sm min-h-[42px]",
+              "[&_.p-multiselect-label]:py-2 [&_.p-multiselect-label]:px-3",
+              "[&_.p-multiselect-token]:bg-[#4C226A] [&_.p-multiselect-token]:text-white [&_.p-multiselect-token]:rounded-md [&_.p-multiselect-token]:px-2 [&_.p-multiselect-token]:py-0.5 [&_.p-multiselect-token]:mr-1 [&_.p-multiselect-token]:mt-1 [&_.p-multiselect-token]:mb-1",
+              "[&_.p-multiselect-token-label]:text-xs",
+              "[&_.p-multiselect-token-icon]:text-white/80 [&_.p-multiselect-token-icon:hover]:text-white [&_.p-multiselect-token-icon]:w-3 [&_.p-multiselect-token-icon]:h-3 [&_.p-multiselect-token-icon]:ml-1",
               error ? "border-error" : hasValue ? "border-primary" : "border-lightGray/40",
               error 
                 ? "focus:outline-none focus:border-error focus:ring-2 focus:ring-error/20"
@@ -139,6 +139,7 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
             panelStyle={{
               minWidth: "100%",
             }}
+            panelClassName="[&_.p-multiselect-header]:flex [&_.p-multiselect-header]:items-center [&_.p-multiselect-header]:gap-3 [&_.p-multiselect-header]:p-3 [&_.p-multiselect-header_.p-checkbox]:flex-shrink-0 [&_.p-multiselect-header_.p-checkbox]:min-w-[20px] [&_.p-multiselect-header_.p-checkbox]:min-h-[20px] [&_.p-multiselect-header_.p-checkbox-box]:min-w-[20px] [&_.p-multiselect-header_.p-checkbox-box]:min-h-[20px] [&_.p-multiselect-header_.p-checkbox-box]:border-2 [&_.p-multiselect-header_.p-checkbox-box]:rounded [&_.p-multiselect-item.p-highlight]:bg-[#4C226A]/10 [&_.p-multiselect-item.p-highlight]:text-[#4C226A] [&_.p-checkbox.p-highlight_.p-checkbox-box]:border-[#4C226A] [&_.p-checkbox.p-highlight_.p-checkbox-box]:bg-[#4C226A] [&_.p-multiselect-header-text]:translate-y-[3px] [&_.p-multiselect-header-text]:font-medium"
             appendTo="self"
             {...(rest as Record<string, unknown>)}
           />
@@ -151,4 +152,3 @@ export const Dropdown = React.forwardRef<any, DropdownProps>(
     );
   }
 );
-

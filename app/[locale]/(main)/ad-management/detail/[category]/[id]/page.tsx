@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { getAdvertisement } from "@/src/api/advertisements/advertisements.service";
+import { getWorkshop } from "@/src/api/advertisements/workshops.service";
+import { getGiftKit } from "@/src/api/advertisements/giftKits.service";
 import { Advertisement } from "@/src/api/advertisements/advertisements.models";
 import { BASE_URL } from "@/src/api/axios";
 import { useCategories } from "@/src/hooks/useCategories";
@@ -29,15 +31,23 @@ export default function AdDetailPage() {
 
     const fetchAd = async () => {
       try {
-        const response = await getAdvertisement(id);
+        let response;
+        if (categoryParam === "workshop") {
+          response = await getWorkshop(id);
+        } else if (categoryParam === "hediye_kiti") {
+          response = await getGiftKit(id);
+        } else {
+          response = await getAdvertisement(id);
+        }
+
         if (response.success && response.data) {
-          setAd(response.data);
+          setAd(response.data as any);
         } else {
           setError("İlan bulunamadı.");
         }
       } catch (err: any) {
-        console.error("Error fetching ad details:", err);
-        setError("İlan detayları yüklenirken bir hata oluştu.");
+        console.error("Error fetching details:", err);
+        setError("Detaylar yüklenirken bir hata oluştu.");
       } finally {
         setIsLoading(false);
       }
@@ -48,6 +58,10 @@ export default function AdDetailPage() {
 
   const getImageUrl = (url?: string) => {
     if (!url) return '/images/soiree.png';
+    if (url.includes('localhost:5100')) {
+      const tunnelOrigin = new URL(BASE_URL).origin;
+      return url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+    }
     if (url.startsWith('http') || url.startsWith('/images/')) return url;
     const cleanPath = url.replace(/\\/g, '/').replace(/^\//, '');
     try {
@@ -74,10 +88,10 @@ export default function AdDetailPage() {
         <h2 className="text-2xl font-bold text-gray-800 mb-2">İlan Bulunamadı</h2>
         <p className="text-gray-500 mb-6">{error || "Aradığınız ilan mevcut değil veya silinmiş olabilir."}</p>
         <button 
-          onClick={() => router.push(`/${locale}/ad-management`)}
+          onClick={() => router.push(`/${locale}/ad-management?tab=${categoryParam}`)}
           className="px-6 py-3 bg-[#4C226A] text-white font-semibold rounded-xl hover:bg-[#3b1a52] transition-colors"
         >
-          İlan Listesine Dön
+          Listeye Dön
         </button>
       </div>
     );
@@ -91,8 +105,8 @@ export default function AdDetailPage() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => router.push(`/${locale}/ad-management`)}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+            onClick={() => router.push(`/${locale}/ad-management?tab=${categoryParam}`)}
+            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
           >
             <i className="pi pi-arrow-left text-[#4C226A]"></i>
           </button>
@@ -108,8 +122,13 @@ export default function AdDetailPage() {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={() => router.push(`/${locale}/ad-management/add?editId=${ad.id}`)}
-            className="px-4 py-2 bg-white text-[#4C226A] font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2"
+            onClick={() => {
+              let route = `/${locale}/ad-management/add?editId=${ad.id}`;
+              if (categoryParam === "workshop") route = `/${locale}/ad-management/workshop/add?editId=${ad.id}`;
+              else if (categoryParam === "hediye_kiti") route = `/${locale}/ad-management/gift-kit/add?editId=${ad.id}`;
+              router.push(route);
+            }}
+            className="px-4 py-2 bg-white text-[#4C226A] font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer"
           >
             <i className="pi pi-pencil"></i> Düzenle
           </button>

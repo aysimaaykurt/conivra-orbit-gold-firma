@@ -264,14 +264,16 @@ export default function SupportPage() {
     <>
       <Toast ref={toastRef} />
       <div className="p-6 bg-[#F7F6F9] min-h-screen">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: "#4C226A" }}>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "#4C226A" }}>
             Taleplerim / Desteklerim
           </h1>
-          <CreateDropdown
-            onCreateSupport={handleCreateSupport}
-            onCreateRequest={handleCreateRequest}
-          />
+          <div className="w-full md:w-auto">
+            <CreateDropdown
+              onCreateSupport={handleCreateSupport}
+              onCreateRequest={handleCreateRequest}
+            />
+          </div>
         </div>
 
         <div className="mb-4">

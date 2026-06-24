@@ -32,10 +32,21 @@ export const addAdvertisement = async (
     formData.append('category', data.category);
     formData.append('services', data.services);
     formData.append('guestCount', data.guestCount);
-    formData.append('platformPreference', data.platformPreference);
+    // Append array fields properly
+    if (Array.isArray(data.platformPreference)) {
+      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+    } else if (data.platformPreference) {
+      formData.append('platformPreference', data.platformPreference);
+    }
+
     formData.append('followerRange', data.followerRange);
-    formData.append('contentType', data.contentType);
     formData.append('businessType', data.businessType);
+
+    if (Array.isArray(data.contentType)) {
+      data.contentType.forEach(c => formData.append('contentType', c));
+    } else if (data.contentType) {
+      formData.append('contentType', data.contentType);
+    }
 
     // Add images if provided
     if (data.images && data.images.length > 0) {
@@ -100,10 +111,21 @@ export const updateAdvertisement = async (
     formData.append('category', data.category);
     formData.append('services', data.services);
     formData.append('guestCount', data.guestCount);
-    formData.append('platformPreference', data.platformPreference);
+    // Append array fields properly
+    if (Array.isArray(data.platformPreference)) {
+      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+    } else if (data.platformPreference) {
+      formData.append('platformPreference', data.platformPreference);
+    }
+
     formData.append('followerRange', data.followerRange);
-    formData.append('contentType', data.contentType);
     formData.append('businessType', data.businessType);
+
+    if (Array.isArray(data.contentType)) {
+      data.contentType.forEach(c => formData.append('contentType', c));
+    } else if (data.contentType) {
+      formData.append('contentType', data.contentType);
+    }
 
     // Add images if provided
     if (data.images && data.images.length > 0) {
@@ -224,3 +246,23 @@ export const deleteAdvertisement = async (id: string): Promise<any> => {
   }
 };
 
+/**
+ * Delete Advertisement Image Service
+ * DELETE Advertisements/deleteImage/:imageId
+ */
+export const deleteAdImage = async (imageId: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(
+      `Advertisements/deleteImage/${imageId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Görsel silinirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};

@@ -26,9 +26,20 @@ export const addGiftKit = async (
     formData.append('category', data.category);
     formData.append('targetAudience', data.targetAudience);
     formData.append('followerRange', data.followerRange);
-    formData.append('platformPreference', data.platformPreference);
+    // Append array fields properly
+    if (Array.isArray(data.platformPreference)) {
+      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+    } else if (data.platformPreference) {
+      formData.append('platformPreference', data.platformPreference);
+    }
+    
     formData.append('businessType', data.businessType);
-    formData.append('contentType', data.contentType);
+
+    if (Array.isArray(data.contentType)) {
+      data.contentType.forEach(c => formData.append('contentType', c));
+    } else if (data.contentType) {
+      formData.append('contentType', data.contentType);
+    }
 
     // Add images if provided
     if (data.images && data.images.length > 0) {
@@ -77,9 +88,20 @@ export const updateGiftKit = async (
     formData.append('category', data.category);
     formData.append('targetAudience', data.targetAudience);
     formData.append('followerRange', data.followerRange);
-    formData.append('platformPreference', data.platformPreference);
+    // Append array fields properly
+    if (Array.isArray(data.platformPreference)) {
+      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+    } else if (data.platformPreference) {
+      formData.append('platformPreference', data.platformPreference);
+    }
+    
     formData.append('businessType', data.businessType);
-    formData.append('contentType', data.contentType);
+
+    if (Array.isArray(data.contentType)) {
+      data.contentType.forEach(c => formData.append('contentType', c));
+    } else if (data.contentType) {
+      formData.append('contentType', data.contentType);
+    }
 
     // Add images if provided
     if (data.images && data.images.length > 0) {

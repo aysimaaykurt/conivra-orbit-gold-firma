@@ -11,9 +11,9 @@ export interface AddAdvertisementRequest {
   category: string;
   services: string;
   guestCount: string;
-  platformPreference: string;
+  platformPreference: string[];
   followerRange: string;
-  contentType: string;
+  contentType: string[];
   businessType: string;
   images?: File[]; // Multi-image support
 }
@@ -31,9 +31,9 @@ export interface UpdateAdvertisementRequest {
   category: string;
   services: string;
   guestCount: string;
-  platformPreference: string;
+  platformPreference: string[];
   followerRange: string;
-  contentType: string;
+  contentType: string[];
   businessType: string;
   images?: File[]; // Multi-image support
 }
@@ -52,9 +52,9 @@ export interface Advertisement {
   category: string;
   services: string;
   guestCount: string;
-  platformPreference: string;
+  platformPreference: string[];
   followerRange: string;
-  contentType: string;
+  contentType: string[];
   businessType: string;
   images?: { id?: string | number; imageUrl: string; imageId?: string; isMain: boolean; sortOrder?: number }[]; // URL to the uploaded images
   createDate: string; // ISO 8601 date format

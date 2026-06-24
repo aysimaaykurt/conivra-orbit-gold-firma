@@ -11,9 +11,10 @@ import { Calendar } from "primereact/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
+import { MultiSelect } from "@/components/ui/multiselect";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
-import { addAdvertisement, getAdvertisement, updateAdvertisement } from "@/src/api/advertisements/advertisements.service";
+import { addAdvertisement, getAdvertisement, updateAdvertisement, deleteAdImage } from "@/src/api/advertisements/advertisements.service";
 
 interface AddAdFormProps {
   onClose?: () => void;
@@ -33,9 +34,9 @@ interface FormValues {
   // Step 2: Özel Alanlar
   services: string;
   guestCount: string;
-  platformPreference: string;
+  platformPreference: string[];
   followerRange: string;
-  contentType: string;
+  contentType: string[];
   businessType: string;
 
   images: File[];
@@ -100,6 +101,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
   const { sectors: sectorOptions, isLoading: isSectorsLoading } = useSectors();
   const { cities: cityOptions, fetchDistricts } = useLocations();
   const [districtOptions, setDistrictOptions] = useState<{label: string, value: string | number}[]>([]);
+  const [existingImagesMap, setExistingImagesMap] = useState<Record<string, string>>({});
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -113,9 +115,9 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
       category: "",
       services: "",
       guestCount: "",
-      platformPreference: "",
+      platformPreference: [],
       followerRange: "",
-      contentType: "",
+      contentType: [],
       businessType: "",
       images: [],
       imagePreviews: [],
@@ -134,9 +136,9 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
       category: Yup.string().required("Kategori seçimi zorunludur"),
       services: Yup.string().required("Sunulan hizmetler zorunludur"),
       guestCount: Yup.string().required("Misafir sayısı zorunludur"),
-      platformPreference: Yup.string().required("Platform tercihi zorunludur"),
+      platformPreference: Yup.array().min(1, "En az bir platform seçmelisiniz").required("Platform tercihi zorunludur"),
       followerRange: Yup.string().required("Takipçi aralığı zorunludur"),
-      contentType: Yup.string().required("İçerik türü zorunludur"),
+      contentType: Yup.array().min(1, "En az bir içerik türü seçmelisiniz").required("İçerik türü zorunludur"),
       businessType: Yup.string().required("İş tipi zorunludur"),
     }),
     onSubmit: async (values) => {
@@ -204,11 +206,12 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
           }, 1500);
         }
       } catch (error: any) {
+        console.error("Save ad error:", error);
         toastRef.current?.show({
           severity: "error",
           summary: "Hata",
-          detail: error.message || "İlan eklenirken bir hata oluştu",
-          life: 3000,
+          detail: error.message || "İlan eklenirken bir hata oluştu (Sunucu reddetti)",
+          life: 4000,
         });
       } finally {
         setIsLoading(false);
@@ -238,16 +241,50 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
               category: ad.category ? String(ad.category) : "",
               services: ad.services || "",
               guestCount: ad.guestCount || "",
-              platformPreference: ad.platformPreference || "",
+              platformPreference: Array.isArray(ad.platformPreference) ? ad.platformPreference : (ad.platformPreference ? [ad.platformPreference] : []),
               followerRange: ad.followerRange || "",
-              contentType: Array.isArray(ad.contentType as any) ? (ad.contentType as any)[0] : (ad.contentType || ""),
+              contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType] : []),
               businessType: ad.businessType || "",
               images: [],
-              imagePreviews: ad.images && ad.images.length > 0 
-                ? ad.images.map(img => img.imageUrl.startsWith('http') || img.imageUrl.startsWith('/images/') 
-                  ? img.imageUrl 
-                  : `${new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com').origin}/${img.imageUrl.replace(/\\/g, '/').replace(/^\//, '')}`) 
-                : [],
+              imagePreviews: (() => {
+                const previewsMap: Record<string, string> = {};
+                const previews = ad.images && ad.images.length > 0 
+                  ? ad.images.map(img => {
+                      const url = img.imageUrl;
+                      if (!url) return '';
+                      let finalUrl = url;
+                      if (!url.startsWith('/images/')) {
+                        const tunnelOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://flooring-lets-function-bright.trycloudflare.com/api/v1/').origin;
+                        if (url.includes('localhost:5100')) {
+                          finalUrl = url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+                        } else if (!url.startsWith('http')) {
+                          finalUrl = `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
+                        }
+                      }
+                      // Backend expects ONLY the GUID (e.g., 1c241dae-d60b-43f3-b2a1-60247333216b)
+                      let filename = finalUrl.split('/').pop();
+                      if (filename) {
+                        filename = filename.split('?')[0]; // Remove query params if any
+                        
+                        // Remove "ad_" prefix and extension
+                        let guid = filename;
+                        if (guid.startsWith('ad_')) {
+                          guid = guid.substring(3);
+                        }
+                        const dotIndex = guid.lastIndexOf('.');
+                        if (dotIndex !== -1) {
+                          guid = guid.substring(0, dotIndex);
+                        }
+                        
+                        previewsMap[finalUrl] = guid;
+                      }
+                      
+                      return finalUrl;
+                    })
+                  : [];
+                setExistingImagesMap(previewsMap);
+                return previews;
+              })(),
             });
           }
         } catch (error) {
@@ -399,7 +436,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
               <i className="pi pi-arrow-left text-xl" />
             </button>
             <h1 className="text-2xl font-bold" style={{ color: "#4C226A" }}>
-              İlan Ekle
+              {editId ? "İlanı Güncelle" : "İlan Ekle"}
             </h1>
           </div>
 
@@ -550,7 +587,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                       rows={4}
                     />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <Dropdown
                         label="Misafir Sayısı"
                         name="guestCount"
@@ -563,19 +600,6 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                       />
 
                       <Dropdown
-                        label="Platform Tercihi"
-                        name="platformPreference"
-                        value={values.platformPreference}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={touched.platformPreference ? errors.platformPreference : undefined}
-                        options={platformOptions}
-                        placeholder="Bir kategori seçiniz"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Dropdown
                         label="Takipçi Aralığı"
                         name="followerRange"
                         value={values.followerRange}
@@ -587,27 +611,38 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                       />
 
                       <Dropdown
+                        label="İş Tipi Seçiniz"
+                        name="businessType"
+                        value={values.businessType}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.businessType ? errors.businessType : undefined}
+                        options={businessTypeOptions}
+                        placeholder="İş Tipi Seçiniz"
+                      />
+
+                      <MultiSelect
+                        label="Platform Tercihi"
+                        name="platformPreference"
+                        value={values.platformPreference}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.platformPreference ? (errors.platformPreference as string) : undefined}
+                        options={platformOptions}
+                        placeholder="Platform seçiniz"
+                      />
+
+                      <MultiSelect
                         label="İstenen İçerik Türü"
                         name="contentType"
                         value={values.contentType}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        error={touched.contentType ? errors.contentType : undefined}
+                        error={touched.contentType ? (errors.contentType as string) : undefined}
                         options={contentTypeOptions}
                         placeholder="İçerik Türü seçiniz"
                       />
                     </div>
-
-                    <Dropdown
-                      label="İş Tipi Seçiniz"
-                      name="businessType"
-                      value={values.businessType}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.businessType ? errors.businessType : undefined}
-                      options={businessTypeOptions}
-                      placeholder="İş Tipi Seçiniz"
-                    />
                   </div>
                 )}
 
@@ -680,7 +715,33 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                             )}
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={async () => {
+                                const previewUrl = values.imagePreviews[index];
+                                const imageId = existingImagesMap[previewUrl];
+
+                                if (imageId) {
+                                  try {
+                                    const res = await deleteAdImage(imageId);
+                                    if (res && res.success === false) {
+                                      throw new Error(res.message || "Görsel silinemedi (Sunucu reddetti)");
+                                    }
+                                    toastRef.current?.show({
+                                      severity: "success",
+                                      summary: "Başarılı",
+                                      detail: "Görsel silindi",
+                                      life: 3000,
+                                    });
+                                  } catch (error: any) {
+                                    toastRef.current?.show({
+                                      severity: "error",
+                                      summary: "Hata",
+                                      detail: error.message || "Görsel silinemedi",
+                                      life: 3000,
+                                    });
+                                    return; // Stop if API call fails
+                                  }
+                                }
+
                                 const newImages = [...values.images];
                                 newImages.splice(index, 1);
                                 formik.setFieldValue("images", newImages);
@@ -693,7 +754,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                                   fileInputRef.current.value = "";
                                 }
                               }}
-                              className="absolute -top-2 -right-2 bg-white text-red-500 border border-gray-100 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors"
+                              className="absolute -top-2 -right-2 bg-white text-red-500 border border-gray-100 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors cursor-pointer"
                               title="Görseli Kaldır"
                             >
                               <i className="pi pi-times text-xs"></i>
@@ -737,7 +798,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                     className="bg-primary text-white"
                     style={{ backgroundColor: "#4C226A" }}
                   >
-                    {isLoading ? "Ekleniyor..." : "İlan Ekle"}
+                    {isLoading ? (editId ? "Güncelleniyor..." : "Ekleniyor...") : (editId ? "İlanı Güncelle" : "İlan Ekle")}
                   </Button>
                 )}
               </div>
@@ -774,12 +835,12 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
             </div>
 
             {/* Right Section - Preview */}
-            <div className="w-full lg:w-[400px] bg-[#F5F2F1] rounded-lg p-4 md:p-6 lg:sticky lg:top-6 min-h-0 lg:min-h-[600px] lg:max-h-[800px] overflow-y-auto flex flex-col">
-              <h2 className="text-xl font-bold mb-4" style={{ color: "#4C226A" }}>
+            <div className="w-full lg:w-[400px] bg-[#F5F2F1] rounded-lg p-4 md:p-6 lg:sticky lg:top-6 min-h-0 lg:h-[calc(100vh-3rem)] lg:max-h-[800px] flex flex-col">
+              <h2 className="text-xl font-bold mb-4 flex-shrink-0" style={{ color: "#4C226A" }}>
                 İlan Özeti
               </h2>
 
-              <div className="space-y-4 flex-1">
+              <div className="space-y-4 flex-1 overflow-y-auto pr-2 pb-2">
                 {/* Image */}
                 <div className="w-full aspect-square bg-[#EBE7EC] border-2 border-dashed border-[#D1C9D6] rounded-lg overflow-hidden relative">
                   {values.imagePreviews && values.imagePreviews.length > 0 ? (
@@ -858,7 +919,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
               </div>
 
               {/* Submit Button at Bottom */}
-              <div className="mt-auto pt-6 border-t border-gray-300">
+              <div className="mt-4 pt-4 border-t border-gray-300 flex-shrink-0">
                 <Button
                   type="button"
                   onClick={() => formik.handleSubmit()}
@@ -866,7 +927,7 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                   className="w-full text-white py-3 rounded-lg"
                   style={{ backgroundColor: "#4C226A" }}
                 >
-                  {isLoading ? "Ekleniyor..." : "İlan Ekle"}
+                  {isLoading ? (editId ? "Güncelleniyor..." : "Ekleniyor...") : (editId ? "İlanı Güncelle" : "İlan Ekle")}
                 </Button>
               </div>
             </div>

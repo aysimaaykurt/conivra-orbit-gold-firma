@@ -45,6 +45,10 @@ export default function EventCard({ event, onEdit, onDelete, spanCount = 7 }: Ev
 
   const getImageUrl = (url?: string) => {
     if (!url) return '/images/soiree.png';
+    if (url.includes('localhost:5100')) {
+      const tunnelOrigin = new URL(BASE_URL).origin;
+      return url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+    }
     if (url.startsWith('http') || url.startsWith('/images/')) return url;
     const cleanPath = url.replace(/\\/g, '/').replace(/^\//, '');
     try {
@@ -75,7 +79,7 @@ export default function EventCard({ event, onEdit, onDelete, spanCount = 7 }: Ev
               <img 
                 src={getImageUrl(event.coverImageUrl)} 
                 alt={event.title} 
-                className="w-full h-full object-cover" 
+                className="absolute inset-0 w-full h-full object-cover" 
                 onError={(e) => { 
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = '/images/soiree.png';
@@ -142,7 +146,7 @@ export default function EventCard({ event, onEdit, onDelete, spanCount = 7 }: Ev
               e.stopPropagation();
               if (onEdit) onEdit(event.id, event.category);
             }}
-            className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-white text-[#4C226A] shadow-sm transition-colors"
+            className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-white text-[#4C226A] shadow-sm transition-colors cursor-pointer"
             title="Düzenle"
           >
             <i className="pi pi-pencil text-[10px]" />
@@ -152,7 +156,7 @@ export default function EventCard({ event, onEdit, onDelete, spanCount = 7 }: Ev
               e.stopPropagation();
               if (onDelete) onDelete(event.id, event.category);
             }}
-            className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-red-50 text-red-500 shadow-sm transition-colors"
+            className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-red-50 text-red-500 shadow-sm transition-colors cursor-pointer"
             title="Sil"
           >
             <i className="pi pi-trash text-[10px]" />

@@ -70,10 +70,10 @@ export default function ProfileHeader({
 
   return (
     <div className="mb-6">
-      {/* Main Section - Profile Picture, Name, Badge and Statistics all in one row */}
-      <div className="flex items-center justify-between mb-6">
+      {/* Main Section - Profile Picture, Name, Badge and Statistics all in one row on desktop, stacked on mobile */}
+      <div className="flex flex-col md:flex-row items-center md:justify-between mb-6 gap-6 md:gap-0">
         {/* Left Side - Profile Picture and Name */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-4">
           {/* Profile Picture */}
           <div className="relative">
             <div
@@ -120,7 +120,7 @@ export default function ProfileHeader({
 
         {/* Right Side - Statistics */}
         {isLoading ? (
-          <div className="flex items-center gap-8">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 w-full md:w-auto">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="text-center">
                 <div className="w-12 h-10 bg-gray-200 rounded mb-2 animate-pulse"></div>
@@ -129,7 +129,7 @@ export default function ProfileHeader({
             ))}
           </div>
         ) : (
-          <div className="flex items-center gap-8">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 w-full md:w-auto">
             {/* Toplam İş */}
             <div className="text-center">
               <div className="text-3xl font-bold mb-1" style={{ color: "#4C226A" }}>

@@ -13,13 +13,15 @@ import type { Workshop } from "@/src/api/advertisements/workshops.models";
 import type { GiftKit } from "@/src/api/advertisements/giftKits.models";
 import { AdEvent, AdCategory } from "@/src/mocks/adManagement";
 import { useAdManagement } from "@/src/hooks/useAdManagement";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 
 export default function AdManagementPage() {
   const router = useRouter();
   const locale = useLocale();
-  const [active, setActive] = useState<AdCategory>("ilan");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [active, setActive] = useState<AdCategory>((tabParam as AdCategory) || "ilan");
   const [filters, setFilters] = useState<Record<string, any>>({
     page: 1,
     pageSize: 10,
@@ -202,7 +204,14 @@ export default function AdManagementPage() {
       </div>
 
       <div className="mb-4">
-        <Tabs active={active} onChange={(key) => setActive(key as AdCategory)} />
+        <Tabs 
+          active={active} 
+          onChange={(key) => {
+            const category = key as AdCategory;
+            setActive(category);
+            window.history.replaceState(null, '', `/${locale}/ad-management?tab=${category}`);
+          }} 
+        />
       </div>
 
       {isLoading ? (

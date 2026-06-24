@@ -45,21 +45,22 @@ export default function CreateDropdown({
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative w-full md:w-auto" ref={dropdownRef}>
       {/* Main Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90"
+        className="flex w-full md:w-auto items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90"
         style={{ backgroundColor: "#4C226A" }}
       >
         <i className="pi pi-file text-base" />
-        <span>Destek / Talep Oluştur</span>
+        <span className="md:hidden">Yeni Oluştur</span>
+        <span className="hidden md:inline">Destek / Talep Oluştur</span>
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[200px] z-50"
+          className="absolute top-full left-0 md:left-auto right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[200px] z-50 w-full md:w-auto"
           style={{ boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)" }}
         >
           <button

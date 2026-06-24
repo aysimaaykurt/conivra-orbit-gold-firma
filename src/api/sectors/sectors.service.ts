@@ -24,6 +24,17 @@ export const getSectors = async (): Promise<Sector[]> => {
       return response.data;
     }
 
+    // Fallback for wrapped items
+    if (response.data?.success && response.data.data?.items && Array.isArray(response.data.data.items)) {
+      return response.data.data.items;
+    }
+    
+    // Object values fallback
+    if (response.data?.success && typeof response.data.data === 'object' && !Array.isArray(response.data.data)) {
+      const firstArray = Object.values(response.data.data).find(val => Array.isArray(val));
+      if (firstArray) return firstArray as Sector[];
+    }
+
     return [];
   } catch (error) {
     console.error('Sektörler çekilirken hata oluştu:', error);

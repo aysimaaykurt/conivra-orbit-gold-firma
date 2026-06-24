@@ -379,3 +379,40 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
   background-color: rgba(76, 34, 106, 0.04) !important;
   color: #202020 !important;
 }
+
+/* MultiSelect Panel Global Fixes */
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+  background-color: rgba(76, 34, 106, 0.1) !important;
+  color: #4C226A !important;
+}
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
+  background-color: rgba(76, 34, 106, 0.04) !important;
+  color: #202020 !important;
+}
+.p-multiselect-panel .p-checkbox-box.p-highlight,
+.p-multiselect-panel .p-checkbox.p-highlight .p-checkbox-box,
+body .p-multiselect-panel .p-checkbox .p-checkbox-box.p-highlight {
+  background-color: #4C226A !important;
+  border-color: #4C226A !important;
+}
+.p-multiselect-panel .p-checkbox-box:not(.p-disabled):hover {
+  border-color: #4C226A !important;
+}
+.p-multiselect-panel .p-checkbox-box.p-focus {
+  box-shadow: 0 0 0 2px rgba(76, 34, 106, 0.2) !important;
+  border-color: #4C226A !important;
+}
+
+/* MultiSelect Select All Checkbox Label */
+.p-multiselect-panel .p-multiselect-header .p-checkbox {
+  display: flex !important;
+  align-items: center !important;
+}
+.p-multiselect-panel .p-multiselect-header .p-checkbox::after {
+  content: "Tümü";
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #202020;
+  cursor: pointer;
+}

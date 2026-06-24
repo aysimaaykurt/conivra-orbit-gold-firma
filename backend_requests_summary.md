@@ -22,6 +22,9 @@ Bu doküman, frontend (arayüz) entegrasyonu sırasında tespit edilen eksik end
 ### 2.4. Hediye Kiti Geçerlilik Süresi
 - **Talep**: Hediye Kiti (Gift Kit) oluştururken geçerlilik süresinin (örn: son kullanma tarihi) kaydedilebilmesi için ilgili modele `expirationDate` veya `validityPeriod` parametresi eklenmelidir.
 
+### 2.5. İlan/Workshop/Hediye Kiti Görsellerini Silme (Image Deletion)
+- **Talep**: Mevcut bir ilan güncellenirken (Update), arayüzden silinen eski fotoğrafların sunucudan da silinebilmesi için bir mekanizmaya ihtiyaç vardır. Bunun için ya `PUT` payload'ına `deletedImageIds` dizisi (array) eklenmeli ya da bağımsız bir `DELETE /api/v1/Advertisements/deleteImage/{imageId}` endpoint'i oluşturulmalıdır. Şu anki yapıda sadece yeni fotoğraflar eskilere eklenmektedir.
+
 ## 3. Başvurularım ve Projelerim (Kritik Ortak Yapı)
 
 **Durum**: 

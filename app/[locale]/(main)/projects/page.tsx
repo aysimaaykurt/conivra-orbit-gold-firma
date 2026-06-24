@@ -6,13 +6,14 @@ import { useProjects } from "@/src/hooks/useProjects";
 
 export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const [activeMobileTab, setActiveMobileTab] = useState<"pending" | "ongoing" | "completed">("pending");
+
   // Fetch all projects. Backend might not support search query yet, so we fetch all and filter on the client.
   const { projects, isLoading, error } = useProjects({ page: 1, pageSize: 100 });
 
   // Filter by search query
   const filteredProjects = projects.filter(
-    (p) => 
+    (p) =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.assignee?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -54,76 +55,109 @@ export default function ProjectsPage() {
           <p className="text-gray-500 text-center max-w-md mb-6 leading-relaxed">
             Projelerinizi yüklerken bir sunucu veya ağ hatası oluştu. Lütfen bağlantınızı kontrol edip sayfayı yenilemeyi deneyin.
           </p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-6 py-3 bg-[#4C226A] text-white font-semibold rounded-xl shadow-md hover:bg-[#3b1a52] transition-colors flex items-center gap-2"
           >
             <i className="pi pi-refresh"></i> Tekrar Dene
           </button>
         </div>
       ) : (
-        /* Three Columns */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 pb-4">
-          {/* Bekleyen Projelerim */}
-          <div className="flex flex-col h-[600px] lg:h-full">
-            <div className="flex items-center justify-between mb-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100 shrink-0">
-              <h2 className="text-lg font-bold text-dark flex items-center gap-2">
-                <i className="pi pi-clock text-orange-500"></i>
-                Bekleyen
-              </h2>
-              <span className="text-sm font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full">
-                {pendingProjects.length}
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto pr-2 pb-4">
-              {pendingProjects.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">Bekleyen proje bulunmuyor.</p>
-              ) : (
-                <ProjectsList projects={pendingProjects} />
-              )}
-            </div>
+        <>
+          {/* Mobile Tabs */}
+          <div className="flex lg:hidden gap-2  overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setActiveMobileTab("pending")}
+              className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap flex-shrink-0 transition-colors ${activeMobileTab === "pending"
+                ? "text-white bg-[#4C226A]"
+                : "text-gray-600 bg-white border border-gray-200"
+                }`}
+            >
+              <i className="pi pi-clock mr-2"></i> Bekleyen ({pendingProjects.length})
+            </button>
+            <button
+              onClick={() => setActiveMobileTab("ongoing")}
+              className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap flex-shrink-0 transition-colors ${activeMobileTab === "ongoing"
+                ? "text-white bg-[#4C226A]"
+                : "text-gray-600 bg-white border border-gray-200"
+                }`}
+            >
+              <i className="pi pi-sync mr-2"></i> Devam Eden ({ongoingProjects.length})
+            </button>
+            <button
+              onClick={() => setActiveMobileTab("completed")}
+              className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap flex-shrink-0 transition-colors ${activeMobileTab === "completed"
+                ? "text-white bg-[#4C226A]"
+                : "text-gray-600 bg-white border border-gray-200"
+                }`}
+            >
+              <i className="pi pi-check-circle mr-2"></i> Tamamlanan ({completedProjects.length})
+            </button>
           </div>
 
-          {/* Devam Eden Projelerim */}
-          <div className="flex flex-col h-[600px] lg:h-full">
-            <div className="flex items-center justify-between mb-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100 shrink-0">
-              <h2 className="text-lg font-bold text-dark flex items-center gap-2">
-                <i className="pi pi-sync text-blue-500"></i>
-                Devam Eden
-              </h2>
-              <span className="text-sm font-semibold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
-                {ongoingProjects.length}
-              </span>
+          /* Three Columns */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 pb-4">
+            {/* Bekleyen Projelerim */}
+            <div className={`flex-col h-[calc(100vh-280px)] lg:h-full ${activeMobileTab === "pending" ? "flex" : "hidden lg:flex"}`}>
+              <div className="flex items-center justify-between mb-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100 shrink-0">
+                <h2 className="text-lg font-bold text-dark flex items-center gap-2">
+                  <i className="pi pi-clock text-orange-500"></i>
+                  Bekleyen
+                </h2>
+                <span className="text-sm font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full">
+                  {pendingProjects.length}
+                </span>
+              </div>
+              <div className="flex-1 overflow-y-auto pr-2 pb-4">
+                {pendingProjects.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">Bekleyen proje bulunmuyor.</p>
+                ) : (
+                  <ProjectsList projects={pendingProjects} />
+                )}
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto pr-2 pb-4">
-              {ongoingProjects.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">Devam eden proje bulunmuyor.</p>
-              ) : (
-                <ProjectsList projects={ongoingProjects} />
-              )}
-            </div>
-          </div>
 
-          {/* Tamamlanan Projelerim */}
-          <div className="flex flex-col h-[600px] lg:h-full">
-            <div className="flex items-center justify-between mb-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100 shrink-0">
-              <h2 className="text-lg font-bold text-dark flex items-center gap-2">
-                <i className="pi pi-check-circle text-green-500"></i>
-                Tamamlanan
-              </h2>
-              <span className="text-sm font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">
-                {completedProjects.length}
-              </span>
+            {/* Devam Eden Projelerim */}
+            <div className={`flex-col h-[calc(100vh-280px)] lg:h-full ${activeMobileTab === "ongoing" ? "flex" : "hidden lg:flex"}`}>
+              <div className="flex items-center justify-between mb-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100 shrink-0">
+                <h2 className="text-lg font-bold text-dark flex items-center gap-2">
+                  <i className="pi pi-sync text-blue-500"></i>
+                  Devam Eden
+                </h2>
+                <span className="text-sm font-semibold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                  {ongoingProjects.length}
+                </span>
+              </div>
+              <div className="flex-1 overflow-y-auto pr-2 pb-4">
+                {ongoingProjects.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">Devam eden proje bulunmuyor.</p>
+                ) : (
+                  <ProjectsList projects={ongoingProjects} />
+                )}
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto pr-2 pb-4">
-              {completedProjects.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">Tamamlanan proje bulunmuyor.</p>
-              ) : (
-                <ProjectsList projects={completedProjects} />
-              )}
+
+            {/* Tamamlanan Projelerim */}
+            <div className={`flex-col h-[calc(100vh-280px)] lg:h-full ${activeMobileTab === "completed" ? "flex" : "hidden lg:flex"}`}>
+              <div className="flex items-center justify-between mb-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100 shrink-0">
+                <h2 className="text-lg font-bold text-dark flex items-center gap-2">
+                  <i className="pi pi-check-circle text-green-500"></i>
+                  Tamamlanan
+                </h2>
+                <span className="text-sm font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">
+                  {completedProjects.length}
+                </span>
+              </div>
+              <div className="flex-1 overflow-y-auto pr-2 pb-4">
+                {completedProjects.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">Tamamlanan proje bulunmuyor.</p>
+                ) : (
+                  <ProjectsList projects={completedProjects} />
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
