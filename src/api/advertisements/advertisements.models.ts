@@ -15,7 +15,7 @@ export interface AddAdvertisementRequest {
   followerRange: string;
   contentType: string;
   businessType: string;
-  image?: File; // Optional, will be sent as FormData
+  images?: File[]; // Multi-image support
 }
 
 // Update Advertisement Request Models (PUT)
@@ -35,7 +35,7 @@ export interface UpdateAdvertisementRequest {
   followerRange: string;
   contentType: string;
   businessType: string;
-  image?: File; // Optional, will be sent as FormData
+  images?: File[]; // Multi-image support
 }
 
 // Advertisement Response Models (GET)
@@ -56,7 +56,7 @@ export interface Advertisement {
   followerRange: string;
   contentType: string;
   businessType: string;
-  imageUrl?: string; // URL to the uploaded image
+  images?: { id?: string | number; imageUrl: string; imageId?: string; isMain: boolean; sortOrder?: number }[]; // URL to the uploaded images
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)
   status?: string; // e.g., "active", "inactive", "pending"
@@ -69,7 +69,7 @@ export interface AddAdvertisementResponse {
   data?: {
     id: string;
     title: string;
-    imageUrl?: string;
+    adImages?: { id?: string; imageUrl: string; isMain: boolean }[];
   };
 }
 
@@ -80,7 +80,7 @@ export interface UpdateAdvertisementResponse {
   data?: {
     id: string;
     title: string;
-    imageUrl?: string;
+    adImages?: { id?: string; imageUrl: string; isMain: boolean }[];
   };
 }
 

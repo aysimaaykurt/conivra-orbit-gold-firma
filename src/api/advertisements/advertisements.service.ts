@@ -37,12 +37,14 @@ export const addAdvertisement = async (
     formData.append('contentType', data.contentType);
     formData.append('businessType', data.businessType);
 
-    // Add image if provided
-    if (data.image) {
-      console.log('--- UPLOADING IMAGE (Add) ---', data.image.name, data.image.type, data.image.size);
-      formData.append('image', data.image);
+    // Add images if provided
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        console.log('--- UPLOADING IMAGE (Add) ---', image.name, image.type, image.size);
+        formData.append('images', image);
+      });
     } else {
-      console.log('--- NO IMAGE PROVIDED (Add) ---');
+      console.log('--- NO IMAGES PROVIDED (Add) ---');
     }
 
     console.log('--- FormData Entries (Add) ---');
@@ -103,12 +105,14 @@ export const updateAdvertisement = async (
     formData.append('contentType', data.contentType);
     formData.append('businessType', data.businessType);
 
-    // Add image if provided
-    if (data.image) {
-      console.log('--- UPLOADING IMAGE (Update) ---', data.image.name, data.image.type, data.image.size);
-      formData.append('image', data.image);
+    // Add images if provided
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        console.log('--- UPLOADING IMAGE (Update) ---', image.name, image.type, image.size);
+        formData.append('images', image);
+      });
     } else {
-      console.log('--- NO IMAGE PROVIDED (Update) ---');
+      console.log('--- NO IMAGES PROVIDED (Update) ---');
     }
 
     console.log('--- FormData Entries (Update) ---');

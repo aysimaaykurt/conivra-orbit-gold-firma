@@ -64,10 +64,14 @@ export default function SupportPage() {
         }
       } catch (error: any) {
         console.error("Error fetching data:", error);
+        
+        // Use a user-friendly message instead of raw "Network Error"
+        const isNetworkError = error?.message === "Network Error" || error?.message?.includes("Network Error");
+        
         toastRef.current?.show({
           severity: "error",
-          summary: "Hata",
-          detail: error.message || "Veriler yüklenirken bir hata oluştu",
+          summary: "Bağlantı Hatası",
+          detail: isNetworkError ? "Sunucuya bağlanılamadı, lütfen internet bağlantınızı kontrol edin." : (error.message || "Veriler yüklenirken bir hata oluştu"),
           life: 3000,
         });
       } finally {

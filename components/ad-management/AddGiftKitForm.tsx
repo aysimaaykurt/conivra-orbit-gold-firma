@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useFormik } from "formik";
+import * as Yup from "yup";
 import { useRouter } from "@/src/navigation";
 import { useSearchParams } from "next/navigation";
 import { useCategories } from "@/src/hooks/useCategories";
@@ -27,9 +28,8 @@ interface FormValues {
   businessType: string;
   contentType: string;
 
-  // Step 2: Hediye Kiti Görseli
-  image: File | null;
-  imagePreview: string;
+  images: File[];
+  imagePreviews: string[];
 }
 
 const steps = [
@@ -95,9 +95,19 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       platformPreference: "",
       businessType: "",
       contentType: "",
-      image: null,
-      imagePreview: "",
+      images: [],
+      imagePreviews: [],
     },
+    validationSchema: Yup.object({
+      title: Yup.string().required("Başlık zorunludur"),
+      content: Yup.string().required("İçerik açıklaması zorunludur"),
+      category: Yup.string().required("Kategori seçimi zorunludur"),
+      targetAudience: Yup.string().required("Hedef kitle zorunludur"),
+      followerRange: Yup.string().required("Takipçi aralığı zorunludur"),
+      platformPreference: Yup.string().required("Platform tercihi zorunludur"),
+      businessType: Yup.string().required("İş tipi zorunludur"),
+      contentType: Yup.string().required("İçerik türü zorunludur"),
+    }),
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
@@ -110,7 +120,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
           platformPreference: values.platformPreference,
           businessType: values.businessType,
           contentType: values.contentType,
-          image: values.image || undefined,
+          images: values.images || [],
         };
 
         let response;
@@ -168,8 +178,12 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
               platformPreference: ad.platformPreference || "",
               businessType: ad.businessType || "",
               contentType: Array.isArray(ad.contentType as any) ? (ad.contentType as any)[0] : (ad.contentType || ""),
-              image: null,
-              imagePreview: ad.imageUrl ? (ad.imageUrl.startsWith('http') || ad.imageUrl.startsWith('/images/') ? ad.imageUrl : `${new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com').origin}/${ad.imageUrl.replace(/\\/g, '/').replace(/^\//, '')}`) : "",
+              images: [],
+              imagePreviews: ad.images && ad.images.length > 0 
+                ? ad.images.map(img => img.imageUrl.startsWith('http') || img.imageUrl.startsWith('/images/') 
+                  ? img.imageUrl 
+                  : `${new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com').origin}/${img.imageUrl.replace(/\\/g, '/').replace(/^\//, '')}`) 
+                : [],
             });
           }
         } catch (error) {
@@ -204,23 +218,25 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Dosya boyutu 5MB'dan büyük olamaz");
-        return;
-      }
-      if (!file.type.startsWith("image/")) {
-        alert("Sadece resim dosyaları yüklenebilir");
-        return;
-      }
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.filter(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`${file.name} boyutu 5MB'dan büyük olamaz`);
+          return false;
+        }
+        if (!file.type.startsWith("image/")) {
+          alert(`${file.name} geçerli bir resim dosyası değil`);
+          return false;
+        }
+        return true;
+      });
 
-      setFieldValue("image", file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFieldValue("imagePreview", reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      if (validFiles.length > 0) {
+        setFieldValue("images", [...values.images, ...validFiles]);
+        const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+        setFieldValue("imagePreviews", [...values.imagePreviews, ...newPreviews]);
+      }
     }
   };
 
@@ -232,23 +248,25 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Dosya boyutu 5MB'dan büyük olamaz");
-        return;
-      }
-      if (!file.type.startsWith("image/")) {
-        alert("Sadece resim dosyaları yüklenebilir");
-        return;
-      }
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      const validFiles = files.filter(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`${file.name} boyutu 5MB'dan büyük olamaz`);
+          return false;
+        }
+        if (!file.type.startsWith("image/")) {
+          alert(`${file.name} geçerli bir resim dosyası değil`);
+          return false;
+        }
+        return true;
+      });
 
-      setFieldValue("image", file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFieldValue("imagePreview", reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      if (validFiles.length > 0) {
+        setFieldValue("images", [...values.images, ...validFiles]);
+        const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+        setFieldValue("imagePreviews", [...values.imagePreviews, ...newPreviews]);
+      }
     }
   };
 
@@ -413,30 +431,68 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                         accept="image/jpeg,image/png"
                         onChange={handleImageChange}
                         className="hidden"
+                        multiple
                       />
                     </div>
 
-                    {values.imagePreview && (
-                      <div className="mt-4 relative inline-block">
-                        <img
-                          src={values.imagePreview}
-                          alt="Preview"
-                          className="rounded-lg object-contain w-64 h-64 bg-gray-50"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFieldValue("image", null);
-                            setFieldValue("imagePreview", "");
-                            if (fileInputRef.current) {
-                              fileInputRef.current.value = "";
-                            }
-                          }}
-                          className="absolute -top-2 -right-1 bg-white text-red-500 border border-gray-100 rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors"
-                          title="Görseli Kaldır"
-                        >
-                          <i className="pi pi-trash text-xs"></i>
-                        </button>
+                    {values.imagePreviews && values.imagePreviews.length > 0 && (
+                      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {values.imagePreviews.map((preview, index) => (
+                          <div key={index} className="relative group inline-block border rounded-lg p-1 bg-white shadow-sm">
+                            {index === 0 && (
+                              <span className="absolute -top-2 left-2 bg-[#4C226A] text-white text-[10px] px-2 py-0.5 rounded-full z-10 shadow-sm">
+                                Ana Görsel
+                              </span>
+                            )}
+                            <img
+                              src={preview}
+                              alt={`Preview ${index}`}
+                              className="rounded-md object-contain w-full h-32 bg-gray-50"
+                            />
+                            {index > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImages = [...values.images];
+                                  const newPreviews = [...values.imagePreviews];
+                                  
+                                  const selectedImage = newImages.splice(index, 1)[0];
+                                  newImages.unshift(selectedImage);
+                                  
+                                  const selectedPreview = newPreviews.splice(index, 1)[0];
+                                  newPreviews.unshift(selectedPreview);
+                                  
+                                  formik.setFieldValue("images", newImages);
+                                  formik.setFieldValue("imagePreviews", newPreviews);
+                                }}
+                                className="absolute bottom-2 left-2 right-2 bg-black/70 hover:bg-black/90 text-white text-xs py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center gap-1 z-10"
+                                title="Ana Görsel Yap"
+                              >
+                                <i className="pi pi-star text-[10px]" /> Kapak Yap
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = [...values.images];
+                                newImages.splice(index, 1);
+                                formik.setFieldValue("images", newImages);
+
+                                const newPreviews = [...values.imagePreviews];
+                                newPreviews.splice(index, 1);
+                                formik.setFieldValue("imagePreviews", newPreviews);
+                                
+                                if (fileInputRef.current) {
+                                  fileInputRef.current.value = "";
+                                }
+                              }}
+                              className="absolute -top-2 -right-2 bg-white text-red-500 border border-gray-100 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-md z-10 transition-colors"
+                              title="Görseli Kaldır"
+                            >
+                              <i className="pi pi-times text-xs"></i>
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -518,85 +574,93 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
 
               <div className="space-y-4 flex-1">
                 {/* Image */}
-                <div className="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                  {values.imagePreview ? (
-                    <img
-                      src={values.imagePreview}
-                      alt="Gift Kit preview"
-                      className="w-full h-full object-contain bg-gray-50"
-                    />
+                <div className="w-full aspect-square bg-[#EBE7EC] border-2 border-dashed border-[#D1C9D6] rounded-lg overflow-hidden relative">
+                  {values.imagePreviews && values.imagePreviews.length > 0 ? (
+                    <>
+                      <img
+                        src={values.imagePreviews[0]}
+                        alt="Gift Kit preview main"
+                        className="w-full h-full object-contain bg-gray-50"
+                      />
+                      {values.imagePreviews.length > 1 && (
+                        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm">
+                          +{values.imagePreviews.length - 1} Görsel
+                        </div>
+                      )}
+                    </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <i className="pi pi-image text-4xl" />
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
+                      <i className="pi pi-image text-5xl opacity-40 mb-2" />
+                      <span className="text-sm font-medium opacity-60">Görsel Yüklenmedi</span>
                     </div>
                   )}
                 </div>
 
                 {/* Title */}
-                {values.title && (
-                  <h3 className="text-lg font-bold text-dark">{values.title}</h3>
-                )}
+                <h3 className={`text-lg font-bold ${values.title ? 'text-dark' : 'text-gray-500/90 italic'}`}>
+                  {values.title || "Hediye Kiti Başlığı Girilmedi"}
+                </h3>
 
                 {/* Content/Description */}
-                {values.content && (
-                  <p className="text-sm text-gray-600 line-clamp-4">{values.content}</p>
-                )}
+                <p className={`text-sm line-clamp-4 ${values.content ? 'text-gray-600' : 'text-gray-500/90 italic'}`}>
+                  {values.content || "Hediye kiti açıklaması girilmedi..."}
+                </p>
 
                 {/* Details */}
-                <div className="space-y-2 pt-2">
+                <div className="space-y-3 pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-2 text-sm">
                     <i className="pi pi-tag text-primary" />
-                    <span className="text-gray-700">
+                    <span className={values.category ? 'text-gray-700' : 'text-gray-500/90 italic'}>
                       {values.category
                         ? categoryOptions.find((opt) => opt.value === values.category)?.label || values.category
-                        : "Hediye Kiti"}
+                        : "Kategori seçilmedi"}
                     </span>
                   </div>
 
-                  {values.targetAudience && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <i className="pi pi-users text-primary" />
-                      <span className="text-gray-700">
-                        {targetAudienceOptions.find((opt) => opt.value === values.targetAudience)?.label || values.targetAudience}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <i className="pi pi-users text-primary" />
+                    <span className={values.targetAudience ? 'text-gray-700' : 'text-gray-500/90 italic'}>
+                      {values.targetAudience 
+                        ? targetAudienceOptions.find((opt) => opt.value === values.targetAudience)?.label || values.targetAudience
+                        : "Hedef kitle seçilmedi"}
+                    </span>
+                  </div>
 
-                  {values.followerRange && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <i className="pi pi-users text-primary" />
-                      <span className="text-gray-700">
-                        {followerRangeOptions.find((opt) => opt.value === values.followerRange)?.label || values.followerRange}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <i className="pi pi-users text-primary" />
+                    <span className={values.followerRange ? 'text-gray-700' : 'text-gray-500/90 italic'}>
+                      {values.followerRange
+                        ? followerRangeOptions.find((opt) => opt.value === values.followerRange)?.label || values.followerRange
+                        : "Takipçi aralığı seçilmedi"}
+                    </span>
+                  </div>
 
-                  {values.platformPreference && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <i className="pi pi-share-alt text-primary" />
-                      <span className="text-gray-700">
-                        {platformOptions.find((opt) => opt.value === values.platformPreference)?.label || values.platformPreference}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <i className="pi pi-share-alt text-primary" />
+                    <span className={values.platformPreference ? 'text-gray-700' : 'text-gray-500/90 italic'}>
+                      {values.platformPreference
+                        ? platformOptions.find((opt) => opt.value === values.platformPreference)?.label || values.platformPreference
+                        : "Platform seçilmedi"}
+                    </span>
+                  </div>
 
-                  {values.businessType && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <i className="pi pi-briefcase text-primary" />
-                      <span className="text-gray-700">
-                        {businessTypeOptions.find((opt) => opt.value === values.businessType)?.label || values.businessType}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <i className="pi pi-briefcase text-primary" />
+                    <span className={values.businessType ? 'text-gray-700' : 'text-gray-500/90 italic'}>
+                      {values.businessType
+                        ? businessTypeOptions.find((opt) => opt.value === values.businessType)?.label || values.businessType
+                        : "İş tipi seçilmedi"}
+                    </span>
+                  </div>
 
-                  {values.contentType && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <i className="pi pi-image text-primary" />
-                      <span className="text-gray-700">
-                        {contentTypeOptions.find((opt) => opt.value === values.contentType)?.label || values.contentType}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <i className="pi pi-image text-primary" />
+                    <span className={values.contentType ? 'text-gray-700' : 'text-gray-500/90 italic'}>
+                      {values.contentType
+                        ? contentTypeOptions.find((opt) => opt.value === values.contentType)?.label || values.contentType
+                        : "İçerik türü seçilmedi"}
+                    </span>
+                  </div>
                 </div>
               </div>
 

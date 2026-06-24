@@ -149,8 +149,16 @@ export default function ApplicationsList() {
             ))}
             {Array.isArray(currentApplications) && currentApplications.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500">
-                  Bu filtrelere uygun başvuru bulunamadı.
+                <td colSpan={6} className="text-center py-20">
+                  <div className="flex flex-col items-center justify-center space-y-4">
+                    <div className="w-24 h-24 bg-[#4C226A]/5 rounded-full flex items-center justify-center mb-2">
+                      <i className="pi pi-folder-open text-[#4C226A] opacity-80" style={{ fontSize: '36px' }} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800">Başvuru Bulunamadı</h3>
+                    <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+                      Seçili filtrelere ve arama kriterlerine uygun herhangi bir başvuru sonucu bulamadık. Lütfen farklı kelimelerle veya sekmelerle tekrar deneyin.
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}

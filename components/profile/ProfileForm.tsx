@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cityOptions, districtOptions, ProfileFormValues } from "@/src/mocks/profile";
 import { useSectors } from "@/src/hooks/useSectors";
- 
+import { useLocations } from "@/src/hooks/useLocations";
+
 interface ProfileFormProps {
   initialValues: ProfileFormValues;
   onSubmit: (values: ProfileFormValues) => void;
@@ -35,7 +36,9 @@ export default function ProfileForm({
 }: ProfileFormProps) {
   const t = useTranslations("profile");
   const { sectors: dynamicSectors, isLoading: isSectorsLoading } = useSectors();
-  
+  const { cities: apiCities, fetchDistricts } = useLocations();
+  const [districtOptions, setDistrictOptions] = React.useState<{ value: string; label: string }[]>([]);
+
   const formik = useFormik<ProfileFormValues>({
     initialValues,
     validationSchema,
@@ -45,35 +48,18 @@ export default function ProfileForm({
     enableReinitialize: true,
   });
 
-  // Translate options
-  const translatedCityOptions = useMemo(
-    () =>
-      cityOptions.map((option) => ({
-        ...option,
-        label: t(`cities.${option.value}`),
-      })),
-    [t]
-  );
-
-  const translatedDistrictOptions = useMemo(
-    () => {
-      if (!formik.values.city) return [];
-      const districts = districtOptions[formik.values.city] || [];
-      return districts.map((option) => ({
-        ...option,
-        label: t(`districts.${formik.values.city}.${option.value}`),
-      }));
-    },
-    [formik.values.city, t]
-  );
-
-
+  // Load districts initially if a city is already selected (e.g. edit mode)
+  React.useEffect(() => {
+    if (formik.values.city) {
+      fetchDistricts(formik.values.city).then(setDistrictOptions);
+    }
+  }, [formik.values.city]);
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-6">
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-         <div className="space-y-6">
-           <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <div>
             <Input
               label="Firma Adı"
               name="companyName"
@@ -90,7 +76,7 @@ export default function ProfileForm({
             />
           </div>
 
-           <div>
+          <div>
             <Textarea
               label="Firma Hakkında"
               name="aboutCompany"
@@ -109,15 +95,18 @@ export default function ProfileForm({
           </div>
         </div>
 
-         <div className="space-y-6">
-           <div>
+        <div className="space-y-6">
+          <div>
             <Dropdown
               label="İl"
               name="city"
               id="city"
               value={formik.values.city}
               onChange={(e) => {
-                formik.setFieldValue("city", e.target.value);
+                const newCity = e.target.value;
+                formik.setFieldValue("city", newCity);
+                formik.setFieldValue("district", "");
+                fetchDistricts(newCity).then(setDistrictOptions);
               }}
               onBlur={() => formik.setFieldTouched("city", true)}
               error={
@@ -125,7 +114,7 @@ export default function ProfileForm({
                   ? formik.errors.city
                   : undefined
               }
-              options={translatedCityOptions}
+              options={apiCities}
               placeholder="İl seçiniz"
             />
           </div>
@@ -145,13 +134,13 @@ export default function ProfileForm({
                   ? formik.errors.district
                   : undefined
               }
-              options={translatedDistrictOptions}
+              options={districtOptions}
               placeholder="İlçe seçiniz"
-              disabled={!formik.values.city}
+              disabled={!formik.values.city || districtOptions.length === 0}
             />
           </div>
 
-           <div>
+          <div>
             <Textarea
               label="Adres Bilgisi"
               name="address"
@@ -169,7 +158,7 @@ export default function ProfileForm({
             />
           </div>
 
-           <div>
+          <div>
             <Dropdown
               label="Sektör"
               name="sector"
@@ -192,7 +181,7 @@ export default function ProfileForm({
         </div>
       </div>
 
-       <div className="flex justify-center pt-4">
+      <div className="flex justify-center pt-4">
         <Button
           type="submit"
           disabled={isSaving}

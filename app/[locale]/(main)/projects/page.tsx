@@ -46,8 +46,20 @@ export default function ProjectsPage() {
           <i className="pi pi-spinner pi-spin text-4xl text-primary" style={{ color: "#4C226A" }}></i>
         </div>
       ) : error ? (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
-          {error}
+        <div className="flex flex-col items-center justify-center flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mb-6">
+            <i className="pi pi-exclamation-triangle text-red-500" style={{ fontSize: '48px' }}></i>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Bağlantı Hatası</h2>
+          <p className="text-gray-500 text-center max-w-md mb-6 leading-relaxed">
+            Projelerinizi yüklerken bir sunucu veya ağ hatası oluştu. Lütfen bağlantınızı kontrol edip sayfayı yenilemeyi deneyin.
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-3 bg-[#4C226A] text-white font-semibold rounded-xl shadow-md hover:bg-[#3b1a52] transition-colors flex items-center gap-2"
+          >
+            <i className="pi pi-refresh"></i> Tekrar Dene
+          </button>
         </div>
       ) : (
         /* Three Columns */

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com/api/v1/';
+export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://educators-veterinary-eclipse-successfully.trycloudflare.com/api/v1/';
 // Axios instance oluştur
 const apiClient = axios.create({
   baseURL: BASE_URL,

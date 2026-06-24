@@ -8,7 +8,10 @@ export interface AdEvent {
   formattedDate: string; // DD.MM.YYYY format
   startTime: string; // HH:mm
   endTime: string; // HH:mm
+  startDateIso?: string; // Tam başlangıç tarihi (ISO format)
+  endDateIso?: string; // Tam bitiş tarihi (ISO format)
   coverImageUrl?: string;
+  images?: any[]; // Tüm görseller
   type: string; // "Reklam" gibi
   views: number;
   comments: number;

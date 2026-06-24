@@ -1,66 +1,23 @@
 "use client";
 
 import { AdEvent } from "@/src/mocks/adManagement";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { useCategories } from "@/src/hooks/useCategories";
+import { BASE_URL } from "@/src/api/axios";
+import { useRouter } from "next/navigation";
 
 interface EventCardProps {
   event: AdEvent;
   onEdit?: (id: string, category: string) => void;
   onDelete?: (id: string, category: string) => void;
+  spanCount?: number;
 }
 
-export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
+export default function EventCard({ event, onEdit, onDelete, spanCount = 7 }: EventCardProps) {
   const t = useTranslations("adManagement");
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const { categories } = useCategories();
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  
-  // Helper function to get month translation key
-  const getMonthKey = (month: string) => {
-    const monthMap: Record<string, string> = {
-      "Ocak": "ocak",
-      "Şubat": "şubat",
-      "Mart": "mart",
-      "Nisan": "nisan",
-      "Mayıs": "mayıs",
-      "Haziran": "haziran",
-      "Temmuz": "temmuz",
-      "Ağustos": "ağustos",
-      "Eylül": "eylül",
-      "Ekim": "ekim",
-      "Kasım": "kasım",
-      "Aralık": "aralık",
-    };
-    return monthMap[month] || month.toLowerCase();
-  };
-
-  // Helper function to get day translation key
-  const getDayKey = (day: string) => {
-    const dayMap: Record<string, string> = {
-      "Pazartesi": "pazartesi",
-      "Salı": "salı",
-      "Çarşamba": "çarşamba",
-      "Perşembe": "perşembe",
-      "Cuma": "cuma",
-      "Cumartesi": "cumartesi",
-      "Pazar": "pazar",
-    };
-    return dayMap[day] || day.toLowerCase();
-  };
+  const router = useRouter();
+  const locale = useLocale();
 
   const translateValue = (key: string, type: 'category' | 'audience' | 'platform') => {
     if (type === 'category') {
@@ -68,7 +25,6 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
       if (found) return found.label;
       return key;
     }
-
     const maps: Record<string, Record<string, string>> = {
       audience: {
         "adults": "Yetişkinler",
@@ -84,164 +40,125 @@ export default function EventCard({ event, onEdit, onDelete }: EventCardProps) {
         "twitter": "Twitter",
       }
     };
-    return maps[type][key] || key;
+    return maps[type]?.[key] || key;
   };
 
-  // Helper to handle backslashes and relative paths from .NET
   const getImageUrl = (url?: string) => {
     if (!url) return '/images/soiree.png';
     if (url.startsWith('http') || url.startsWith('/images/')) return url;
     const cleanPath = url.replace(/\\/g, '/').replace(/^\//, '');
-    
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com';
-      const origin = new URL(baseUrl).origin;
-      return `${origin}/${cleanPath}`;
+      return `${new URL(BASE_URL).origin}/${cleanPath}`;
     } catch {
-      return `https://complexity-cloud-awarded-mug.trycloudflare.com/${cleanPath}`;
+      // Fallback
+      return `https://viii-standards-violation-requirement.trycloudflare.com/${cleanPath}`;
     }
   };
 
+  const imagesList = event.images?.length ? event.images : (event.coverImageUrl ? [{ imageUrl: event.coverImageUrl }] : []);
+
+  const handleClick = () => {
+    router.push(`/${locale}/ad-management/detail/${event.category}/${event.id}`);
+  };
+
   return (
-    <div className="group relative rounded-xl bg-white p-3 cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border border-gray-100 shadow-sm overflow-hidden">
-      {/* Subtle accent border */}
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#4C226A] to-[#8A3A99]" />
-      
-      <div className="flex items-start gap-3.5 pl-1 relative flex-1">
-        {/* Image Section */}
-        <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100/50 shadow-inner flex items-center justify-center">
+    <>
+      <div 
+        onClick={handleClick}
+        className="group relative rounded-xl bg-[#D4C5D9] shadow-sm cursor-pointer hover:shadow-md transition-all duration-300 w-full h-full flex overflow-hidden min-h-[80px]"
+      >
+        
+        {/* Left Full Height Image */}
+        <div className={`relative flex-shrink-0 bg-white transition-all ${spanCount <= 3 ? 'w-20 md:w-24' : 'w-32'}`}>
           {event.coverImageUrl ? (
-            <img 
-              src={getImageUrl(event.coverImageUrl)} 
-              alt={event.title} 
-              className="w-full h-full object-contain p-1" 
-              onError={(e) => { 
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = '/images/soiree.png';
-              }}
-            />
+            <>
+              <img 
+                src={getImageUrl(event.coverImageUrl)} 
+                alt={event.title} 
+                className="w-full h-full object-cover" 
+                onError={(e) => { 
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/images/soiree.png';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              <span className="absolute bottom-1 left-2 text-white font-bold text-[10px] uppercase tracking-wider drop-shadow-md">
+                {event.title.split(' ')[0]}
+              </span>
+            </>
           ) : (
-            <i className="pi pi-image text-gray-300 text-2xl"></i>
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <i className="pi pi-image text-gray-400 text-xl"></i>
+            </div>
           )}
         </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0 pr-6 flex flex-col py-0.5 h-full">
-          {/* Badge & Title Row */}
-          <div className="flex flex-col mb-2 gap-1.5">
-            <div className="flex items-center justify-between">
-              <span className="bg-[#4C226A]/10 text-[#4C226A] px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase w-fit">
-                {event.type === 'Reklam' ? 'İlan' : event.type}
-              </span>
+        
+        {/* Right Content Area */}
+        <div className="flex flex-col flex-1 min-w-0 p-3 pl-4 pr-16 justify-center">
+          {/* Title */}
+          <span className="text-sm font-extrabold text-gray-900 truncate mb-2" title={event.title}>
+            {event.title}
+          </span>
+          
+          {/* Capsules Grid */}
+          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            {event.city && (
+              <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700">
+                <i className="pi pi-map-marker text-[10px] text-[#4C226A]"></i>
+                <span className={`text-[10px] font-semibold truncate ${spanCount <= 3 ? 'max-w-[50px]' : 'max-w-[80px]'}`}>{event.city}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700">
+              <i className="pi pi-clock text-[10px] text-[#4C226A]"></i>
+              <span className="text-[10px] font-semibold">{event.formattedDate}</span>
             </div>
-            <h3 className="text-sm leading-tight font-bold text-gray-800 line-clamp-2 pr-2">
-              {event.title}
-            </h3>
-          </div>
 
-          <div className="flex flex-col gap-1.5 mt-auto">
-            {/* Info rows */}
-            {event.category === "hediye_kiti" ? (
-              event.targetAudience && (
-                <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
-                  <i className="pi pi-users text-gray-400 text-[10px]"></i>
-                  <span className="truncate font-medium">{translateValue(event.targetAudience, 'audience')}</span>
-                </div>
-              )
-            ) : (
+            <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700">
+              <i className="pi pi-tag text-[10px] text-[#4C226A]"></i>
+              <span className="text-[10px] font-semibold uppercase">{event.type === 'Reklam' ? 'İlan' : event.type}</span>
+            </div>
+
+            {spanCount > 3 && (
               <>
-                <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
-                  <i className="pi pi-map-marker text-gray-400 text-[10px]"></i>
-                  <span className="truncate font-medium">{event.city}</span>
+                <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700" title="Görüntülenme">
+                  <i className="pi pi-eye text-[10px] text-[#4C226A]"></i>
+                  <span className="text-[10px] font-semibold">{event.views || 0}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
-                  <i className="pi pi-calendar text-gray-400 text-[10px]"></i>
-                  <span className="truncate font-medium">{event.formattedDate}</span>
+
+                <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700" title="Yorumlar">
+                  <i className="pi pi-file-edit text-[10px] text-[#4C226A]"></i>
+                  <span className="text-[10px] font-semibold">{event.comments || 0}</span>
                 </div>
               </>
             )}
-
-            {/* Views and Comments */}
-            <div className="flex items-center gap-3 text-[11px] text-gray-400 pt-1 border-t border-gray-50 mt-1">
-              {!event.subCategory && (
-                <div className="flex items-center gap-1" title="Görüntülenme">
-                  <i className="pi pi-eye text-[10px]"></i>
-                  <span className="font-medium">{event.views}</span>
-                </div>
-              )}
-              {!event.platform && (
-                <div className="flex items-center gap-1" title="Yorumlar">
-                  <i className="pi pi-comment text-[10px]"></i>
-                  <span className="font-medium">{event.comments}</span>
-                </div>
-              )}
-              {event.subCategory && (
-                <div className="flex items-center gap-1" title="Kategori">
-                  <i className="pi pi-tags text-[10px]"></i>
-                  <span className="truncate font-medium">{translateValue(event.subCategory, 'category')}</span>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
-        {/* Platform Icon - Absolute positioned bottom right */}
-        {event.platform && (
-          <div
-            className={`absolute bottom-0 right-0 w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm ${
-              event.platform.toLowerCase() === 'instagram' ? '' : 'bg-gray-100 border border-gray-200'
-            }`}
-            style={
-              event.platform.toLowerCase() === 'instagram'
-                ? { background: "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" }
-                : {}
-            }
-            title={translateValue(event.platform, 'platform')}
-          >
-            <i className={`pi pi-${event.platform.toLowerCase()} ${event.platform.toLowerCase() === 'instagram' ? 'text-white' : 'text-gray-600'} text-xs`}></i>
-          </div>
-        )}
-
-        {/* Options Menu Button - Top Right */}
-        <div className="absolute -top-1 -right-1" ref={menuRef}>
+        {/* Action Buttons (Absolute Top Right) */}
+        <div className="absolute top-2 right-2 flex items-center gap-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setShowMenu(!showMenu);
+              if (onEdit) onEdit(event.id, event.category);
             }}
-            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-white text-[#4C226A] shadow-sm transition-colors"
+            title="Düzenle"
           >
-            <i className="pi pi-ellipsis-v text-xs"></i>
+            <i className="pi pi-pencil text-[10px]" />
           </button>
-
-          {showMenu && (
-            <div className="absolute right-0 mt-1 w-32 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100 overflow-hidden">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  if (onEdit) onEdit(event.id, event.category);
-                }}
-                className="w-full text-left px-4 py-2.5 text-xs text-gray-700 hover:bg-[#4C226A]/5 hover:text-[#4C226A] flex items-center gap-2 transition-colors"
-              >
-                <i className="pi pi-pencil"></i>
-                Düzenle
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  if (onDelete) onDelete(event.id, event.category);
-                }}
-                className="w-full text-left px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
-              >
-                <i className="pi pi-trash"></i>
-                Sil
-              </button>
-            </div>
-          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onDelete) onDelete(event.id, event.category);
+            }}
+            className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-red-50 text-red-500 shadow-sm transition-colors"
+            title="Sil"
+          >
+            <i className="pi pi-trash text-[10px]" />
+          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

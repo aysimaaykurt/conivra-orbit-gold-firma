@@ -27,10 +27,16 @@ export default function SupportsTable({ supports, isLoading, onEdit, onDelete }:
 
   if (!Array.isArray(supports) || supports.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <p className="text-sm text-lightGray text-center py-8">
-          Henüz destek bulunmamaktadır.
-        </p>
+      <div className="bg-white rounded-lg shadow-sm p-16">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="w-24 h-24 bg-[#4C226A]/5 rounded-full flex items-center justify-center mb-2">
+            <i className="pi pi-comments text-[#4C226A] opacity-80" style={{ fontSize: '36px' }} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800">Destek Bulunamadı</h3>
+          <p className="text-sm text-gray-500 max-w-sm text-center leading-relaxed">
+            Henüz herhangi bir destek kaydı oluşturmamışsınız. Yeni bir destek talebi açmak için sağ üstteki butonu kullanabilirsiniz.
+          </p>
+        </div>
       </div>
     );
   }
@@ -71,7 +77,7 @@ export default function SupportsTable({ supports, isLoading, onEdit, onDelete }:
                 </td>
                 <td className="py-3 px-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    {onEdit && (
+                    {/* {onEdit && (
                       <button
                         onClick={() => onEdit(support)}
                         className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
@@ -79,7 +85,7 @@ export default function SupportsTable({ supports, isLoading, onEdit, onDelete }:
                       >
                         <i className="pi pi-pencil" style={{ fontSize: '1rem' }}></i>
                       </button>
-                    )}
+                    )} */}
                     {onDelete && (
                       <button
                         onClick={() => onDelete(support)}

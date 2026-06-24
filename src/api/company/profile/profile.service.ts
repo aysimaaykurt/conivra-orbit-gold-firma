@@ -14,7 +14,23 @@ export const updateProfile = async (
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
   try {
-    const response = await apiClient.put<UpdateProfileResponse>('company/profile', data);
+    const formData = new FormData();
+    formData.append('companyName', data.companyName);
+    if (data.aboutCompany) formData.append('aboutCompany', data.aboutCompany);
+    formData.append('city', data.city);
+    formData.append('district', data.district);
+    formData.append('address', data.address);
+    formData.append('sector', data.sector);
+    
+    if (data.profileImage) {
+      formData.append('profileImage', data.profileImage);
+    }
+
+    const response = await apiClient.put<UpdateProfileResponse>('company/profile', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.data) {
@@ -36,7 +52,23 @@ export const updateProfileById = async (
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
   try {
-    const response = await apiClient.put<UpdateProfileResponse>(`company/profile/${id}`, data);
+    const formData = new FormData();
+    formData.append('companyName', data.companyName);
+    if (data.aboutCompany) formData.append('aboutCompany', data.aboutCompany);
+    formData.append('city', data.city);
+    formData.append('district', data.district);
+    formData.append('address', data.address);
+    formData.append('sector', data.sector);
+    
+    if (data.profileImage) {
+      formData.append('profileImage', data.profileImage);
+    }
+
+    const response = await apiClient.put<UpdateProfileResponse>(`company/profile/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.data) {

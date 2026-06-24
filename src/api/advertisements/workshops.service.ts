@@ -38,9 +38,11 @@ export const addWorkshop = async (
     formData.append('workshopGoal', data.workshopGoal);
     formData.append('workshopContent', data.workshopContent);
 
-    // Add image if provided
-    if (data.image) {
-      formData.append('image', data.image);
+    // Add images if provided
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
 
     const response = await apiClient.post<AddWorkshopResponse>(
@@ -95,9 +97,11 @@ export const updateWorkshop = async (
     formData.append('workshopGoal', data.workshopGoal);
     formData.append('workshopContent', data.workshopContent);
 
-    // Add image if provided
-    if (data.image) {
-      formData.append('image', data.image);
+    // Add images if provided
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
 
     const response = await apiClient.put<UpdateWorkshopResponse>(

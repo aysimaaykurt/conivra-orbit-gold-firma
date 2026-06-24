@@ -8,7 +8,7 @@ export interface AddGiftKitRequest {
   platformPreference: string;
   businessType: string;
   contentType: string;
-  image?: File; // Optional, will be sent as FormData
+  images?: File[]; // Multi-image support
 }
 
 // Update Gift Kit Request Models (PUT)
@@ -21,7 +21,7 @@ export interface UpdateGiftKitRequest {
   platformPreference: string;
   businessType: string;
   contentType: string;
-  image?: File; // Optional, will be sent as FormData
+  images?: File[]; // Multi-image support
 }
 
 // Gift Kit Response Models (GET)
@@ -35,7 +35,7 @@ export interface GiftKit {
   platformPreference: string;
   businessType: string;
   contentType: string;
-  imageUrl?: string; // URL to the uploaded image
+  images?: { id?: string | number; imageUrl: string; imageId?: string; isMain: boolean; sortOrder?: number }[]; // URL to the uploaded images
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)
   status?: string; // e.g., "active", "inactive", "pending"
@@ -48,7 +48,7 @@ export interface AddGiftKitResponse {
   data?: {
     id: string;
     title: string;
-    imageUrl?: string;
+    images?: { id?: string | number; imageUrl: string; imageId?: string; isMain: boolean; sortOrder?: number }[];
   };
 }
 
@@ -59,7 +59,7 @@ export interface UpdateGiftKitResponse {
   data?: {
     id: string;
     title: string;
-    imageUrl?: string;
+    adImages?: { id?: string; imageUrl: string; isMain: boolean }[];
   };
 }
 

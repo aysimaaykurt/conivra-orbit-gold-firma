@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
+import PrimeReactInitializer from "@/components/ui/PrimeReactInitializer";
 
 const cairo = Cairo({
   variable: "--font-cairo",
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body className={`${cairo.variable} antialiased`}>
+        <PrimeReactInitializer />
         {children}
       </body>
     </html>

@@ -12,6 +12,7 @@ import { useRef } from "react";
 export default function ProfilePage() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [initialValues, setInitialValues] = useState<ProfileFormValues>({
     companyName: "",
     aboutCompany: "",
@@ -40,6 +41,13 @@ export default function ProfilePage() {
             address: profile.address,
             sector: profile.sector,
           });
+
+          if (profile.logoUrl) {
+            const fullUrl = profile.logoUrl.startsWith('http') 
+              ? profile.logoUrl 
+              : `${new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com').origin}/${profile.logoUrl.replace(/\\/g, '/').replace(/^\//, '')}`;
+            setProfileImage(fullUrl);
+          }
           // Stats would come from a separate endpoint or be part of profile
           // For now, keeping mock stats structure
         }
@@ -59,13 +67,45 @@ export default function ProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleImageSelect = (file: File) => {
-    // In a real app, upload to server and get URL
+  const handleImageSelect = async (file: File) => {
+    setProfileImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setProfileImage(reader.result as string);
     };
     reader.readAsDataURL(file);
+
+    // Immediately upload the new image
+    setIsSaving(true);
+    try {
+      const response = await updateProfile({
+        companyName: initialValues.companyName,
+        aboutCompany: initialValues.aboutCompany || undefined,
+        city: initialValues.city,
+        district: initialValues.district,
+        address: initialValues.address,
+        sector: initialValues.sector,
+        profileImage: file,
+      });
+
+      if (response.success) {
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: "Profil resmi başarıyla yüklendi",
+          life: 3000,
+        });
+      }
+    } catch (error: any) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: error.message || "Profil resmi yüklenirken bir hata oluştu",
+        life: 3000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleFormSubmit = async (values: ProfileFormValues) => {
@@ -78,6 +118,7 @@ export default function ProfilePage() {
         district: values.district,
         address: values.address,
         sector: values.sector,
+        profileImage: profileImageFile || undefined,
       });
 
       if (response.success) {

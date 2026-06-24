@@ -30,8 +30,8 @@ export const useProjects = (filters?: GetProjectsParams) => {
               dataArray = response.data.data;
             } else if (Array.isArray(response)) {
               dataArray = response as any;
-            } else if (response.items && Array.isArray(response.items)) {
-              dataArray = response.items;
+            } else if ((response as any).items && Array.isArray((response as any).items)) {
+              dataArray = (response as any).items;
             } else if (response.data) {
               dataArray = response.data as any;
             }
@@ -68,12 +68,11 @@ export const useProjects = (filters?: GetProjectsParams) => {
               }
 
               // Extract date
-              let formattedDate = "";
-              if (item.date || item.createdAt || item.startDate) {
-                const d = new Date(item.date || item.createdAt || item.startDate);
+              let formattedDate = "-";
+              const dateVal = item.date || item.createdAt || item.startDate || item.createDate;
+              if (dateVal) {
+                const d = new Date(dateVal);
                 formattedDate = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-              } else {
-                formattedDate = "Belirtilmemiş";
               }
 
               // Resolve image URL
@@ -87,10 +86,11 @@ export const useProjects = (filters?: GetProjectsParams) => {
                 title: item.name || item.title || "İsimsiz Proje",
                 description: item.description || "",
                 imageSrc,
-                location: item.city || item.location || "Lokasyon yok",
+                location: item.city || item.location || "-",
                 date: formattedDate,
-                type: item.type || item.category || "Belirtilmemiş",
-                assignee: item.influencerName || item.assignee || "Atanmadı",
+                type: item.type || item.category || "-",
+                assignee: item.influencerName || item.assignee || "-",
+                applicationCount: item.applicationCount,
                 socialMediaLink: item.socialMediaLink || "",
                 status,
                 showCheckmark,

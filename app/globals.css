@@ -355,35 +355,15 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
   box-shadow: 0 4px 6px -1px rgba(76, 34, 106, 0.2) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  .p-datepicker {
-    background-color: #1e1e24 !important; /* soft dark mode slate */
-    border-color: #2e2e38 !important;
-    color: #e2e8f0 !important;
-  }
-  .p-datepicker .p-datepicker-header {
-    border-bottom: 1px solid #2e2e38 !important;
-  }
-  .p-datepicker .p-datepicker-title .p-datepicker-month,
-  .p-datepicker .p-datepicker-title .p-datepicker-year {
-    color: #e2e8f0 !important;
-  }
-  .p-datepicker .p-datepicker-header button {
-    color: #c084fc !important; /* purple-400 */
-  }
-  .p-datepicker .p-datepicker-header button:hover {
-    background-color: rgba(192, 132, 252, 0.1) !important;
-  }
-  .p-datepicker table td > span {
-    color: #e2e8f0 !important;
-  }
-  .p-datepicker table td > span:not(.p-highlight):not(.p-disabled):hover {
-    background-color: rgba(192, 132, 252, 0.1) !important;
-    color: #c084fc !important;
-  }
-  .p-datepicker table td > span.p-disabled {
-    color: #4b5563 !important;
-  }
+/* Calendar Button (Trigger) Style Override */
+.p-datepicker-trigger {
+  background-color: #4C226A !important;
+  border-color: #4C226A !important;
+  color: white !important;
+}
+.p-datepicker-trigger:hover {
+  background-color: rgba(76, 34, 106, 0.9) !important;
+  border-color: rgba(76, 34, 106, 0.9) !important;
 }
 
 /* Dropdown Panel Items Global Fixes */

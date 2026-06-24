@@ -47,6 +47,13 @@ export const login = async (
       if (response.data.data.tenantName) {
         localStorage.setItem('tenantName', response.data.data.tenantName);
       }
+
+      // Token kaydedildikten sonra auth/me'ye istek atıp güncel verileri çek
+      try {
+        await getCurrentUser();
+      } catch (meError) {
+        console.error("Kullanıcı detayları alınamadı:", meError);
+      }
     }
 
     return response.data;
@@ -89,6 +96,13 @@ export const register = async (
           JSON.stringify(response.data.data.user)
         );
       }
+
+      // Token kaydedildikten sonra auth/me'ye istek atıp güncel verileri çek
+      try {
+        await getCurrentUser();
+      } catch (meError) {
+        console.error("Kullanıcı detayları alınamadı:", meError);
+      }
     }
 
     return response.data;
@@ -116,16 +130,20 @@ export const getCurrentUser = async (): Promise<GetCurrentUserResponse> => {
 
     if (response.data.success && typeof window !== 'undefined') {
       // User bilgilerini güncelle
-      localStorage.setItem(
-        'user',
-        JSON.stringify(response.data.data.user)
-      );
-
-      // Organizasyon listesini kaydet
-      localStorage.setItem(
-        'organizations',
-        JSON.stringify(response.data.data.organizations)
-      );
+      if (response.data.data.user) {
+        localStorage.setItem(
+          'user',
+          JSON.stringify(response.data.data.user)
+        );
+      }
+      
+      // Organizations bilgilerini kaydet
+      if (response.data.data.organizations) {
+        localStorage.setItem(
+          'organizations',
+          JSON.stringify(response.data.data.organizations)
+        );
+      }
     }
 
     return response.data;

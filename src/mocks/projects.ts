@@ -9,6 +9,7 @@ export interface Project {
   date: string;
   type: string;
   assignee?: string;
+  applicationCount?: number;
   socialMediaLink: string;
   status: ProjectStatus;
   showCheckmark?: boolean;

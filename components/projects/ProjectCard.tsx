@@ -25,6 +25,7 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
     showCheckmark,
     overlayText,
     overlayIcon,
+    applicationCount,
   } = project;
 
   const cardColor = cardColors[colorIndex % cardColors.length];
@@ -75,31 +76,42 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
 
       {/* Content Section */}
       <div className="flex-1 flex flex-col justify-between min-w-0">
-        {/* Title */}image.png
+        {/* Title */}
         <h3 className="font-bold text-dark mb-3 text-base line-clamp-1">{title}</h3>
 
         {/* Details Grid (2x2) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
           {/* Row 1 - Left: Location */}
-          <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
-            <i className="pi pi-map-marker text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
-            <span className="text-[11px] text-gray-800 font-medium truncate">{location}</span>
-          </div>
+          {location && (
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+              <i className="pi pi-map-marker text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+              <span className="text-[11px] text-gray-800 font-medium truncate">{location}</span>
+            </div>
+          )}
           
           {/* Row 1 - Right: Date */}
-          <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
-            <i className="pi pi-calendar text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
-            <span className="text-[11px] text-gray-800 font-medium truncate">{date}</span>
-          </div>
+          {date && (
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+              <i className="pi pi-calendar text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+              <span className="text-[11px] text-gray-800 font-medium truncate">{date}</span>
+            </div>
+          )}
 
           {/* Row 2 - Left: Type */}
-          <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
-            <i className="pi pi-tag text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
-            <span className="text-[11px] text-gray-800 font-medium truncate">{t("type.ad")}</span>
-          </div>
+          {type && (
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+              <i className="pi pi-tag text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+              <span className="text-[11px] text-gray-800 font-medium truncate capitalize">{type === "campaign" ? "Kampanya" : type}</span>
+            </div>
+          )}
 
-          {/* Row 2 - Right: Assignee */}
-          {assignee && (
+          {/* Row 2 - Right: Assignee or Application Count */}
+          {applicationCount !== undefined ? (
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+              <i className="pi pi-users text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+              <span className="text-[11px] text-gray-800 font-medium truncate">{applicationCount} Başvuru</span>
+            </div>
+          ) : assignee && assignee !== "-" && (
             <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
               <i className="pi pi-user text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
               <span className="text-[11px] text-gray-800 font-medium truncate">{assignee}</span>

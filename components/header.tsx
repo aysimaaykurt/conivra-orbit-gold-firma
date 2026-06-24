@@ -1,25 +1,41 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Dropdown as PrimeDropdown } from "primereact/dropdown";
 import { Menu } from "primereact/menu";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/src/navigation";
 import goldStatue from "@/src/images/goldStatue.png";
-import { mockCompany, type CompanyProfile } from "@/src/mocks/user";
 import { logout } from "@/src/api/auth/auth.service";
 
-const mockReferralCode = "REF123456";
-
 export default function Header() {
-  const company = mockCompany;
+  const [user, setUser] = useState<any>(null);
+  const [organization, setOrganization] = useState<any>(null);
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations("header");
-  const [notificationCount] = useState(4);
+  const [notificationCount] = useState(4); // Bildirimler ileride dinamik yapılabilir
   const profileMenu = useRef<Menu>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      const storedOrgs = localStorage.getItem("organizations");
+      
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+      
+      if (storedOrgs) {
+        const orgs = JSON.parse(storedOrgs);
+        if (orgs && orgs.length > 0) {
+          setOrganization(orgs[0]);
+        }
+      }
+    }
+  }, []);
 
   const profileItems = [
     {
@@ -32,7 +48,7 @@ export default function Header() {
     }
   ];
 
-  function getStatusLabel(status: CompanyProfile["status"]) {
+  function getStatusLabel(status: string | null | undefined) {
     switch (status) {
       case "Gold":
         return t("status.gold");
@@ -56,14 +72,14 @@ export default function Header() {
 
   const handleLanguageChange = (newLocale: string) => {
     if (newLocale !== locale) {
-      // Navigate to the same pathname but with new locale
-      // usePathname from next-intl already returns pathname without locale
       router.replace(pathname || '/', { locale: newLocale });
     }
   };
 
   const copyReferralCode = () => {
-    navigator.clipboard.writeText(mockReferralCode);
+    if (organization?.code) {
+      navigator.clipboard.writeText(organization.code);
+    }
   };
 
   return (
@@ -84,7 +100,7 @@ export default function Header() {
           </button>
           <Image src={goldStatue} alt="Gold Statue" width={32} height={32} className="object-contain" />
           <span className="text-sm font-semibold" style={{ color: "#D99B2B" }}>
-            {getStatusLabel(company.status)}
+            {getStatusLabel(user?.subscriptionStatus)}
           </span>
         </div>
 
@@ -117,7 +133,6 @@ export default function Header() {
               </div>
             )}
             valueTemplate={(option, props) => {
-              // If option is missing, try to find it from options list using value
               const currentOption = option || languageOptions.find(opt => opt.value === props.value) || languageOptions[0];
               if (!currentOption) return null;
               
@@ -145,10 +160,12 @@ export default function Header() {
               borderWidth: "0.5px",
               height: "40px",
             }}
-            title={t("referralCode")}
+            title={organization?.code ? t("referralCode") : "Referans kodu yok"}
           >
             <i className="pi pi-link text-primary text-sm md:text-base"></i>
-            <span className="hidden lg:inline text-sm font-semibold text-dark">{t("referralCode")}</span>
+            <span className="hidden lg:inline text-sm font-semibold text-dark">
+              {organization?.code || t("referralCode")}
+            </span>
           </button>
 
           {/* User Profile */}
@@ -176,7 +193,7 @@ export default function Header() {
               <i className="pi pi-user text-dark text-xs"></i>
             </div>
             <span className="hidden sm:inline text-xs md:text-sm font-semibold text-dark truncate max-w-[100px] md:max-w-[150px]">
-              {company.companyName}
+              {organization?.name || (user ? `${user.firstName} ${user.lastName}` : "Yükleniyor...")}
             </span>
             <i className="pi pi-chevron-down text-[8px] md:text-[10px] text-lightGray"></i>
           </button>

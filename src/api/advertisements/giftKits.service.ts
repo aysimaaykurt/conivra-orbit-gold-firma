@@ -30,9 +30,11 @@ export const addGiftKit = async (
     formData.append('businessType', data.businessType);
     formData.append('contentType', data.contentType);
 
-    // Add image if provided
-    if (data.image) {
-      formData.append('image', data.image);
+    // Add images if provided
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
 
     const response = await apiClient.post<AddGiftKitResponse>(
@@ -79,9 +81,11 @@ export const updateGiftKit = async (
     formData.append('businessType', data.businessType);
     formData.append('contentType', data.contentType);
 
-    // Add image if provided
-    if (data.image) {
-      formData.append('image', data.image);
+    // Add images if provided
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        formData.append('images', image);
+      });
     }
 
     const response = await apiClient.put<UpdateGiftKitResponse>(

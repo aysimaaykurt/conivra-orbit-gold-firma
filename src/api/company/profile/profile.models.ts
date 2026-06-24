@@ -6,6 +6,7 @@ export interface UpdateProfileRequest {
   district: string;
   address: string;
   sector: string;
+  profileImage?: File | null;
 }
 
 // Profile Response Models (GET)
@@ -19,6 +20,7 @@ export interface Profile {
   sector: string;
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)
+  logoUrl?: string | null;
 }
 
 // Update Profile Response Models (POST/PUT)

@@ -27,7 +27,7 @@ export default function AdManagementPage() {
     sortBy: "createDate",
     sortOrder: "desc"
   });
-  const { data: rawData, isLoading, error } = useAdManagement(active, filters);
+  const { data: rawData, isLoading, error, refetch } = useAdManagement(active, filters);
   const [events, setEvents] = useState<AdEvent[]>([]);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string; category: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -110,7 +110,12 @@ export default function AdManagementPage() {
         formattedDate,
         startTime,
         endTime,
-        coverImageUrl: item.imageUrl || "/images/soiree.png",
+        startDateIso: startDate.toISOString(),
+        endDateIso: endDate.toISOString(),
+        coverImageUrl: (item as any).images && (item as any).images.length > 0  
+          ? ((item as any).images.find((img: any) => img.isMain)?.imageUrl || (item as any).images[0].imageUrl) 
+          : "/images/soiree.png",
+        images: (item as any).images || [],
         type: category === "ilan" ? "Reklam" : category === "workshop" ? "Workshop" : "Hediye Kiti",
         views: 0, // API'den gelmiyorsa varsayılan değer
         comments: 0, // API'den gelmiyorsa varsayılan değer
@@ -126,8 +131,8 @@ export default function AdManagementPage() {
           highlightedDay: dayNumber,
         },
       };
-    } catch (error) {
-      console.error("Error converting to AdEvent:", error);
+    } catch (err) {
+      console.error("Error converting to AdEvent:", err);
       return null;
     }
   };
@@ -148,19 +153,19 @@ export default function AdManagementPage() {
     }
   }, [rawData, active]);
 
-  const handleEdit = (id: string, category: string) => {
+  const handleEdit = (id: string, cat: string) => {
     // Navigate to the correct form page with editId query parameter
     let route = `/${locale}/ad-management/add?editId=${id}`;
-    if (category === "workshop") {
+    if (cat === "workshop") {
       route = `/${locale}/ad-management/workshop/add?editId=${id}`;
-    } else if (category === "hediye_kiti") {
+    } else if (cat === "hediye_kiti") {
       route = `/${locale}/ad-management/gift-kit/add?editId=${id}`;
     }
     router.push(route);
   };
 
-  const handleDeleteClick = (id: string, category: string) => {
-    setDeleteModal({ isOpen: true, id, category });
+  const handleDeleteClick = (id: string, cat: string) => {
+    setDeleteModal({ isOpen: true, id, category: cat });
   };
 
   const confirmDelete = async () => {
@@ -177,8 +182,8 @@ export default function AdManagementPage() {
       
       setEvents((prev) => prev.filter((e) => e.id !== deleteModal.id));
       setDeleteModal(null);
-    } catch (error) {
-      console.error("Silme hatası:", error);
+    } catch (err) {
+      console.error("Silme hatası:", err);
       alert("Silinirken bir hata oluştu.");
     } finally {
       setIsDeleting(false);
@@ -207,14 +212,47 @@ export default function AdManagementPage() {
           </div>
         </div>
       ) : error ? (
-        <div className="mt-6 bg-white rounded-lg p-6">
-          <p className="text-sm text-lightGray text-center py-4">{error}</p>
+        <div className="mt-8 bg-red-50/50 rounded-2xl p-12 shadow-sm border border-red-100 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <i className="pi pi-exclamation-triangle text-3xl text-red-500"></i>
+          </div>
+          <h3 className="text-xl font-bold text-red-800 mb-2">
+            Bir Hata Oluştu
+          </h3>
+          <p className="text-red-600 max-w-sm mx-auto mb-6">
+            {error}
+          </p>
+          <button 
+            onClick={() => refetch()}
+            className="flex items-center gap-2 px-6 py-3 bg-white text-red-600 border border-red-200 font-medium rounded-xl hover:bg-red-50 transition-all shadow-sm"
+          >
+            <i className="pi pi-refresh"></i>
+            <span>Tekrar Dene</span>
+          </button>
         </div>
       ) : events.length === 0 ? (
-        <div className="mt-6 bg-white rounded-lg p-6">
-          <p className="text-sm text-lightGray text-center py-4">
-            Henüz {active === "ilan" ? "ilan" : active === "workshop" ? "workshop" : "hediye kiti"} bulunmamaktadır.
+        <div className="mt-8 bg-white rounded-2xl p-12 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 bg-purple-50 rounded-full flex items-center justify-center mb-4">
+            <i className={`pi ${active === "ilan" ? "pi-megaphone" : active === "workshop" ? "pi-users" : "pi-gift"} text-3xl text-primary`}></i>
+          </div>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">
+            Kayıt Bulunamadı
+          </h3>
+          <p className="text-slate-500 max-w-sm mx-auto mb-6">
+            Henüz herhangi bir {active === "ilan" ? "ilan" : active === "workshop" ? "workshop" : "hediye kiti"} oluşturmamışsınız. Yeni bir tane oluşturarak başlayabilirsiniz.
           </p>
+          <button 
+            onClick={() => {
+              if (active === "workshop") router.push(`/${locale}/ad-management/workshop/add`);
+              else if (active === "hediye_kiti") router.push(`/${locale}/ad-management/gift-kit/add`);
+              else router.push(`/${locale}/ad-management/add`);
+            }}
+            className="flex items-center gap-2 px-6 py-3 text-white font-medium rounded-xl hover:opacity-90 transition-all shadow-md"
+            style={{ backgroundColor: "#4C226A" }}
+          >
+            <i className="pi pi-plus"></i>
+            <span>Yeni {active === "ilan" ? "İlan" : active === "workshop" ? "Workshop" : "Hediye Kiti"} Oluştur</span>
+          </button>
         </div>
       ) : active === "hediye_kiti" ? (
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
