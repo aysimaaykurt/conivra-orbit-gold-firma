@@ -43,6 +43,13 @@ export const addWorkshop = async (
     
     formData.append('workshopGoal', data.workshopGoal);
     formData.append('workshopContent', data.workshopContent);
+    
+    if (data.latitude) {
+      formData.append('latitude', data.latitude);
+    }
+    if (data.longitude) {
+      formData.append('longitude', data.longitude);
+    }
 
     // Add images if provided
     if (data.images && data.images.length > 0) {
@@ -108,6 +115,13 @@ export const updateWorkshop = async (
     
     formData.append('workshopGoal', data.workshopGoal);
     formData.append('workshopContent', data.workshopContent);
+    
+    if (data.latitude) {
+      formData.append('latitude', data.latitude);
+    }
+    if (data.longitude) {
+      formData.append('longitude', data.longitude);
+    }
 
     // Add images if provided
     if (data.images && data.images.length > 0) {

@@ -16,6 +16,8 @@ export interface AddWorkshopRequest {
   contentType: string[];
   workshopGoal: string;
   workshopContent: string;
+  latitude?: string;
+  longitude?: string;
   images?: File[]; // Multi-image support
 }
 
@@ -37,6 +39,8 @@ export interface UpdateWorkshopRequest {
   contentType: string[];
   workshopGoal: string;
   workshopContent: string;
+  latitude?: string;
+  longitude?: string;
   images?: File[]; // Multi-image support
 }
 
@@ -59,6 +63,8 @@ export interface Workshop {
   contentType: string[];
   workshopGoal: string;
   workshopContent: string;
+  latitude?: string;
+  longitude?: string;
   images?: { id?: string | number; imageUrl: string; imageId?: string; isMain: boolean; sortOrder?: number }[]; // URL to the uploaded images
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)

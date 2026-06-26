@@ -41,6 +41,13 @@ export const addAdvertisement = async (
 
     formData.append('followerRange', data.followerRange);
     formData.append('businessType', data.businessType);
+    
+    if (data.latitude) {
+      formData.append('latitude', data.latitude);
+    }
+    if (data.longitude) {
+      formData.append('longitude', data.longitude);
+    }
 
     if (Array.isArray(data.contentType)) {
       data.contentType.forEach(c => formData.append('contentType', c));
@@ -120,6 +127,13 @@ export const updateAdvertisement = async (
 
     formData.append('followerRange', data.followerRange);
     formData.append('businessType', data.businessType);
+    
+    if (data.latitude) {
+      formData.append('latitude', data.latitude);
+    }
+    if (data.longitude) {
+      formData.append('longitude', data.longitude);
+    }
 
     if (Array.isArray(data.contentType)) {
       data.contentType.forEach(c => formData.append('contentType', c));

@@ -56,7 +56,14 @@ export default function AdDetailPage() {
     fetchAd();
   }, [id]);
 
-  const getImageUrl = (url?: string) => {
+  const getImageUrl = (imgInput: any) => {
+    if (!imgInput) return '/images/soiree.png';
+    let url = "";
+    if (typeof imgInput === 'string') {
+      url = imgInput;
+    } else if (imgInput && typeof imgInput === 'object') {
+      url = imgInput.imageUrl || imgInput.url || imgInput.imagePath || imgInput.path || "";
+    }
     if (!url) return '/images/soiree.png';
     if (url.includes('localhost:5100')) {
       const tunnelOrigin = new URL(BASE_URL).origin;
@@ -97,7 +104,17 @@ export default function AdDetailPage() {
     );
   }
 
-  const images = ad.images || [];
+  const images = ad.images || (ad as any).adImages || (ad as any).images || [];
+  const rawPlatformPref = ad.platformPreference as any;
+  const platforms: string[] = Array.isArray(rawPlatformPref)
+    ? rawPlatformPref
+    : typeof rawPlatformPref === "string"
+      ? (rawPlatformPref.startsWith("[") && rawPlatformPref.endsWith("]")
+        ? (() => {
+            try { return JSON.parse(rawPlatformPref); } catch { return [rawPlatformPref]; }
+          })()
+        : rawPlatformPref.split(",").map((s: string) => s.trim()).filter(Boolean))
+      : [];
 
   return (
     <div className="p-6 md:p-8 min-h-screen bg-[#F7F6F9]">
@@ -142,7 +159,7 @@ export default function AdDetailPage() {
             <>
               <div className="aspect-[4/5] w-full rounded-2xl overflow-hidden shadow-md relative bg-gray-100">
                 <img 
-                  src={getImageUrl(images[0].imageUrl)} 
+                  src={getImageUrl(images[0])} 
                   alt={ad.title}
                   className="w-full h-full object-cover"
                   onError={(e) => { 
@@ -156,7 +173,7 @@ export default function AdDetailPage() {
                   {images.slice(1).map((img: any, idx: number) => (
                     <div key={idx} className="aspect-square rounded-lg overflow-hidden shadow-sm relative bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity">
                       <img 
-                        src={getImageUrl(img.imageUrl)} 
+                        src={getImageUrl(img)} 
                         alt={`${ad.title} ${idx + 1}`}
                         className="w-full h-full object-cover"
                         onError={(e) => { 
@@ -240,11 +257,11 @@ export default function AdDetailPage() {
                 </div>
               )}
 
-              {ad.platformPreference && ad.platformPreference.length > 0 && (
+              {platforms.length > 0 && (
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Platform Tercihi</p>
                   <div className="flex flex-wrap items-center gap-2">
-                    {ad.platformPreference.map((platform, idx) => (
+                    {platforms.map((platform, idx) => (
                       <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-md text-gray-800 font-medium capitalize text-sm">
                         <i className={`pi pi-${platform.toLowerCase()} text-[#4C226A]`}></i>
                         {platform}
@@ -293,7 +310,7 @@ export default function AdDetailPage() {
               </div>
             )}
 
-            {ad.address && (
+            {ad.address && ad.address.toLowerCase() !== "test" && (
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <p className="text-sm text-gray-500 font-medium mb-2 flex items-center gap-2"><i className="pi pi-map text-[#4C226A]"></i> Açık Adres</p>
                 <p className="text-gray-800 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100">{ad.address}</p>

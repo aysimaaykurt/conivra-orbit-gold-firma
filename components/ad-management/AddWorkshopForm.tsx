@@ -14,6 +14,7 @@ import { MultiSelect } from "@/components/ui/multiselect";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { addWorkshop, getWorkshop, updateWorkshop } from "@/src/api/advertisements/workshops.service";
+import LocationPickerModal from "./LocationPickerModal";
 
 interface AddWorkshopFormProps {
   onClose?: () => void;
@@ -30,6 +31,8 @@ interface FormValues {
   address: string;
   category: string;
   targetAudience: string;
+  latitude: string;
+  longitude: string;
 
   // Step 2: Özel Alanlar
   participantCount: string;
@@ -103,6 +106,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories();
   const { cities: cityOptions, fetchDistricts } = useLocations();
   const [districtOptions, setDistrictOptions] = useState<{label: string, value: string | number}[]>([]);
+  const [isMapVisible, setIsMapVisible] = useState(false);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -115,6 +119,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       address: "",
       category: "",
       targetAudience: "",
+      latitude: "",
+      longitude: "",
       participantCount: "",
       participationCondition: "",
       fee: "",
@@ -143,6 +149,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       contentType: Yup.array().min(1, "En az bir içerik türü seçmelisiniz").required("İçerik türü zorunludur"),
       workshopGoal: Yup.string().required("Workshop amacı zorunludur"),
       workshopContent: Yup.string().required("Workshop içeriği zorunludur"),
+      latitude: Yup.string().nullable(),
+      longitude: Yup.string().nullable(),
     }),
     onSubmit: async (values) => {
       // Validate dateRange
@@ -182,6 +190,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
           contentType: values.contentType,
           workshopGoal: values.workshopGoal,
           workshopContent: values.workshopContent,
+          latitude: values.latitude,
+          longitude: values.longitude,
           images: values.images || [],
         };
 
@@ -240,7 +250,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               duration: ad.duration || "",
               city: ad.city || "",
               district: ad.district || "",
-              address: ad.address || "",
+              address: ad.address && ad.address.toLowerCase() !== "test" ? ad.address : "",
               category: ad.category ? String(ad.category) : "",
               targetAudience: ad.targetAudience || "",
               participantCount: ad.participantCount || "",
@@ -249,6 +259,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType as unknown as string] : []),
               workshopGoal: ad.workshopGoal || "",
               workshopContent: ad.workshopContent || "",
+              latitude: ad.latitude && !isNaN(Number(ad.latitude)) ? ad.latitude : "",
+              longitude: ad.longitude && !isNaN(Number(ad.longitude)) ? ad.longitude : "",
               images: [],
               imagePreviews: ad.images && ad.images.length > 0 
                 ? ad.images.map(img => {
@@ -386,6 +398,110 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       return `${start} - ${end}`;
     }
     return "";
+  };
+
+  const handleMapLocationSelect = (
+    lat: string,
+    lng: string,
+    address?: string,
+    city?: string,
+    district?: string
+  ) => {
+    setFieldValue("latitude", lat);
+    setFieldValue("longitude", lng);
+    if (address) {
+      setFieldValue("address", address);
+    }
+    if (city) {
+      const matchedCity = cityOptions.find(
+        c => c.label.toLowerCase() === city.toLowerCase() || c.value.toLowerCase() === city.toLowerCase()
+      );
+      if (matchedCity) {
+        setFieldValue("city", matchedCity.value);
+        fetchDistricts(matchedCity.value).then(districts => {
+          setDistrictOptions(districts);
+          if (district) {
+            const matchedDistrict = districts.find(
+              d => d.label.toLowerCase() === district.toLowerCase() || d.value.toLowerCase() === district.toLowerCase()
+            );
+            if (matchedDistrict) {
+              setFieldValue("district", matchedDistrict.value);
+            }
+          }
+        });
+      }
+    }
+  };
+
+  const handleGetCoordinatesFromAddress = async () => {
+    if (!values.city || !values.address) {
+      toastRef.current?.show({
+        severity: "warn",
+        summary: "Eksik Bilgi",
+        detail: "Konum sorgulaması yapabilmek için lütfen İl ve Adres bilgilerini doldurunuz.",
+        life: 3000,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const cityName = cityOptions.find(opt => opt.value === values.city)?.label || values.city;
+      const districtName = districtOptions.find(opt => opt.value === values.district)?.label || values.district || "";
+      
+      const searchQuery = `${values.address}, ${districtName}, ${cityName}, Türkiye`;
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        setFieldValue("latitude", lat);
+        setFieldValue("longitude", lon);
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Konum Bulundu",
+          detail: `Konum başarıyla tespit edildi: Lat: ${parseFloat(lat).toFixed(4)}, Lng: ${parseFloat(lon).toFixed(4)}`,
+          life: 3000,
+        });
+      } else {
+        const fallbackQuery = `${districtName}, ${cityName}, Türkiye`;
+        const fallbackResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}`
+        );
+        const fallbackData = await fallbackResponse.json();
+
+        if (fallbackData && fallbackData.length > 0) {
+          const { lat, lon } = fallbackData[0];
+          setFieldValue("latitude", lat);
+          setFieldValue("longitude", lon);
+          toastRef.current?.show({
+            severity: "info",
+            summary: "Yaklaşık Konum",
+            detail: `Tam adres bulunamadı, ilçe merkezine göre konum atandı.`,
+            life: 4000,
+          });
+        } else {
+          toastRef.current?.show({
+            severity: "error",
+            summary: "Konum Bulunamadı",
+            detail: "Belirtilen adresin koordinatları tespit edilemedi. Lütfen manuel giriniz.",
+            life: 4000,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Geocoding error:", err);
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: "Konum sorgulama servisiyle bağlantı kurulamadı.",
+        life: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Format full address
@@ -527,6 +643,56 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                       error={touched.address ? errors.address : undefined}
                       placeholder="Adres giriniz"
                     />
+
+                    <div className="flex flex-col gap-2 mt-1 mb-3">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsMapVisible(true)}
+                          className="flex items-center gap-2 text-xs font-semibold px-3 py-2 bg-white border border-[#4C226A] text-[#4C226A] rounded-lg hover:bg-purple-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                          <i className="pi pi-map text-[#4C226A] text-xs"></i>
+                          Haritadan Konum Bilgisi Al
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={handleGetCoordinatesFromAddress}
+                          disabled={isLoading}
+                          className="flex items-center gap-2 text-xs font-medium px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+                        >
+                          <i className="pi pi-search text-gray-500 text-xs"></i>
+                          Adresten Konum Sorgula
+                        </button>
+                      </div>
+
+                      {values.latitude && values.longitude ? (
+                        <div className="flex items-center justify-between p-2.5 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800">
+                          <div className="flex items-center gap-1.5 font-medium">
+                            <i className="pi pi-check-circle text-green-600 text-sm"></i>
+                            <span>Konum başarıyla belirlendi ve haritada işaretlendi.</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setFieldValue("latitude", "");
+                              setFieldValue("longitude", "");
+                              setFieldValue("address", "");
+                            }}
+                            className="text-red-500 hover:text-red-700 text-xs font-semibold cursor-pointer"
+                          >
+                            Temizle
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                          <i className="pi pi-exclamation-triangle text-amber-600 text-sm"></i>
+                          <span>Workshopun haritada doğru görünmesi için lütfen konum seçiniz.</span>
+                        </div>
+                      )}
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Dropdown
@@ -932,6 +1098,15 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
           </div>
         </div>
       </div>
+      
+      <LocationPickerModal
+        visible={isMapVisible}
+        onHide={() => setIsMapVisible(false)}
+        onSelect={handleMapLocationSelect}
+        initialLat={values.latitude}
+        initialLng={values.longitude}
+        initialAddress={values.address}
+      />
     </>
   );
 }

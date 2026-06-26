@@ -168,6 +168,7 @@ export default function Header() {
             }}
             className="header-language-dropdown !border-lightGray rounded-full !w-[80px] sm:!w-[100px] md:!w-[140px]"
             panelClassName="rounded-lg shadow-lg border border-lightGray/20"
+            appendTo="self"
             style={{
               backgroundColor: "white",
               borderColor: "#A5A5A5",
@@ -199,6 +200,7 @@ export default function Header() {
             ref={profileMenu} 
             id="popup_profile_menu"
             className="w-36 mt-1 shadow-lg border border-lightGray/20 rounded-lg"
+            appendTo="self"
             pt={{
               root: { className: "p-1" }
             }}

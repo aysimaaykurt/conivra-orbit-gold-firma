@@ -15,6 +15,8 @@ export interface AddAdvertisementRequest {
   followerRange: string;
   contentType: string[];
   businessType: string;
+  latitude?: string;
+  longitude?: string;
   images?: File[]; // Multi-image support
 }
 
@@ -35,6 +37,8 @@ export interface UpdateAdvertisementRequest {
   followerRange: string;
   contentType: string[];
   businessType: string;
+  latitude?: string;
+  longitude?: string;
   images?: File[]; // Multi-image support
 }
 
@@ -56,6 +60,8 @@ export interface Advertisement {
   followerRange: string;
   contentType: string[];
   businessType: string;
+  latitude?: string;
+  longitude?: string;
   images?: { id?: string | number; imageUrl: string; imageId?: string; isMain: boolean; sortOrder?: number }[]; // URL to the uploaded images
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)
