@@ -126,12 +126,16 @@ export const updateWorkshop = async (
     // Add images if provided
     if (data.images && data.images.length > 0) {
       data.images.forEach((image) => {
+        console.log('--- UPLOADING IMAGE (Update Workshop) ---', image.name, image.type, image.size);
         formData.append('images', image);
       });
+    } else {
+      console.log('--- NO IMAGES PROVIDED (Update Workshop) ---');
     }
 
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
     const response = await apiClient.put<UpdateWorkshopResponse>(
-      `Advertisements/addWorkshop/${id}`,
+      `Advertisements/addWorkshop/${cleanId}`,
       formData,
       {
         headers: {
@@ -160,8 +164,9 @@ export const getWorkshop = async (
   id: string
 ): Promise<GetWorkshopResponse> => {
   try {
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
     const response = await apiClient.get<GetWorkshopResponse>(
-      `Advertisements/addWorkshop/${id}`
+      `Advertisements/addWorkshop/${cleanId}`
     );
 
     return response.data;
@@ -219,7 +224,8 @@ export const getWorkshops = async (
  */
 export const deleteWorkshop = async (id: string): Promise<any> => {
   try {
-    const response = await apiClient.delete(`Advertisements/deleteWorkshop/${id}`);
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
+    const response = await apiClient.delete(`Advertisements/deleteWorkshop/${cleanId}`);
     return response.data;
   } catch (error: any) {
     if (error.response?.data) {

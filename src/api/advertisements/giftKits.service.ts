@@ -110,8 +110,9 @@ export const updateGiftKit = async (
       });
     }
 
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
     const response = await apiClient.put<UpdateGiftKitResponse>(
-      `Advertisements/addGiftKit/${id}`,
+      `Advertisements/addGiftKit/${cleanId}`,
       formData,
       {
         headers: {
@@ -140,8 +141,9 @@ export const getGiftKit = async (
   id: string
 ): Promise<GetGiftKitResponse> => {
   try {
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
     const response = await apiClient.get<GetGiftKitResponse>(
-      `Advertisements/addGiftKit/${id}`
+      `Advertisements/addGiftKit/${cleanId}`
     );
 
     return response.data;
@@ -199,7 +201,8 @@ export const getGiftKits = async (
  */
 export const deleteGiftKit = async (id: string): Promise<any> => {
   try {
-    const response = await apiClient.delete(`Advertisements/deleteGiftKit/${id}`);
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
+    const response = await apiClient.delete(`Advertisements/deleteGiftKit/${cleanId}`);
     return response.data;
   } catch (error: any) {
     if (error.response?.data) {

@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "@/src/navigation";
 import { useTranslations } from "next-intl";
 import { adTypeTabs, ApplicationListItem, AdType } from "@/src/mocks/applications";
 import { useApplications } from "@/src/hooks/useApplications";
-import { useEffect } from "react";
+import { updateApplicationStatus } from "@/src/api/applications/applications.service";
+import { ApplicationStatus } from "@/src/api/applications/applicationStatus.enum";
+import { Toast } from "primereact/toast";
 
 export default function ApplicationsList() {
   const t = useTranslations("applications.adTypes");
   const [activeTab, setActiveTab] = useState<AdType>("soiree-menu");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    type: "approve" | "reject" | null;
+    id: string;
+  }>({
+    visible: false,
+    type: null,
+    id: "",
+  });
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const itemsPerPage = 10;
 
@@ -23,7 +34,9 @@ export default function ApplicationsList() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const { data: currentApplications, totalItems, totalPages, isLoading } = useApplications({
+  const toastRef = useRef<any>(null);
+
+  const { data: currentApplications, totalItems, totalPages, isLoading, refetch } = useApplications({
     page: currentPage,
     pageSize: itemsPerPage,
     searchTerm: debouncedSearch,
@@ -36,13 +49,59 @@ export default function ApplicationsList() {
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
   const handleApprove = (id: string) => {
-    console.log("Approve:", id);
-    // TODO: Implement approve logic
+    setConfirmModal({ visible: true, type: "approve", id });
   };
 
   const handleReject = (id: string) => {
-    console.log("Reject:", id);
-    // TODO: Implement reject logic
+    setConfirmModal({ visible: true, type: "reject", id });
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, id } = confirmModal;
+    setConfirmModal({ visible: false, type: null, id: "" });
+    if (!id || !type) return;
+
+    if (type === "approve") {
+      console.log("Approve Application ID:", id);
+      try {
+        await updateApplicationStatus(id, { status: ApplicationStatus.APPROVED });
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: "Başvuru başarıyla onaylandı.",
+          life: 3000,
+        });
+        refetch();
+      } catch (err: any) {
+        console.error("Failed to approve application status:", err);
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: err.message || "Başvuru onaylanırken bir hata oluştu.",
+          life: 3000,
+        });
+      }
+    } else if (type === "reject") {
+      console.log("Reject Application ID:", id);
+      try {
+        await updateApplicationStatus(id, { status: ApplicationStatus.REJECTED });
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: "Başvuru başarıyla reddedildi.",
+          life: 3000,
+        });
+        refetch();
+      } catch (err: any) {
+        console.error("Failed to reject application status:", err);
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: err.message || "Başvuru reddedilirken bir hata oluştu.",
+          life: 3000,
+        });
+      }
+    }
   };
 
   const handleShare = (id: string) => {
@@ -212,6 +271,56 @@ export default function ApplicationsList() {
           </button>
         </div>
       </div>
+      <Toast ref={toastRef} />
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.visible && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-100 transform scale-100 transition-transform duration-300">
+            <div className="flex flex-col items-center text-center space-y-4">
+              {confirmModal.type === "approve" ? (
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500">
+                  <i className="pi pi-check-circle text-3xl" />
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500">
+                  <i className="pi pi-exclamation-triangle text-3xl" />
+                </div>
+              )}
+              
+              <h3 className="text-xl font-bold text-gray-800">
+                {confirmModal.type === "approve" ? "Başvuruyu Onayla" : "Başvuruyu Reddet"}
+              </h3>
+              
+              <p className="text-sm text-gray-500 leading-relaxed">
+                {confirmModal.type === "approve" 
+                  ? "Bu influencer başvurusunu onaylamak istediğinize emin misiniz? Bu işlem geri alınamaz."
+                  : "Bu influencer başvurusunu reddetmek istediğinize emin misiniz? Bu işlem geri alınamaz."}
+              </p>
+              
+              <div className="flex items-center gap-3 w-full mt-6">
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal({ visible: false, type: null, id: "" })}
+                  className="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmAction}
+                  className="flex-1 py-3 px-4 rounded-xl text-white font-medium shadow-lg hover:opacity-90 transition-opacity"
+                  style={{
+                    backgroundColor: confirmModal.type === "approve" ? "#10B981" : "#EF4444"
+                  }}
+                >
+                  Evet, Eminim
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -223,10 +332,18 @@ function ApplicationTableRow({
   onShare,
 }: {
   application: ApplicationListItem;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  onApprove: (id: string, app?: any) => void;
+  onReject: (id: string, app?: any) => void;
   onShare: (id: string) => void;
 }) {
+  const adId = 
+    (application as any).advertId || 
+    (application as any).advertisementId || 
+    (application as any).adId || 
+    (application as any).advert?.id || 
+    (application as any).advertisement?.id || 
+    application.id;
+
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
       <td className="py-4 px-4">
@@ -276,20 +393,41 @@ function ApplicationTableRow({
       </td>
       <td className="py-4 px-4">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => onApprove(application.id)}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#10B981" }}
-          >
-            Onayla
-          </button>
-          <button
-            onClick={() => onReject(application.id)}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#EF4444" }}
-          >
-            Reddet
-          </button>
+          {(() => {
+            const status = application.status;
+            if (status === 2 || status === "2" || status === "Approved") {
+              return (
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                  Onaylandı
+                </span>
+              );
+            }
+            if (status === 3 || status === "3" || status === "Rejected") {
+              return (
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                  Reddedildi
+                </span>
+              );
+            }
+            return (
+              <>
+                <button
+                  onClick={() => onApprove(application.id, application)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: "#10B981" }}
+                >
+                  Onayla
+                </button>
+                <button
+                  onClick={() => onReject(application.id, application)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: "#EF4444" }}
+                >
+                  Reddet
+                </button>
+              </>
+            );
+          })()}
           <button
             onClick={() => onShare(application.id)}
             className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"

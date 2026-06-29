@@ -14,6 +14,8 @@ import { MultiSelect } from "@/components/ui/multiselect";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { addWorkshop, getWorkshop, updateWorkshop } from "@/src/api/advertisements/workshops.service";
+import { deleteAdImage } from "@/src/api/advertisements/advertisements.service";
+import { BASE_URL } from "@/src/api/axios";
 import LocationPickerModal from "./LocationPickerModal";
 
 interface AddWorkshopFormProps {
@@ -107,6 +109,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   const { cities: cityOptions, fetchDistricts } = useLocations();
   const [districtOptions, setDistrictOptions] = useState<{label: string, value: string | number}[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(false);
+  const [existingImagesMap, setExistingImagesMap] = useState<Record<string, string>>({});
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -262,21 +265,43 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               latitude: ad.latitude && !isNaN(Number(ad.latitude)) ? ad.latitude : "",
               longitude: ad.longitude && !isNaN(Number(ad.longitude)) ? ad.longitude : "",
               images: [],
-              imagePreviews: ad.images && ad.images.length > 0 
-                ? ad.images.map(img => {
-                    const url = img.imageUrl;
-                    if (!url) return '';
-                    if (url.startsWith('/images/')) return url;
-                    
-                    const tunnelOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://flooring-lets-function-bright.trycloudflare.com/api/v1/').origin;
-                    
-                    if (url.includes('localhost:5100')) {
-                      return url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
-                    }
-                    if (url.startsWith('http')) return url;
-                    return `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
-                  })
-                : [],
+              imagePreviews: (() => {
+                const previewsMap: Record<string, string> = {};
+                const previews = ad.images && ad.images.length > 0 
+                  ? ad.images.map(img => {
+                      const url = img.imageUrl;
+                      if (!url) return '';
+                      let finalUrl = url;
+                      if (!url.startsWith('/images/')) {
+                        const tunnelOrigin = new URL(BASE_URL).origin;
+                        if (url.includes('localhost:5100')) {
+                          finalUrl = url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+                        } else if (!url.startsWith('http')) {
+                          finalUrl = `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
+                        }
+                      }
+                      
+                      const rawId = img.imageId || (img.id && typeof img.id === 'string' && img.id.length > 8 ? img.id : null);
+                      if (rawId) {
+                        previewsMap[finalUrl] = String(rawId);
+                      } else {
+                        let filename = finalUrl.split('/').pop();
+                        if (filename) {
+                          filename = filename.split('?')[0]; // Remove query params
+                          const guidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+                          const match = filename.match(guidRegex);
+                          if (match) {
+                            previewsMap[finalUrl] = match[0];
+                          }
+                        }
+                      }
+                      
+                      return finalUrl;
+                    })
+                  : [];
+                setExistingImagesMap(previewsMap);
+                return previews;
+              })(),
             });
           }
         } catch (error) {
@@ -861,7 +886,33 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                             )}
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={async () => {
+                                const previewUrl = values.imagePreviews[index];
+                                const imageId = existingImagesMap[previewUrl];
+
+                                if (imageId) {
+                                  try {
+                                    const res = await deleteAdImage(imageId);
+                                    if (res && res.success === false) {
+                                      throw new Error(res.message || "Görsel silinemedi (Sunucu reddetti)");
+                                    }
+                                    toastRef.current?.show({
+                                      severity: "success",
+                                      summary: "Başarılı",
+                                      detail: "Görsel silindi",
+                                      life: 3000,
+                                    });
+                                  } catch (error: any) {
+                                    toastRef.current?.show({
+                                      severity: "error",
+                                      summary: "Hata",
+                                      detail: error.message || "Görsel silinemedi",
+                                      life: 3000,
+                                    });
+                                    return; // Stop if API call fails
+                                  }
+                                }
+
                                 const newImages = [...values.images];
                                 newImages.splice(index, 1);
                                 formik.setFieldValue("images", newImages);
@@ -913,7 +964,21 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                 ) : (
                   <Button
                     type="button"
-                    onClick={() => formik.handleSubmit()}
+                    onClick={() => {
+                      if (!formik.isValid) {
+                        console.log("Formik validation errors:", formik.errors);
+                        const errorMessages = Object.entries(formik.errors)
+                          .map(([field, err]) => `${field}: ${err}`)
+                          .join(", ");
+                        toastRef.current?.show({
+                          severity: "error",
+                          summary: "Form Hatalı",
+                          detail: `Lütfen tüm zorunlu alanları doldurun: ${errorMessages}`,
+                          life: 6000,
+                        });
+                      }
+                      formik.handleSubmit();
+                    }}
                     disabled={isLoading}
                     className="bg-primary text-white"
                     style={{ backgroundColor: "#4C226A" }}
@@ -1086,7 +1151,21 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               <div className="mt-4 pt-4 border-t border-gray-300 flex-shrink-0">
                 <Button
                   type="button"
-                  onClick={() => formik.handleSubmit()}
+                  onClick={() => {
+                    if (!formik.isValid) {
+                      console.log("Formik validation errors:", formik.errors);
+                      const errorMessages = Object.entries(formik.errors)
+                        .map(([field, err]) => `${field}: ${err}`)
+                        .join(", ");
+                      toastRef.current?.show({
+                        severity: "error",
+                        summary: "Form Hatalı",
+                        detail: `Lütfen tüm zorunlu alanları doldurun: ${errorMessages}`,
+                        life: 6000,
+                      });
+                    }
+                    formik.handleSubmit();
+                  }}
                   disabled={isLoading}
                   className="w-full text-white py-3 rounded-lg"
                   style={{ backgroundColor: "#4C226A" }}

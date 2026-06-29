@@ -85,3 +85,58 @@ Arayüzde şu an sabit dosyalardan okunan form elemanlarının veritabanı kontr
   - Silme: `DELETE /api/v1/company/support/{id}` 
   - Düzenleme: `PUT /api/v1/company/support/{id}`
 endpoint'lerine ihtiyaç vardır.
+
+## 5. Mobil Harita Entegrasyonu Gereksinimleri (Canlı Harita)
+
+Mobil uygulamada ilanların ve workshopların harita üzerinde pin (marker) olarak gösterilmesi için gerekli olan veri modelleri ve yeni endpoint yapıları aşağıda belirtilmiştir.
+
+### 5.1. Haritada Gösterim İçin Eksik / Gerekli Alanlar (DB & DTO)
+Mevcut `Advertisements` ve `Workshops` tablolarına ve bunların Response DTO'larına (`GET` isteklerine) aşağıdaki alanlar eklenmeli ve dolu döndürülmelidir:
+*   `latitude` (double/decimal): Konumun enlemi. (Örn: `37.6910896`)
+*   `longitude` (double/decimal): Konumun boylamı. (Örn: `28.9784123`)
+*   `address` (string): Seçilen tam açık adres bilgisi.
+
+### 5.2. Harita İçin Optimize Edilmiş Ortak Liste Endpoint'i
+Mobil uygulamanın harita ekranına yüklenme hızını artırmak ve gereksiz veri transferini engellemek için, ilanları ve workshopları **aynı anda** ve sadece harita için gerekli olan minimal alanlarla döndüren yeni bir endpoint'e ihtiyaç vardır:
+
+*   **Endpoint:** `GET /api/v1/Map/markers`
+*   **Query Parametreleri (Filtreler):**
+    *   `latitude` (double, opsiyonel): Kullanıcının o anki enlemi.
+    *   `longitude` (double, opsiyonel): Kullanıcının o anki boylamı.
+    *   `radiusInKm` (double, opsiyonel, varsayılan: `20`): Tarama yarıçapı.
+    *   `minLat` / `maxLat` / `minLng` / `maxLng` (double, opsiyonel): Haritada o an görüntülenen kutu sınırları (Viewport Bounding Box).
+    *   `type` (string, opsiyonel): `advertisement` veya `workshop` filtresi.
+    *   `category` (string, opsiyonel): Kategori filtresi.
+
+*   **Örnek JSON Yanıtı (Response Body):**
+    ```json
+    {
+      "success": true,
+      "message": "Harita konum işaretçileri başarıyla getirildi",
+      "data": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "title": "Kahve Atölyesi ve Workshop",
+          "type": "workshop",
+          "category": "Eğitim",
+          "latitude": 37.6910896,
+          "longitude": 28.9784123,
+          "address": "Atatürk Mh. İstiklal Cd. No:45 Kadıköy/İstanbul",
+          "companyName": "Soiree Cafe",
+          "mainImageUrl": "https://api.domain.com/uploads/workshops/image1.jpg"
+        },
+        {
+          "id": "8ca75d31-4113-4a11-a3fb-1c913c22bfa2",
+          "title": "Ürün Tanıtım Reklam Kampanyası",
+          "type": "advertisement",
+          "category": "Tanıtım",
+          "latitude": 41.0082,
+          "longitude": 28.9784,
+          "address": "Cumhuriyet Cd. No:12 Beşiktaş/İstanbul",
+          "companyName": "Gold Tasarım A.Ş.",
+          "mainImageUrl": "https://api.domain.com/uploads/ads/image2.jpg"
+        }
+      ]
+    }
+    ```
+

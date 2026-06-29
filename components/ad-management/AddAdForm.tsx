@@ -15,6 +15,7 @@ import { MultiSelect } from "@/components/ui/multiselect";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { addAdvertisement, getAdvertisement, updateAdvertisement, deleteAdImage } from "@/src/api/advertisements/advertisements.service";
+import { BASE_URL } from "@/src/api/axios";
 import LocationPickerModal from "./LocationPickerModal";
 
 interface AddAdFormProps {
@@ -266,29 +267,27 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                       if (!url) return '';
                       let finalUrl = url;
                       if (!url.startsWith('/images/')) {
-                        const tunnelOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://flooring-lets-function-bright.trycloudflare.com/api/v1/').origin;
+                        const tunnelOrigin = new URL(BASE_URL).origin;
                         if (url.includes('localhost:5100')) {
                           finalUrl = url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
                         } else if (!url.startsWith('http')) {
                           finalUrl = `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
                         }
                       }
-                      // Backend expects ONLY the GUID (e.g., 1c241dae-d60b-43f3-b2a1-60247333216b)
-                      let filename = finalUrl.split('/').pop();
-                      if (filename) {
-                        filename = filename.split('?')[0]; // Remove query params if any
-                        
-                        // Remove "ad_" prefix and extension
-                        let guid = filename;
-                        if (guid.startsWith('ad_')) {
-                          guid = guid.substring(3);
+                      
+                      const rawId = img.imageId || (img.id && typeof img.id === 'string' && img.id.length > 8 ? img.id : null);
+                      if (rawId) {
+                        previewsMap[finalUrl] = String(rawId);
+                      } else {
+                        let filename = finalUrl.split('/').pop();
+                        if (filename) {
+                          filename = filename.split('?')[0]; // Remove query params if any
+                          const guidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+                          const match = filename.match(guidRegex);
+                          if (match) {
+                            previewsMap[finalUrl] = match[0];
+                          }
                         }
-                        const dotIndex = guid.lastIndexOf('.');
-                        if (dotIndex !== -1) {
-                          guid = guid.substring(0, dotIndex);
-                        }
-                        
-                        previewsMap[finalUrl] = guid;
                       }
                       
                       return finalUrl;
@@ -961,7 +960,21 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                 ) : (
                   <Button
                     type="button"
-                    onClick={() => formik.handleSubmit()}
+                    onClick={() => {
+                      if (!formik.isValid) {
+                        console.log("Formik validation errors:", formik.errors);
+                        const errorMessages = Object.entries(formik.errors)
+                          .map(([field, err]) => `${field}: ${err}`)
+                          .join(", ");
+                        toastRef.current?.show({
+                          severity: "error",
+                          summary: "Form Hatalı",
+                          detail: `Lütfen tüm zorunlu alanları doldurun: ${errorMessages}`,
+                          life: 6000,
+                        });
+                      }
+                      formik.handleSubmit();
+                    }}
                     disabled={isLoading}
                     className="bg-primary text-white"
                     style={{ backgroundColor: "#4C226A" }}
@@ -1090,7 +1103,21 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
               <div className="mt-4 pt-4 border-t border-gray-300 flex-shrink-0">
                 <Button
                   type="button"
-                  onClick={() => formik.handleSubmit()}
+                  onClick={() => {
+                    if (!formik.isValid) {
+                      console.log("Formik validation errors:", formik.errors);
+                      const errorMessages = Object.entries(formik.errors)
+                        .map(([field, err]) => `${field}: ${err}`)
+                        .join(", ");
+                      toastRef.current?.show({
+                        severity: "error",
+                        summary: "Form Hatalı",
+                        detail: `Lütfen tüm zorunlu alanları doldurun: ${errorMessages}`,
+                        life: 6000,
+                      });
+                    }
+                    formik.handleSubmit();
+                  }}
                   disabled={isLoading}
                   className="w-full text-white py-3 rounded-lg"
                   style={{ backgroundColor: "#4C226A" }}

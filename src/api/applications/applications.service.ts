@@ -69,8 +69,9 @@ export const updateApplicationStatus = async (
   status: UpdateApplicationStatusRequest
 ): Promise<UpdateApplicationStatusResponse> => {
   try {
+    const cleanId = applicationId.replace(/^(app)-/i, '');
     const response = await apiClient.put<UpdateApplicationStatusResponse>(
-      `applications/${applicationId}`,
+      `applications/${cleanId}`,
       status
     );
 

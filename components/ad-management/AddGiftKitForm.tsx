@@ -534,7 +534,21 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                 ) : (
                   <Button
                     type="button"
-                    onClick={() => formik.handleSubmit()}
+                    onClick={() => {
+                      if (!formik.isValid) {
+                        console.log("Formik validation errors:", formik.errors);
+                        const errorMessages = Object.entries(formik.errors)
+                          .map(([field, err]) => `${field}: ${err}`)
+                          .join(", ");
+                        toastRef.current?.show({
+                          severity: "error",
+                          summary: "Form Hatalı",
+                          detail: `Lütfen tüm zorunlu alanları doldurun: ${errorMessages}`,
+                          life: 6000,
+                        });
+                      }
+                      formik.handleSubmit();
+                    }}
                     disabled={isLoading}
                     className="bg-primary text-white"
                     style={{ backgroundColor: "#4C226A" }}
@@ -677,7 +691,21 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
               <div className="mt-4 pt-4 border-t border-gray-300 flex-shrink-0">
                 <Button
                   type="button"
-                  onClick={() => formik.handleSubmit()}
+                  onClick={() => {
+                    if (!formik.isValid) {
+                      console.log("Formik validation errors:", formik.errors);
+                      const errorMessages = Object.entries(formik.errors)
+                        .map(([field, err]) => `${field}: ${err}`)
+                        .join(", ");
+                      toastRef.current?.show({
+                        severity: "error",
+                        summary: "Form Hatalı",
+                        detail: `Lütfen tüm zorunlu alanları doldurun: ${errorMessages}`,
+                        life: 6000,
+                      });
+                    }
+                    formik.handleSubmit();
+                  }}
                   disabled={isLoading}
                   className="w-full text-white py-3 rounded-lg"
                   style={{ backgroundColor: "#4C226A" }}

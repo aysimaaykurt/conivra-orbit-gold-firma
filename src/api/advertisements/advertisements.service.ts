@@ -156,8 +156,9 @@ export const updateAdvertisement = async (
       console.log(pair[0] + ':', pair[1]);
     }
 
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
     const response = await apiClient.put<UpdateAdvertisementResponse>(
-      `Advertisements/addAd/${id}`,
+      `Advertisements/addAd/${cleanId}`,
       formData,
       {
         headers: {
@@ -188,8 +189,9 @@ export const getAdvertisement = async (
   id: string
 ): Promise<GetAdvertisementResponse> => {
   try {
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
     const response = await apiClient.get<GetAdvertisementResponse>(
-      `Advertisements/addAd/${id}`
+      `Advertisements/addAd/${cleanId}`
     );
 
     return response.data;
@@ -247,7 +249,8 @@ export const getAdvertisements = async (
  */
 export const deleteAdvertisement = async (id: string): Promise<any> => {
   try {
-    const response = await apiClient.delete(`Advertisements/deleteAd/${id}`);
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
+    const response = await apiClient.delete(`Advertisements/deleteAd/${cleanId}`);
     return response.data;
   } catch (error: any) {
     if (error.response?.data) {
@@ -277,6 +280,32 @@ export const deleteAdImage = async (imageId: string): Promise<{ success: boolean
     throw {
       success: false,
       message: error.message || 'Görsel silinirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Update Advertisement Status Service (PATCH)
+ * PATCH Advertisements/:id/status
+ */
+export const updateAdvertisementStatus = async (
+  id: string,
+  status: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
+    const response = await apiClient.patch<{ success: boolean; message: string }>(
+      `Advertisements/${cleanId}/status`,
+      { status }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'İlan durumu güncellenirken bir hata oluştu',
     } as ApiErrorResponse;
   }
 };
