@@ -98,3 +98,14 @@ export interface ApiErrorResponse {
   message: string;
 }
 
+// Bulk Update Application Status Request
+export interface BulkUpdateApplicationStatusRequest {
+  applicationIds: number[];
+  status: number;
+}
+
+// Request Revision Request
+export interface RequestRevisionRequest {
+  revisionNote: string;
+}
+

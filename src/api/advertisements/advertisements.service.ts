@@ -34,7 +34,7 @@ export const addAdvertisement = async (
     formData.append('guestCount', data.guestCount);
     // Append array fields properly
     if (Array.isArray(data.platformPreference)) {
-      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+      formData.append('platformPreference', data.platformPreference.join(','));
     } else if (data.platformPreference) {
       formData.append('platformPreference', data.platformPreference);
     }
@@ -43,10 +43,10 @@ export const addAdvertisement = async (
     formData.append('businessType', data.businessType);
     
     if (data.latitude) {
-      formData.append('latitude', data.latitude);
+      formData.append('latitude', data.latitude.toString().replace('.', ','));
     }
     if (data.longitude) {
-      formData.append('longitude', data.longitude);
+      formData.append('longitude', data.longitude.toString().replace('.', ','));
     }
 
     if (Array.isArray(data.contentType)) {
@@ -120,7 +120,7 @@ export const updateAdvertisement = async (
     formData.append('guestCount', data.guestCount);
     // Append array fields properly
     if (Array.isArray(data.platformPreference)) {
-      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+      formData.append('platformPreference', data.platformPreference.join(','));
     } else if (data.platformPreference) {
       formData.append('platformPreference', data.platformPreference);
     }
@@ -129,10 +129,10 @@ export const updateAdvertisement = async (
     formData.append('businessType', data.businessType);
     
     if (data.latitude) {
-      formData.append('latitude', data.latitude);
+      formData.append('latitude', data.latitude.toString().replace('.', ','));
     }
     if (data.longitude) {
-      formData.append('longitude', data.longitude);
+      formData.append('longitude', data.longitude.toString().replace('.', ','));
     }
 
     if (Array.isArray(data.contentType)) {
@@ -306,6 +306,30 @@ export const updateAdvertisementStatus = async (
     throw {
       success: false,
       message: error.message || 'İlan durumu güncellenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Pause Advertisement Service
+ * POST advertisements/:id/pause
+ */
+export const pauseAdvertisement = async (
+  id: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `advertisements/${cleanId}/pause`
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'İlan durdurulurken bir hata oluştu',
     } as ApiErrorResponse;
   }
 };

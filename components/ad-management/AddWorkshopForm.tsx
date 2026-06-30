@@ -262,8 +262,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType as unknown as string] : []),
               workshopGoal: ad.workshopGoal || "",
               workshopContent: ad.workshopContent || "",
-              latitude: ad.latitude && !isNaN(Number(ad.latitude)) ? ad.latitude : "",
-              longitude: ad.longitude && !isNaN(Number(ad.longitude)) ? ad.longitude : "",
+              latitude: ad.latitude && !isNaN(Number(ad.latitude.toString().replace(',', '.'))) ? ad.latitude.toString().replace(',', '.') : "",
+              longitude: ad.longitude && !isNaN(Number(ad.longitude.toString().replace(',', '.'))) ? ad.longitude.toString().replace(',', '.') : "",
               images: [],
               imagePreviews: (() => {
                 const previewsMap: Record<string, string> = {};

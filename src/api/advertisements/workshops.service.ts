@@ -45,10 +45,10 @@ export const addWorkshop = async (
     formData.append('workshopContent', data.workshopContent);
     
     if (data.latitude) {
-      formData.append('latitude', data.latitude);
+      formData.append('latitude', data.latitude.toString().replace('.', ','));
     }
     if (data.longitude) {
-      formData.append('longitude', data.longitude);
+      formData.append('longitude', data.longitude.toString().replace('.', ','));
     }
 
     // Add images if provided
@@ -117,10 +117,10 @@ export const updateWorkshop = async (
     formData.append('workshopContent', data.workshopContent);
     
     if (data.latitude) {
-      formData.append('latitude', data.latitude);
+      formData.append('latitude', data.latitude.toString().replace('.', ','));
     }
     if (data.longitude) {
-      formData.append('longitude', data.longitude);
+      formData.append('longitude', data.longitude.toString().replace('.', ','));
     }
 
     // Add images if provided

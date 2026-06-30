@@ -135,3 +135,53 @@ export const evaluateApplication = async (
     } as ApiErrorResponse;
   }
 };
+
+/**
+ * Bulk Update Application Status Service (PATCH)
+ * PATCH applications/bulk-status
+ */
+export const bulkUpdateApplicationStatus = async (
+  data: import('./applications.models').BulkUpdateApplicationStatusRequest
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await apiClient.patch<{ success: boolean; message: string }>(
+      'applications/bulk-status',
+      data
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Toplu durum güncellemesi yapılırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Request Revision Service (POST)
+ * POST applications/{id}/revision
+ */
+export const requestApplicationRevision = async (
+  id: string,
+  data: import('./applications.models').RequestRevisionRequest
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const cleanId = id.replace(/^(app)-/i, '');
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `applications/${cleanId}/revision`,
+      data
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Revizyon istenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};

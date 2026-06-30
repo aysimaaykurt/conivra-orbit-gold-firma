@@ -252,12 +252,12 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
               category: ad.category ? String(ad.category) : "",
               services: ad.services || "",
               guestCount: ad.guestCount || "",
-              platformPreference: Array.isArray(ad.platformPreference) ? ad.platformPreference : (ad.platformPreference ? [ad.platformPreference] : []),
+              platformPreference: typeof ad.platformPreference === 'string' ? ad.platformPreference.split(',').map(p => p.trim()) : (Array.isArray(ad.platformPreference) ? ad.platformPreference : []),
               followerRange: ad.followerRange || "",
               contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType] : []),
               businessType: ad.businessType || "",
-              latitude: ad.latitude && !isNaN(Number(ad.latitude)) ? ad.latitude : "",
-              longitude: ad.longitude && !isNaN(Number(ad.longitude)) ? ad.longitude : "",
+              latitude: ad.latitude && !isNaN(Number(ad.latitude.toString().replace(',', '.'))) ? ad.latitude.toString().replace(',', '.') : "",
+              longitude: ad.longitude && !isNaN(Number(ad.longitude.toString().replace(',', '.'))) ? ad.longitude.toString().replace(',', '.') : "",
               images: [],
               imagePreviews: (() => {
                 const previewsMap: Record<string, string> = {};

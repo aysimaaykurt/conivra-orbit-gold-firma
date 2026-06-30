@@ -28,7 +28,7 @@ export const addGiftKit = async (
     formData.append('followerRange', data.followerRange);
     // Append array fields properly
     if (Array.isArray(data.platformPreference)) {
-      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+      formData.append('platformPreference', data.platformPreference.join(','));
     } else if (data.platformPreference) {
       formData.append('platformPreference', data.platformPreference);
     }
@@ -90,7 +90,7 @@ export const updateGiftKit = async (
     formData.append('followerRange', data.followerRange);
     // Append array fields properly
     if (Array.isArray(data.platformPreference)) {
-      data.platformPreference.forEach(p => formData.append('platformPreference', p));
+      formData.append('platformPreference', data.platformPreference.join(','));
     } else if (data.platformPreference) {
       formData.append('platformPreference', data.platformPreference);
     }

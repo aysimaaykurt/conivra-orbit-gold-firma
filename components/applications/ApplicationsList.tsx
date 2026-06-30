@@ -368,26 +368,32 @@ function ApplicationTableRow({
       </td>
       <td className="py-4 px-4">
         <div className="flex items-center gap-2">
-          {application.socialMedia.instagram && (
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{
-                background:
-                  "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
-              }}
-            >
-              <i className="pi pi-instagram text-white text-xs" />
-            </div>
-          )}
-          {application.socialMedia.tiktok && (
-            <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
-              <i className="pi pi-video text-white text-xs" />
-            </div>
-          )}
-          {application.socialMedia.youtube && (
-            <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
-              <i className="pi pi-youtube text-white text-xs" />
-            </div>
+          {application.socialMedia && (application.socialMedia.instagram || application.socialMedia.tiktok || application.socialMedia.youtube) ? (
+            <>
+              {application.socialMedia.instagram && (
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{
+                    background:
+                      "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
+                  }}
+                >
+                  <i className="pi pi-instagram text-white text-xs" />
+                </div>
+              )}
+              {application.socialMedia.tiktok && (
+                <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                  <i className="pi pi-video text-white text-xs" />
+                </div>
+              )}
+              {application.socialMedia.youtube && (
+                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
+                  <i className="pi pi-youtube text-white text-xs" />
+                </div>
+              )}
+            </>
+          ) : (
+            <span className="text-xs text-gray-400 italic">Sosyal Medya Bağlı Değil</span>
           )}
         </div>
       </td>
