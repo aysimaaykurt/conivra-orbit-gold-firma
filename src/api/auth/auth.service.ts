@@ -253,3 +253,24 @@ export const changePassword = async (
   }
 };
 
+/**
+ * Get KVKK Document Service
+ * GET settings/kvkk
+ */
+export const getKvkkDocument = async (): Promise<{ success: boolean; message: string; data: { title: string; content: string } }> => {
+  try {
+    const response = await apiClient.get<{ success: boolean; message: string; data: { title: string; content: string } }>(
+      'settings/kvkk'
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data;
+    }
+    throw {
+      success: false,
+      message: error.message || 'KVKK dökümanı alınırken bir hata oluştu',
+    };
+  }
+};
+

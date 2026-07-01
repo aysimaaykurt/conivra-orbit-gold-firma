@@ -4,12 +4,13 @@ import Image from "next/image";
 import { Link, useRouter } from "@/src/navigation";
 import { useFormik } from "formik";
 import { registerSchema } from "@/src/yups/auth";
-import { register } from "@/src/api/auth/auth.service";
+import { register, getKvkkDocument } from "@/src/api/auth/auth.service";
 import { Input } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { Calendar } from "primereact/calendar";
+import { Dialog } from "primereact/dialog";
 import { useRef, useState } from "react";
 import circles from "@/src/images/circles.png";
 
@@ -46,6 +47,29 @@ export default function RegisterPage() {
   const router = useRouter();
   const toastRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [kvkkModalVisible, setKvkkModalVisible] = useState(false);
+  const [kvkkData, setKvkkData] = useState<{ title: string; content: string } | null>(null);
+  const [isKvkkLoading, setIsKvkkLoading] = useState(false);
+
+  const handleOpenKvkk = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsKvkkLoading(true);
+    setKvkkModalVisible(true);
+    try {
+      const response = await getKvkkDocument();
+      if (response.success && response.data) {
+        setKvkkData(response.data);
+      }
+    } catch (err) {
+      console.error("KVKK metni yüklenemedi:", err);
+      setKvkkData({
+        title: "KVKK Aydınlatma Metni",
+        content: "KVKK metni şu anda yüklenemedi. Lütfen daha sonra tekrar deneyiniz."
+      });
+    } finally {
+      setIsKvkkLoading(false);
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -277,7 +301,7 @@ export default function RegisterPage() {
                     </label>
                     <label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
                       <input type="checkbox" name="kvkk" checked={values.kvkk} onChange={handleChange} className="rounded border-slate-300 dark:border-zinc-700 text-primary focus:ring-primary dark:focus:ring-purple-500" />
-                      <span>Kişisel Verilerimin <a className="text-primary dark:text-purple-400 hover:underline font-medium" href="#">Aydınlatma Metni</a> kapsamında işlenmesini kabul ediyorum.</span>
+                      <span>Kişisel Verilerimin <a className="text-primary dark:text-purple-400 hover:underline font-medium" href="#" onClick={handleOpenKvkk}>Aydınlatma Metni</a> kapsamında işlenmesini kabul ediyorum.</span>
                     </label>
                     {touched.kvkk && errors.kvkk ? (
                       <p className="text-error mt-1 text-xs" style={{ color: "#E53935" }}>{errors.kvkk as string}</p>
@@ -311,6 +335,29 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
+      <Dialog
+        header={
+          <div className="text-lg font-bold" style={{ color: "#4C226A" }}>
+            {isKvkkLoading ? "Yükleniyor..." : kvkkData?.title || "KVKK Aydınlatma Metni"}
+          </div>
+        }
+        visible={kvkkModalVisible}
+        style={{ width: "90vw", maxWidth: "600px" }}
+        onHide={() => setKvkkModalVisible(false)}
+        modal
+        dismissableMask
+        className="rounded-lg overflow-hidden animate-none [&_.p-dialog-header]:pb-2 [&_.p-dialog-content]:pt-2"
+      >
+        <div className="py-2 text-slate-700 dark:text-zinc-300 leading-relaxed text-sm max-h-[60vh] overflow-y-auto whitespace-pre-line">
+          {isKvkkLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+            </div>
+          ) : (
+            kvkkData?.content
+          )}
+        </div>
+      </Dialog>
     </>
   );
 }
