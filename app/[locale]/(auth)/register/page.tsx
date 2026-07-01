@@ -343,12 +343,14 @@ export default function RegisterPage() {
         }
         visible={kvkkModalVisible}
         style={{ width: "90vw", maxWidth: "600px" }}
+        contentStyle={{ backgroundColor: "#ffffff", color: "#1e293b" }}
+        headerStyle={{ backgroundColor: "#ffffff", color: "#1e293b" }}
         onHide={() => setKvkkModalVisible(false)}
         modal
         dismissableMask
         className="rounded-lg overflow-hidden animate-none [&_.p-dialog-header]:pb-2 [&_.p-dialog-content]:pt-2"
       >
-        <div className="py-2 text-slate-700 dark:text-zinc-300 leading-relaxed text-sm max-h-[60vh] overflow-y-auto whitespace-pre-line">
+        <div className="py-2 text-slate-800 leading-relaxed text-sm max-h-[60vh] overflow-y-auto whitespace-pre-line" style={{ color: "#1e293b" }}>
           {isKvkkLoading ? (
             <div className="flex justify-center items-center py-8">
               <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
