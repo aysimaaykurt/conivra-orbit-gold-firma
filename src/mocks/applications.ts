@@ -18,7 +18,7 @@ export interface ApplicationListItem {
 }
 
 export const adTypeTabs: { id: AdType; label: string }[] = [
-  { id: "campaign", label: "Kampanya Başvuruları" },
+  { id: "campaign", label: "İlan Başvuruları" },
   { id: "giftkit", label: "Hediye Kiti Başvuruları" },
   { id: "workshop", label: "Workshop Başvuruları" },
 ];

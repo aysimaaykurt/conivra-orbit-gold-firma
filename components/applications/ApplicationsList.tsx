@@ -279,25 +279,25 @@ export default function ApplicationsList() {
                   }}
                 />
               </th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">
                 Görsel
               </th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">
                 Ad-Soyad
               </th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">
                 Takipçi Sayısı
               </th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">
                 Lokasyon
               </th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap min-w-[200px]">
                 Başvurulan İlan
               </th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">
                 Sosyal Medya
               </th>
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">
                 Durum
               </th>
             </tr>
@@ -464,9 +464,15 @@ function ApplicationTableRow({
     (application as any).advertisement?.id || 
     application.id;
 
+  const urlCategory = 
+    application.adType === "campaign" ? "reklam" :
+    application.adType === "giftkit" ? "hediye_kiti" :
+    application.adType === "workshop" ? "workshop" :
+    "reklam";
+
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
-      <td className="py-4 px-4 w-12 text-center">
+      <td className="py-4 px-4 w-12 text-center whitespace-nowrap">
         {Number(application.status) === 1 && (
           <input
             type="checkbox"
@@ -476,7 +482,7 @@ function ApplicationTableRow({
           />
         )}
       </td>
-      <td className="py-4 px-4">
+      <td className="py-4 px-4 whitespace-nowrap">
         {application.profileImageSrc || (application as any).profileImageSrc ? (
           <img
             src={
@@ -496,7 +502,7 @@ function ApplicationTableRow({
           </div>
         )}
       </td>
-      <td className="py-4 px-4">
+      <td className="py-4 px-4 whitespace-nowrap">
         <Link
           href={`/applications/${application.id}`}
           className="font-semibold text-dark hover:text-purple-600 transition-colors"
@@ -504,37 +510,41 @@ function ApplicationTableRow({
           {application.fullName}
         </Link>
       </td>
-      <td className="py-4 px-4 text-gray-700">{application.followerCount}</td>
-      <td className="py-4 px-4">
+      <td className="py-4 px-4 text-gray-700 whitespace-nowrap">{application.followerCount}</td>
+      <td className="py-4 px-4 whitespace-nowrap">
         <div className="flex items-center gap-2 text-gray-700">
           <i className="pi pi-map-marker text-gray-400" />
           <span>{application.location}</span>
         </div>
       </td>
-      <td className="py-4 px-4">
+      <td className="py-4 px-4 min-w-[200px]">
         <div className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-dark">
+          <Link
+            href={`/ad-management/detail/${urlCategory}/${adId}`}
+            target="_blank"
+            className="text-sm font-semibold text-purple-700 hover:text-purple-900 hover:underline transition-colors"
+          >
             {((application as any).advertisementTitle || 
               (application as any).adTitle || 
               (application as any).advert?.title || 
               (application as any).advertisement?.title || 
               (application as any).title || 
               "").trim() || (
-                application.adType === "campaign" ? "İlan Başvurusu" :
-                application.adType === "giftkit" ? "Hediye Kiti Başvurusu" :
-                application.adType === "workshop" ? "Workshop Başvurusu" :
-                "Başvuru"
+                application.adType === "campaign" ? "İlan Detayı" :
+                application.adType === "giftkit" ? "Hediye Kiti Detayı" :
+                application.adType === "workshop" ? "Workshop Detayı" :
+                "Detay Gör"
               )}
-          </span>
+          </Link>
           <span className="text-xs text-purple-600 bg-purple-50 w-max px-2 py-0.5 rounded font-medium">
-            {application.adType === "campaign" ? "Kampanya" :
+            {application.adType === "campaign" ? "İlan" :
              application.adType === "giftkit" ? "Hediye Kiti" :
              application.adType === "workshop" ? "Workshop" :
              application.adType}
           </span>
         </div>
       </td>
-      <td className="py-4 px-4">
+      <td className="py-4 px-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           {application.socialMedia && ((application.socialMedia as any).instagram || (application.socialMedia as any).tiktok || (application.socialMedia as any).youtube || (application.socialMedia as any).instagramLink || (application.socialMedia as any).tiktokLink || (application.socialMedia as any).youtubeLink) ? (
             <>
