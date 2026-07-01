@@ -37,6 +37,11 @@ const genderOptions = [
   { label: "Belirtmek İstemiyorum", value: "belirtmek-istemiyorum" },
 ];
 
+const companyTypeOptions = [
+  { label: "Bireysel", value: "Bireysel" },
+  { label: "Kurumsal", value: "Kurumsal" },
+];
+
 export default function RegisterPage() {
   const router = useRouter();
   const toastRef = useRef<any>(null);
@@ -45,6 +50,7 @@ export default function RegisterPage() {
   const formik = useFormik({
     initialValues: {
       company: "",
+      companyType: "",
       sector: "",
       fullName: "",
       email: "",
@@ -64,6 +70,7 @@ export default function RegisterPage() {
       try {
         const response = await register({
           company: values.company,
+          companyType: values.companyType,
           sector: values.sector,
           fullName: values.fullName,
           email: values.email,
@@ -164,6 +171,15 @@ export default function RegisterPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} autoComplete="off" noValidate className="grid gap-x-4 gap-y-4 grid-cols-1 md:grid-cols-2">
+                  <Dropdown 
+                    label="Firma Tipi" 
+                    name="companyType" 
+                    value={values.companyType} 
+                    onChange={handleChange} 
+                    onBlur={handleBlur} 
+                    error={touched.companyType ? errors.companyType : undefined}
+                    options={companyTypeOptions}
+                  />
                   <Input label="Firma" name="company" value={values.company} onChange={handleChange} onBlur={handleBlur} error={touched.company ? errors.company : undefined} />
                   <Dropdown 
                     label="Sektör" 

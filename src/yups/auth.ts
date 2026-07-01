@@ -7,6 +7,7 @@ export const loginSchema = Yup.object({
 
 export const registerSchema = Yup.object({
   company: Yup.string().required("Firma adı zorunludur"),
+  companyType: Yup.string().required("Firma tipi zorunludur"),
   sector: Yup.string().required("Sektör zorunludur"),
   fullName: Yup.string().required("Ad Soyad zorunludur"),
   email: Yup.string().email("Geçerli bir e-posta giriniz").required("E-posta zorunludur"),

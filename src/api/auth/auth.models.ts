@@ -7,6 +7,7 @@ export interface LoginRequest {
 // Register Request Models
 export interface RegisterRequest {
   company: string;
+  companyType: string;
   sector: string;
   fullName: string;
   email: string;
