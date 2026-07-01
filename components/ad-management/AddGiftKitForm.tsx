@@ -176,7 +176,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
               category: ad.category ? String(ad.category) : "",
               targetAudience: ad.targetAudience || "",
               followerRange: ad.followerRange || "",
-              platformPreference: typeof ad.platformPreference === 'string' ? ad.platformPreference.split(',').map(p => p.trim()) : (Array.isArray(ad.platformPreference) ? ad.platformPreference : []),
+              platformPreference: typeof (ad as any).platformPreference === 'string' ? ((ad as any).platformPreference as string).split(',').map((p: string) => p.trim()) : (Array.isArray((ad as any).platformPreference) ? (ad as any).platformPreference : []),
               businessType: ad.businessType || "",
               contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType] : []),
               images: [],

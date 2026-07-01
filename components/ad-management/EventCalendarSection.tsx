@@ -9,9 +9,11 @@ interface EventCalendarSectionProps {
   event: AdEvent;
   onEdit?: (id: string, category: string) => void;
   onDelete?: (id: string, category: string) => void;
+  onPause?: (id: string, category: string) => void;
+  onDuplicate?: (id: string, category: string) => void;
 }
 
-export default function EventCalendarSection({ event, onEdit, onDelete }: EventCalendarSectionProps) {
+export default function EventCalendarSection({ event, onEdit, onDelete, onPause, onDuplicate }: EventCalendarSectionProps) {
   const t = useTranslations("adManagement");
   
   const getMonthKey = (monthIndex: number) => {
@@ -152,6 +154,8 @@ export default function EventCalendarSection({ event, onEdit, onDelete }: EventC
                 event={event} 
                 onEdit={onEdit} 
                 onDelete={onDelete} 
+                onPause={onPause}
+                onDuplicate={onDuplicate}
                 spanCount={spanCount}
               />
             </div>

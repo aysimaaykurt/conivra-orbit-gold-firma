@@ -10,7 +10,7 @@ export interface Application {
 }
 
 // Application List Item Models (Applications sayfası için detaylı tip)
-export type AdType = "soiree-menu" | "beach-cocktail" | "soiree-breakfast";
+export type AdType = "campaign" | "giftkit" | "workshop" | "soiree-menu" | "beach-cocktail" | "soiree-breakfast";
 
 export interface ApplicationListItem {
   id: string;
@@ -100,7 +100,7 @@ export interface ApiErrorResponse {
 
 // Bulk Update Application Status Request
 export interface BulkUpdateApplicationStatusRequest {
-  applicationIds: number[];
+  applicationIds: string[];
   status: number;
 }
 

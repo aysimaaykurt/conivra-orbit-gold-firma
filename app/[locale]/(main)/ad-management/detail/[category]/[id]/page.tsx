@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { getAdvertisement } from "@/src/api/advertisements/advertisements.service";
+import { getAdvertisement, pauseAdvertisement, duplicateAdvertisement } from "@/src/api/advertisements/advertisements.service";
 import { getWorkshop } from "@/src/api/advertisements/workshops.service";
 import { getGiftKit } from "@/src/api/advertisements/giftKits.service";
 import { Advertisement } from "@/src/api/advertisements/advertisements.models";
 import { BASE_URL } from "@/src/api/axios";
 import { useCategories } from "@/src/hooks/useCategories";
 import { useSectors } from "@/src/hooks/useSectors";
+import { Toast } from "primereact/toast";
 
 export default function AdDetailPage() {
   const params = useParams();
@@ -25,6 +26,8 @@ export default function AdDetailPage() {
   const [ad, setAd] = useState<Advertisement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdatingState, setIsUpdatingState] = useState(false);
+  const toastRef = useRef<any>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -55,6 +58,79 @@ export default function AdDetailPage() {
 
     fetchAd();
   }, [id]);
+
+  const fetchAdDetail = async () => {
+    try {
+      let response;
+      if (categoryParam === "workshop") {
+        response = await getWorkshop(id);
+      } else if (categoryParam === "hediye_kiti") {
+        response = await getGiftKit(id);
+      } else {
+        response = await getAdvertisement(id);
+      }
+
+      if (response.success && response.data) {
+        setAd(response.data as any);
+      }
+    } catch (err) {
+      console.error("Error refreshing ad details:", err);
+    }
+  };
+
+  const handlePauseAd = async () => {
+    if (!id || isUpdatingState) return;
+    try {
+      setIsUpdatingState(true);
+      const res = await pauseAdvertisement(id);
+      if (res && res.success) {
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: res.message || "İlan durumu başarıyla güncellendi.",
+          life: 3000,
+        });
+        await fetchAdDetail();
+      }
+    } catch (err: any) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: err.message || "İlan durdurulurken/başlatılırken bir hata oluştu.",
+        life: 3000,
+      });
+    } finally {
+      setIsUpdatingState(false);
+    }
+  };
+
+  const handleDuplicateAd = async () => {
+    if (!id || isUpdatingState) return;
+    try {
+      setIsUpdatingState(true);
+      const res = await duplicateAdvertisement(id);
+      if (res && res.success) {
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: res.message || "İlan başarıyla kopyalandı.",
+          life: 3000,
+        });
+        setTimeout(() => {
+          router.push(`/${locale}/ad-management?tab=${categoryParam}`);
+        }, 1500);
+      }
+    } catch (err: any) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: err.message || "İlan kopyalanırken bir hata oluştu.",
+        life: 3000,
+      });
+    } finally {
+      setIsUpdatingState(false);
+    }
+  };
 
   const getImageUrl = (imgInput: any) => {
     if (!imgInput) return '/images/soiree.png';
@@ -138,6 +214,20 @@ export default function AdDetailPage() {
           </div>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={handlePauseAd}
+            disabled={isUpdatingState}
+            className="px-4 py-2 bg-white text-[#4C226A] font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <i className={`pi pi-${ad.status === "active" ? "pause" : "play"}`}></i> {ad.status === "active" ? "Durdur" : "Başlat"}
+          </button>
+          <button
+            onClick={handleDuplicateAd}
+            disabled={isUpdatingState}
+            className="px-4 py-2 bg-white text-[#4C226A] font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <i className="pi pi-copy"></i> Kopyala
+          </button>
           <button 
             onClick={() => {
               let route = `/${locale}/ad-management/add?editId=${ad.id}`;
@@ -319,6 +409,7 @@ export default function AdDetailPage() {
           </div>
         </div>
       </div>
+      <Toast ref={toastRef} />
     </div>
   );
 }

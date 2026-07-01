@@ -5,18 +5,20 @@ import { Link } from "@/src/navigation";
 import { useTranslations } from "next-intl";
 import { adTypeTabs, ApplicationListItem, AdType } from "@/src/mocks/applications";
 import { useApplications } from "@/src/hooks/useApplications";
-import { updateApplicationStatus } from "@/src/api/applications/applications.service";
+import { updateApplicationStatus, bulkUpdateApplicationStatus } from "@/src/api/applications/applications.service";
 import { ApplicationStatus } from "@/src/api/applications/applicationStatus.enum";
 import { Toast } from "primereact/toast";
+import { BASE_URL } from "@/src/api/axios";
 
 export default function ApplicationsList() {
   const t = useTranslations("applications.adTypes");
-  const [activeTab, setActiveTab] = useState<AdType>("soiree-menu");
+  const [activeTab, setActiveTab] = useState<AdType>("campaign");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedAppIds, setSelectedAppIds] = useState<string[]>([]);
   const [confirmModal, setConfirmModal] = useState<{
     visible: boolean;
-    type: "approve" | "reject" | null;
+    type: "approve" | "reject" | "bulk-approve" | "bulk-reject" | null;
     id: string;
   }>({
     visible: false,
@@ -56,12 +58,21 @@ export default function ApplicationsList() {
     setConfirmModal({ visible: true, type: "reject", id });
   };
 
+  const handleBulkAction = (actionType: "approve" | "reject") => {
+    setConfirmModal({
+      visible: true,
+      type: actionType === "approve" ? "bulk-approve" : "bulk-reject",
+      id: "",
+    });
+  };
+
   const handleConfirmAction = async () => {
     const { type, id } = confirmModal;
     setConfirmModal({ visible: false, type: null, id: "" });
-    if (!id || !type) return;
+    if (!type) return;
 
     if (type === "approve") {
+      if (!id) return;
       console.log("Approve Application ID:", id);
       try {
         await updateApplicationStatus(id, { status: ApplicationStatus.APPROVED });
@@ -82,6 +93,7 @@ export default function ApplicationsList() {
         });
       }
     } else if (type === "reject") {
+      if (!id) return;
       console.log("Reject Application ID:", id);
       try {
         await updateApplicationStatus(id, { status: ApplicationStatus.REJECTED });
@@ -101,6 +113,54 @@ export default function ApplicationsList() {
           life: 3000,
         });
       }
+    } else if (type === "bulk-approve") {
+      if (selectedAppIds.length === 0) return;
+      try {
+        await bulkUpdateApplicationStatus({
+          applicationIds: selectedAppIds,
+          status: ApplicationStatus.APPROVED,
+        });
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: "Seçilen başvurular başarıyla onaylandı.",
+          life: 3000,
+        });
+        setSelectedAppIds([]);
+        refetch();
+      } catch (err: any) {
+        console.error("Failed bulk approve:", err);
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: err.message || "Başvurular onaylanırken bir hata oluştu.",
+          life: 3000,
+        });
+      }
+    } else if (type === "bulk-reject") {
+      if (selectedAppIds.length === 0) return;
+      try {
+        await bulkUpdateApplicationStatus({
+          applicationIds: selectedAppIds,
+          status: ApplicationStatus.REJECTED,
+        });
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: "Seçilen başvurular başarıyla reddedildi.",
+          life: 3000,
+        });
+        setSelectedAppIds([]);
+        refetch();
+      } catch (err: any) {
+        console.error("Failed bulk reject:", err);
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: err.message || "Başvurular reddedilirken bir hata oluştu.",
+          life: 3000,
+        });
+      }
     }
   };
 
@@ -113,9 +173,28 @@ export default function ApplicationsList() {
     <div className="bg-white rounded-lg shadow-sm p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#4C226A" }}>
-          Başvurularım
-        </h1>
+        <div className="flex items-center gap-4 flex-wrap">
+          <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#4C226A" }}>
+            Başvurularım
+          </h1>
+          {selectedAppIds.length > 0 && (
+            <div className="flex items-center gap-2 bg-[#4C226A]/5 px-3 py-1.5 rounded-lg border border-[#4C226A]/20 animate-fade-in">
+              <span className="text-sm font-semibold text-[#4C226A]">{selectedAppIds.length} Seçildi</span>
+              <button
+                onClick={() => handleBulkAction("approve")}
+                className="ml-2 px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded transition-colors cursor-pointer"
+              >
+                Toplu Onayla
+              </button>
+              <button
+                onClick={() => handleBulkAction("reject")}
+                className="px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold rounded transition-colors cursor-pointer"
+              >
+                Toplu Reddet
+              </button>
+            </div>
+          )}
+        </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
           {/* Search */}
           <div className="relative flex-1 sm:flex-none">
@@ -176,6 +255,30 @@ export default function ApplicationsList() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
+              <th className="py-3 px-4 text-left w-12 text-center">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                  checked={
+                    Array.isArray(currentApplications) &&
+                    currentApplications.length > 0 &&
+                    currentApplications.filter((app) => Number(app.status) === 1).length > 0 &&
+                    currentApplications
+                      .filter((app) => Number(app.status) === 1)
+                      .every((app) => selectedAppIds.includes(app.id))
+                  }
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      const pendingIds = currentApplications
+                        .filter((app) => Number(app.status) === 1)
+                        .map((app) => app.id);
+                      setSelectedAppIds(pendingIds);
+                    } else {
+                      setSelectedAppIds([]);
+                    }
+                  }}
+                />
+              </th>
               <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                 Görsel
               </th>
@@ -187,6 +290,9 @@ export default function ApplicationsList() {
               </th>
               <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                 Lokasyon
+              </th>
+              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                Başvurulan İlan
               </th>
               <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                 Sosyal Medya
@@ -204,11 +310,17 @@ export default function ApplicationsList() {
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onShare={handleShare}
+                selected={selectedAppIds.includes(app.id)}
+                onSelectChange={(id, checked) => {
+                  setSelectedAppIds((prev) =>
+                    checked ? [...prev, id] : prev.filter((item) => item !== id)
+                  );
+                }}
               />
             ))}
             {Array.isArray(currentApplications) && currentApplications.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-20">
+                <td colSpan={8} className="text-center py-20">
                   <div className="flex flex-col items-center justify-center space-y-4">
                     <div className="w-24 h-24 bg-[#4C226A]/5 rounded-full flex items-center justify-center mb-2">
                       <i className="pi pi-folder-open text-[#4C226A] opacity-80" style={{ fontSize: '36px' }} />
@@ -278,7 +390,7 @@ export default function ApplicationsList() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-100 transform scale-100 transition-transform duration-300">
             <div className="flex flex-col items-center text-center space-y-4">
-              {confirmModal.type === "approve" ? (
+              {confirmModal.type === "approve" || confirmModal.type === "bulk-approve" ? (
                 <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500">
                   <i className="pi pi-check-circle text-3xl" />
                 </div>
@@ -289,13 +401,17 @@ export default function ApplicationsList() {
               )}
               
               <h3 className="text-xl font-bold text-gray-800">
-                {confirmModal.type === "approve" ? "Başvuruyu Onayla" : "Başvuruyu Reddet"}
+                {confirmModal.type === "approve" || confirmModal.type === "bulk-approve" ? "Başvuruları Onayla" : "Başvuruları Reddet"}
               </h3>
               
               <p className="text-sm text-gray-500 leading-relaxed">
                 {confirmModal.type === "approve" 
                   ? "Bu influencer başvurusunu onaylamak istediğinize emin misiniz? Bu işlem geri alınamaz."
-                  : "Bu influencer başvurusunu reddetmek istediğinize emin misiniz? Bu işlem geri alınamaz."}
+                  : confirmModal.type === "bulk-approve"
+                  ? `Seçilen ${selectedAppIds.length} başvuruyu onaylamak istediğinize emin misiniz? Bu işlem geri alınamaz.`
+                  : confirmModal.type === "reject"
+                  ? "Bu influencer başvurusunu reddetmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+                  : `Seçilen ${selectedAppIds.length} başvuruyu reddetmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
               </p>
               
               <div className="flex items-center gap-3 w-full mt-6">
@@ -311,7 +427,7 @@ export default function ApplicationsList() {
                   onClick={handleConfirmAction}
                   className="flex-1 py-3 px-4 rounded-xl text-white font-medium shadow-lg hover:opacity-90 transition-opacity"
                   style={{
-                    backgroundColor: confirmModal.type === "approve" ? "#10B981" : "#EF4444"
+                    backgroundColor: confirmModal.type === "approve" || confirmModal.type === "bulk-approve" ? "#10B981" : "#EF4444"
                   }}
                 >
                   Evet, Eminim
@@ -330,11 +446,15 @@ function ApplicationTableRow({
   onApprove,
   onReject,
   onShare,
+  selected,
+  onSelectChange,
 }: {
   application: ApplicationListItem;
   onApprove: (id: string, app?: any) => void;
   onReject: (id: string, app?: any) => void;
   onShare: (id: string) => void;
+  selected: boolean;
+  onSelectChange: (id: string, checked: boolean) => void;
 }) {
   const adId = 
     (application as any).advertId || 
@@ -346,10 +466,35 @@ function ApplicationTableRow({
 
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
+      <td className="py-4 px-4 w-12 text-center">
+        {Number(application.status) === 1 && (
+          <input
+            type="checkbox"
+            className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+            checked={selected}
+            onChange={(e) => onSelectChange(application.id, e.target.checked)}
+          />
+        )}
+      </td>
       <td className="py-4 px-4">
-        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-          <i className="pi pi-user text-gray-400" />
-        </div>
+        {application.profileImageSrc || (application as any).profileImageSrc ? (
+          <img
+            src={
+              (() => {
+                const img = application.profileImageSrc || (application as any).profileImageSrc;
+                return img.startsWith("http")
+                  ? img
+                  : `${BASE_URL.replace("/api/v1", "")}/${img.replace(/^\//, "")}`;
+              })()
+            }
+            alt={application.fullName}
+            className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center border border-gray-100">
+            <i className="pi pi-user text-gray-400" />
+          </div>
+        )}
       </td>
       <td className="py-4 px-4">
         <Link
@@ -367,29 +512,68 @@ function ApplicationTableRow({
         </div>
       </td>
       <td className="py-4 px-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold text-dark">
+            {((application as any).advertisementTitle || 
+              (application as any).adTitle || 
+              (application as any).advert?.title || 
+              (application as any).advertisement?.title || 
+              (application as any).title || 
+              "").trim() || (
+                application.adType === "campaign" ? "İlan Başvurusu" :
+                application.adType === "giftkit" ? "Hediye Kiti Başvurusu" :
+                application.adType === "workshop" ? "Workshop Başvurusu" :
+                "Başvuru"
+              )}
+          </span>
+          <span className="text-xs text-purple-600 bg-purple-50 w-max px-2 py-0.5 rounded font-medium">
+            {application.adType === "campaign" ? "Kampanya" :
+             application.adType === "giftkit" ? "Hediye Kiti" :
+             application.adType === "workshop" ? "Workshop" :
+             application.adType}
+          </span>
+        </div>
+      </td>
+      <td className="py-4 px-4">
         <div className="flex items-center gap-2">
-          {application.socialMedia && (application.socialMedia.instagram || application.socialMedia.tiktok || application.socialMedia.youtube) ? (
+          {application.socialMedia && ((application.socialMedia as any).instagram || (application.socialMedia as any).tiktok || (application.socialMedia as any).youtube || (application.socialMedia as any).instagramLink || (application.socialMedia as any).tiktokLink || (application.socialMedia as any).youtubeLink) ? (
             <>
-              {application.socialMedia.instagram && (
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
+              {((application.socialMedia as any).instagram || (application.socialMedia as any).instagramLink) && (
+                <a
+                  href={(application.socialMedia as any).instagramLink || "https://instagram.com"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
                   style={{
                     background:
                       "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
                   }}
+                  title="Instagram Profiline Git"
                 >
                   <i className="pi pi-instagram text-white text-xs" />
-                </div>
+                </a>
               )}
-              {application.socialMedia.tiktok && (
-                <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+              {((application.socialMedia as any).tiktok || (application.socialMedia as any).tiktokLink) && (
+                <a
+                  href={(application.socialMedia as any).tiktokLink || "https://tiktok.com"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-black flex items-center justify-center hover:scale-105 transition-transform"
+                  title="TikTok Profiline Git"
+                >
                   <i className="pi pi-video text-white text-xs" />
-                </div>
+                </a>
               )}
-              {application.socialMedia.youtube && (
-                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
+              {((application.socialMedia as any).youtube || (application.socialMedia as any).youtubeLink) && (
+                <a
+                  href={(application.socialMedia as any).youtubeLink || "https://youtube.com"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center hover:scale-105 transition-transform"
+                  title="YouTube Profiline Git"
+                >
                   <i className="pi pi-youtube text-white text-xs" />
-                </div>
+                </a>
               )}
             </>
           ) : (
@@ -400,7 +584,7 @@ function ApplicationTableRow({
       <td className="py-4 px-4">
         <div className="flex items-center gap-2">
           {(() => {
-            const status = application.status;
+            const status = application.status as any;
             if (status === 2 || status === "2" || status === "Approved") {
               return (
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
@@ -412,6 +596,20 @@ function ApplicationTableRow({
               return (
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
                   Reddedildi
+                </span>
+              );
+            }
+            if (status === 4 || status === "4" || status === "RevisionRequested" || status === "revisionrequested") {
+              return (
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                  Revizyon İstendi
+                </span>
+              );
+            }
+            if (status === 5 || status === "5" || status === "Completed" || status === "completed") {
+              return (
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                  Tamamlandı
                 </span>
               );
             }

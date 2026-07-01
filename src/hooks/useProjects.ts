@@ -40,10 +40,10 @@ export const useProjects = (filters?: GetProjectsParams) => {
             const mappedProjects: Project[] = dataArray.map((item: any) => {
               // Extract status and map to frontend ProjectStatus
               let status: ProjectStatus = "pending";
-              const rawStatus = (item.status || "").toLowerCase();
-              if (rawStatus === "ongoing" || rawStatus === "devam eden" || rawStatus === "active") {
+              const rawStatus = String(item.status || "").toLowerCase();
+              if (rawStatus === "ongoing" || rawStatus === "devam eden" || rawStatus === "active" || rawStatus === "approved" || rawStatus === "2") {
                 status = "ongoing";
-              } else if (rawStatus === "completed" || rawStatus === "tamamlanan" || rawStatus === "finished") {
+              } else if (rawStatus === "completed" || rawStatus === "tamamlanan" || rawStatus === "finished" || rawStatus === "5") {
                 status = "completed";
               }
 

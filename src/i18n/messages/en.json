@@ -110,7 +110,10 @@
     "adTypes": {
       "soiree-menu": "Soiree Menu Ad",
       "beach-cocktail": "Beach Cocktail Ad",
-      "soiree-breakfast": "Soiree Breakfast Ad"
+      "soiree-breakfast": "Soiree Breakfast Ad",
+      "campaign": "Campaign Applications",
+      "giftkit": "Gift Kit Applications",
+      "workshop": "Workshop Applications"
     }
   },
   "profile": {

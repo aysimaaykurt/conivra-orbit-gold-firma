@@ -10,10 +10,12 @@ interface EventCardProps {
   event: AdEvent;
   onEdit?: (id: string, category: string) => void;
   onDelete?: (id: string, category: string) => void;
+  onPause?: (id: string, category: string) => void;
+  onDuplicate?: (id: string, category: string) => void;
   spanCount?: number;
 }
 
-export default function EventCard({ event, onEdit, onDelete, spanCount = 7 }: EventCardProps) {
+export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicate, spanCount = 7 }: EventCardProps) {
   const t = useTranslations("adManagement");
   const { categories } = useCategories();
   const router = useRouter();
@@ -141,6 +143,30 @@ export default function EventCard({ event, onEdit, onDelete, spanCount = 7 }: Ev
 
         {/* Action Buttons (Absolute Top Right) */}
         <div className="absolute top-2 right-2 flex items-center gap-1">
+          {onPause && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPause(event.id, event.category);
+              }}
+              className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-white text-[#4C226A] shadow-sm transition-colors cursor-pointer"
+              title={(event as any).status === "active" ? "Duraklat" : "Başlat"}
+            >
+              <i className={`pi pi-${(event as any).status === "active" ? "pause" : "play"} text-[10px]`} />
+            </button>
+          )}
+          {onDuplicate && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDuplicate(event.id, event.category);
+              }}
+              className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-white text-[#4C226A] shadow-sm transition-colors cursor-pointer"
+              title="Kopyala"
+            >
+              <i className="pi pi-copy text-[10px]" />
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();

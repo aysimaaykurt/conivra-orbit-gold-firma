@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Tabs from "@/components/ad-management/Tabs";
 import Toolbar from "@/components/ad-management/Toolbar";
 import CalendarGrid from "@/components/ad-management/CalendarGrid";
 import EventCard from "@/components/ad-management/EventCard";
-import { getAdvertisements, deleteAdvertisement } from "@/src/api/advertisements/advertisements.service";
+import { getAdvertisements, deleteAdvertisement, pauseAdvertisement, duplicateAdvertisement } from "@/src/api/advertisements/advertisements.service";
 import { getWorkshops, deleteWorkshop } from "@/src/api/advertisements/workshops.service";
 import { getGiftKits, deleteGiftKit } from "@/src/api/advertisements/giftKits.service";
 import type { Advertisement } from "@/src/api/advertisements/advertisements.models";
@@ -15,6 +15,7 @@ import { AdEvent, AdCategory } from "@/src/mocks/adManagement";
 import { useAdManagement } from "@/src/hooks/useAdManagement";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
+import { Toast } from "primereact/toast";
 
 export default function AdManagementPage() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function AdManagementPage() {
   const [events, setEvents] = useState<AdEvent[]>([]);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string; category: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const toastRef = useRef<any>(null);
 
   // Helper function to convert API data to AdEvent format
   const convertToAdEvent = (
@@ -192,6 +194,50 @@ export default function AdManagementPage() {
     }
   };
 
+  const handlePause = async (id: string, cat: string) => {
+    try {
+      const response = await pauseAdvertisement(id);
+      if (response && response.success) {
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: response.message || "İlan durumu başarıyla güncellendi.",
+          life: 3000,
+        });
+        refetch();
+      }
+    } catch (err: any) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: err.message || "İlan durdurulurken/başlatılırken bir hata oluştu.",
+        life: 3000,
+      });
+    }
+  };
+
+  const handleDuplicate = async (id: string, cat: string) => {
+    try {
+      const response = await duplicateAdvertisement(id);
+      if (response && response.success) {
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: response.message || "İlan başarıyla kopyalandı.",
+          life: 3000,
+        });
+        refetch();
+      }
+    } catch (err: any) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: err.message || "İlan kopyalanırken bir hata oluştu.",
+        life: 3000,
+      });
+    }
+  };
+
   return (
     <div className="p-6 bg-[#F7F6F9] min-h-screen">
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
@@ -271,11 +317,19 @@ export default function AdManagementPage() {
               event={event} 
               onEdit={handleEdit}
               onDelete={handleDeleteClick}
+              onPause={handlePause}
+              onDuplicate={handleDuplicate}
             />
           ))}
         </div>
       ) : (
-        <CalendarGrid events={events} onEdit={handleEdit} onDelete={handleDeleteClick} />
+        <CalendarGrid 
+          events={events} 
+          onEdit={handleEdit} 
+          onDelete={handleDeleteClick} 
+          onPause={handlePause}
+          onDuplicate={handleDuplicate}
+        />
       )}
       {/* Delete Modal */}
       {deleteModal?.isOpen && (
@@ -310,6 +364,7 @@ export default function AdManagementPage() {
           </div>
         </div>
       )}
+      <Toast ref={toastRef} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { ApplicationStatus } from "@/src/api/applications/applicationStatus.enum";
 
-export type AdType = "soiree-menu" | "beach-cocktail" | "soiree-breakfast";
+export type AdType = "campaign" | "giftkit" | "workshop" | "soiree-menu" | "beach-cocktail" | "soiree-breakfast";
 
 export interface ApplicationListItem {
   id: string;
@@ -18,9 +18,9 @@ export interface ApplicationListItem {
 }
 
 export const adTypeTabs: { id: AdType; label: string }[] = [
-  { id: "soiree-menu", label: "Soiree Menü Reklamı" },
-  { id: "beach-cocktail", label: "Beach Kokteyl Reklamı" },
-  { id: "soiree-breakfast", label: "Soiree Kahvaltı Reklamı" },
+  { id: "campaign", label: "Kampanya Başvuruları" },
+  { id: "giftkit", label: "Hediye Kiti Başvuruları" },
+  { id: "workshop", label: "Workshop Başvuruları" },
 ];
 
 export const applicationsList: ApplicationListItem[] = [

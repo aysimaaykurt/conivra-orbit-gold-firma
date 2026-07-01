@@ -8,9 +8,11 @@ interface CalendarGridProps {
   events: AdEvent[];
   onEdit?: (id: string, category: string) => void;
   onDelete?: (id: string, category: string) => void;
+  onPause?: (id: string, category: string) => void;
+  onDuplicate?: (id: string, category: string) => void;
 }
 
-export default function CalendarGrid({ events, onEdit, onDelete }: CalendarGridProps) {
+export default function CalendarGrid({ events, onEdit, onDelete, onPause, onDuplicate }: CalendarGridProps) {
   return (
     <div className="mt-6 space-y-4">
       {events.map((event) => (
@@ -19,6 +21,8 @@ export default function CalendarGrid({ events, onEdit, onDelete }: CalendarGridP
           event={event} 
           onEdit={onEdit}
           onDelete={onDelete}
+          onPause={onPause}
+          onDuplicate={onDuplicate}
         />
       ))}
     </div>

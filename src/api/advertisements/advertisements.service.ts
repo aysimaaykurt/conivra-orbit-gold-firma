@@ -333,3 +333,28 @@ export const pauseAdvertisement = async (
     } as ApiErrorResponse;
   }
 };
+
+/**
+ * Duplicate Advertisement Service
+ * POST Advertisements/:id/duplicate
+ */
+export const duplicateAdvertisement = async (
+  id: string
+): Promise<{ success: boolean; message: string; data?: any }> => {
+  try {
+    const cleanId = id.replace(/^(ad|workshop|gift-kit|gift_kit|app)-/i, '');
+    const response = await apiClient.post<{ success: boolean; message: string; data?: any }>(
+      `Advertisements/${cleanId}/duplicate`
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'İlan kopyalanırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+

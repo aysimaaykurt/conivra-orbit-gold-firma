@@ -109,7 +109,10 @@
     "adTypes": {
       "soiree-menu": "Anuncio de Menú Soiree",
       "beach-cocktail": "Anuncio de Cóctel de Playa",
-      "soiree-breakfast": "Anuncio de Desayuno Soiree"
+      "soiree-breakfast": "Anuncio de Desayuno Soiree",
+      "campaign": "Aplicaciones de Campaña",
+      "giftkit": "Aplicaciones de Kit de Regalo",
+      "workshop": "Aplicaciones de Taller"
     }
   },
   "profile": {
