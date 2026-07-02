@@ -60,7 +60,7 @@ export const mockProjects: Project[] = [
     type: "Reklam",
     assignee: "Derya Sevin",
     socialMediaLink: "https://instagram.com/derya.sevin",
-    status: "ongoing",
+    status: "active",
   },
   // Tamamlanan Projelerim
   {

@@ -9,9 +9,10 @@ import { useLocale } from "next-intl";
 
 interface ProjectsListProps {
   projects: Project[];
+  onRefresh?: () => void;
 }
 
-export default function ProjectsList({ projects }: ProjectsListProps) {
+export default function ProjectsList({ projects, onRefresh }: ProjectsListProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewOnly, setIsViewOnly] = useState(false);
@@ -41,7 +42,9 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
 
   const handleSubmit = (data: EvaluationData) => {
     console.log("Evaluation submitted:", data);
-    // TODO: Submit evaluation data
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   return (

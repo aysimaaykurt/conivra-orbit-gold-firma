@@ -12,6 +12,7 @@ import { Toast } from "primereact/toast";
 import apiClient, { BASE_URL } from "@/src/api/axios";
 import { useSectors } from "@/src/hooks/useSectors";
 import { useCategories } from "@/src/hooks/useCategories";
+import EvaluationModal from "@/components/projects/EvaluationModal";
 
 export default function ApplicationDetailPage({
   params,
@@ -28,6 +29,8 @@ export default function ApplicationDetailPage({
   const [revisionNote, setRevisionNote] = useState("");
   const [isSubmittingRevision, setIsSubmittingRevision] = useState(false);
   const [isApprovingSubmission, setIsApprovingSubmission] = useState(false);
+  const [isEvaluationModalOpen, setIsEvaluationModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const toastRef = useRef<any>(null);
   const { sectors } = useSectors();
   const { categories } = useCategories();
@@ -105,7 +108,7 @@ export default function ApplicationDetailPage({
       }
     };
     fetchDetail();
-  }, [resolvedParams.id]);
+  }, [resolvedParams.id, refreshTrigger]);
 
   // Fetch the related advertisement detail
   useEffect(() => {
@@ -818,9 +821,15 @@ export default function ApplicationDetailPage({
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-700">Değerlendirme Yapılmadı</p>
-                        <p className="text-xs text-gray-500 mt-1 max-w-[240px]">
-                          Bu işe ait değerlendirmeyi henüz yapmadınız. Projeler sayfasından değerlendirme formuna ulaşabilirsiniz.
+                        <p className="text-xs text-gray-500 mt-1 max-w-[240px] mb-3">
+                          Bu işe ait değerlendirmeyi henüz yapmadınız.
                         </p>
+                        <button
+                          onClick={() => setIsEvaluationModalOpen(true)}
+                          className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#4C226A] hover:bg-[#4C226A]/90 transition-colors cursor-pointer"
+                        >
+                          Influencer'ı Değerlendir
+                        </button>
                       </div>
                     </div>
                   )}
@@ -1072,6 +1081,16 @@ export default function ApplicationDetailPage({
           </div>
         )}
       </Dialog>
+
+      <EvaluationModal
+        isOpen={isEvaluationModalOpen}
+        onClose={() => setIsEvaluationModalOpen(false)}
+        onSubmit={() => {
+          setRefreshTrigger(prev => prev + 1);
+        }}
+        applicationId={detailData?.id}
+        influencerId={detailData?.influencerId || detailData?.influencer?.id || detailData?.applicantId || detailData?.applicant?.id || detailData?.id}
+      />
     </div>
   );
 }

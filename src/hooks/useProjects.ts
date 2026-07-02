@@ -8,6 +8,9 @@ export const useProjects = (filters?: GetProjectsParams) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refetch = () => setRefreshTrigger((prev) => prev + 1);
 
   useEffect(() => {
     let mounted = true;
@@ -144,7 +147,7 @@ export const useProjects = (filters?: GetProjectsParams) => {
     return () => {
       mounted = false;
     };
-  }, [JSON.stringify(filters)]);
+  }, [JSON.stringify(filters), refreshTrigger]);
 
-  return { projects, isLoading, error, setProjects };
+  return { projects, isLoading, error, setProjects, refetch };
 };

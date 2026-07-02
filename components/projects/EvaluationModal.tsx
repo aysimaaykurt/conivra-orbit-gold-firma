@@ -17,6 +17,14 @@ interface EvaluationModalProps {
   evaluationId?: string; // For viewing existing evaluation
 }
 
+const mapAdherenceValue = (val: any): "yes" | "no" | null => {
+  if (val === null || val === undefined) return null;
+  if (val === true || String(val).toLowerCase() === "yes" || String(val).toLowerCase() === "true") {
+    return "yes";
+  }
+  return "no";
+};
+
 export default function EvaluationModal({
   isOpen,
   onClose,
@@ -39,7 +47,7 @@ export default function EvaluationModal({
   );
   const [agreementAdherence, setAgreementAdherence] = useState<
     "yes" | "no" | null
-  >(initialData?.agreementAdherence || null);
+  >(mapAdherenceValue(initialData?.agreementAdherence));
   const [agreementExplanation, setAgreementExplanation] = useState(
     initialData?.agreementExplanation || ""
   );
@@ -61,7 +69,7 @@ export default function EvaluationModal({
             const evalData = response.data;
             setServiceSatisfaction(evalData.serviceSatisfaction);
             setCollaborationEffectiveness(evalData.collaborationEffectiveness);
-            setAgreementAdherence(evalData.agreementAdherence);
+            setAgreementAdherence(mapAdherenceValue(evalData.agreementAdherence));
             setAgreementExplanation(evalData.agreementExplanation || "");
             setEffects(evalData.effects);
           }
@@ -87,7 +95,7 @@ export default function EvaluationModal({
     if (!isOpen) {
       setServiceSatisfaction(initialData?.serviceSatisfaction || 0);
       setCollaborationEffectiveness(initialData?.collaborationEffectiveness || 0);
-      setAgreementAdherence(initialData?.agreementAdherence || null);
+      setAgreementAdherence(mapAdherenceValue(initialData?.agreementAdherence));
       setAgreementExplanation(initialData?.agreementExplanation || "");
       setEffects({
         followerIncrease: initialData?.effects.followerIncrease || false,

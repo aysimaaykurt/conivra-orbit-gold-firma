@@ -9,7 +9,7 @@ export default function ProjectsPage() {
   const [activeMobileTab, setActiveMobileTab] = useState<"draft" | "pending" | "active" | "completed" | "cancelled" | "expired" | "paused" | "inactive">("active");
 
   // Fetch all projects. Backend might not support search query yet, so we fetch all and filter on the client.
-  const { projects, isLoading, error } = useProjects({ page: 1, pageSize: 100 });
+  const { projects, isLoading, error, refetch } = useProjects({ page: 1, pageSize: 100 });
 
   // Filter by search query
   const filteredProjects = projects.filter(
@@ -188,7 +188,7 @@ export default function ProjectsPage() {
                 <div className="flex-1 overflow-y-auto pr-2 pb-4">
                   {tab.projects.length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">{tab.emptyText}</p>
-                  ) : <ProjectsList projects={tab.projects} />}
+                  ) : <ProjectsList projects={tab.projects} onRefresh={refetch} />}
                 </div>
               </div>
             ))}
