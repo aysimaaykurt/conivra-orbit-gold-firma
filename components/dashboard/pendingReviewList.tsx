@@ -44,12 +44,12 @@ export default function PendingReviewList() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-4 h-full">
-        <div className="mb-4">
+      <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col max-h-[420px]">
+        <div className="mb-4 flex-shrink-0">
           <h2 className="text-lg font-bold text-dark mb-2">{t("title")}</h2>
           <p className="text-sm text-lightGray">{t("subtitle")}</p>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-3 overflow-y-auto pr-1 flex-1 custom-scrollbar">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white rounded-lg p-3 shadow-sm flex items-start gap-3 relative border border-gray-100 animate-pulse">
               <div className="flex-shrink-0">
@@ -71,17 +71,17 @@ export default function PendingReviewList() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 h-full">
-      <div className="mb-4">
+    <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col max-h-[420px]">
+      <div className="mb-4 flex-shrink-0">
         <h2 className="text-lg font-bold text-dark mb-2">{t("title")}</h2>
         <p className="text-sm text-lightGray">{t("subtitle")}</p>
       </div>
       {error ? (
-        <p className="text-sm text-lightGray text-center py-4">
+        <p className="text-sm text-lightGray text-center py-4 flex-1 flex items-center justify-center">
           {error}
         </p>
       ) : applications.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-3 overflow-y-auto pr-1 flex-1 custom-scrollbar">
           {applications.map((application) => (
             <PendingReviewItemComponent 
               key={application.id} 
@@ -91,7 +91,7 @@ export default function PendingReviewList() {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-lightGray text-center py-4">
+        <p className="text-sm text-lightGray text-center py-4 flex-1 flex items-center justify-center">
           {t("noItems") || "Henüz bekleyen değerlendirme bulunmamaktadır."}
         </p>
       )}

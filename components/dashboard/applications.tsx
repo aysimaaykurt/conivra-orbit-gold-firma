@@ -10,9 +10,9 @@ export default function ApplicationList() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-4 h-full">
-        <h2 className="text-lg font-bold text-dark mb-4">{t("title")}</h2>
-        <div className="space-y-3">
+      <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col min-h-[380px] max-h-[460px]">
+        <h2 className="text-lg font-bold text-dark mb-4 flex-shrink-0">{t("title")}</h2>
+        <div className="space-y-3 overflow-y-auto pr-1 flex-1 custom-scrollbar">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex gap-3 pb-3 border-b border-gray-100 last:border-b-0 last:pb-0 animate-pulse">
               <div className="flex-shrink-0">
@@ -35,20 +35,20 @@ export default function ApplicationList() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 h-full">
-      <h2 className="text-lg font-bold text-dark mb-4">{t("title")}</h2>
+    <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col min-h-[380px] max-h-[460px]">
+      <h2 className="text-lg font-bold text-dark mb-4 flex-shrink-0">{t("title")}</h2>
       {error ? (
-        <p className="text-sm text-lightGray text-center py-4">
+        <p className="text-sm text-lightGray text-center py-4 flex-1 flex items-center justify-center">
           {error}
         </p>
       ) : applications.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-3 overflow-y-auto pr-1 flex-1 custom-scrollbar">
           {applications.map((application) => (
             <ApplicationItem key={application.id} application={application} />
           ))}
         </div>
       ) : (
-        <p className="text-sm text-lightGray text-center py-4">
+        <p className="text-sm text-lightGray text-center py-4 flex-1 flex items-center justify-center">
           Henüz başvuru bulunmamaktadır.
         </p>
       )}
