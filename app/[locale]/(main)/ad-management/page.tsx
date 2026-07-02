@@ -237,8 +237,8 @@ export default function AdManagementPage() {
       toastRef.current?.show({
         severity: "error",
         summary: "Hata",
-        detail: err.message || "İlan durdurulurken/başlatılırken bir hata oluştu.",
-        life: 3000,
+        detail: err.message || err.response?.data?.message || "İlan durdurulurken/başlatılırken bir hata oluştu.",
+        life: 4000,
       });
     } finally {
       setPauseModal(null);
@@ -256,7 +256,7 @@ export default function AdManagementPage() {
         toastRef.current?.show({
           severity: "success",
           summary: "Başarılı",
-          detail: response.message || "İlan başarıyla kopyalandı. Ancak kopyalanan ilan tekrar aktifleştirilirse tarihler çakışacaktır.",
+          detail: response.message || "İlan başarıyla kopyalandı.",
           life: 4000,
         });
         refetch();
@@ -264,7 +264,7 @@ export default function AdManagementPage() {
         toastRef.current?.show({
           severity: "error",
           summary: "İşlem Başarısız",
-          detail: response?.message || "Kopyalanan ilan aktif olduğu için tarihler çakışıyor.",
+          detail: response?.message || "İlan kopyalanamadı.",
           life: 4000,
         });
       }
@@ -449,7 +449,7 @@ export default function AdManagementPage() {
                     <p className="text-xs text-blue-800 text-left flex gap-2">
                       <i className="pi pi-info-circle mt-0.5"></i>
                       <span>
-                        <strong>Uyarı:</strong> Kopyalanmış pasif bir ilanı aktifleştiriyorsanız ve orijinal ilan halihazırda yayındaysa, tarihler çakışacağından dolayı işlem gerçekleşmeyecektir.
+                        <strong>Uyarı:</strong> Birebir aynı içerikte olan kopyalanmış ilanlar, orijinal ilan aktif durumdayken aktif edilemez. İçerikte değişiklik yapıldıysa aktif edilebilir.
                       </span>
                     </p>
                   </div>
