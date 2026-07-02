@@ -29,6 +29,7 @@ export interface InfluencerEvaluationDto {
 
 export interface ApplicationListItem {
   id: string;
+  influencerId?: string;
   adId?: number;
   adType: AdType;
   profileImageSrc?: string;
