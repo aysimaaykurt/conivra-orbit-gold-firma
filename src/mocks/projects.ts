@@ -1,4 +1,4 @@
-export type ProjectStatus = "pending" | "ongoing" | "completed";
+export type ProjectStatus = "draft" | "pending" | "active" | "completed" | "cancelled" | "expired" | "paused" | "inactive";
 export type OverlayAction = "evaluate" | "view";
 
 export interface Project {
@@ -7,11 +7,16 @@ export interface Project {
   title: string;
   location: string;
   date: string;
+  startDate?: string;
+  endDate?: string;
   type: string;
+  sector?: string;
+  platforms?: string;
   assignee?: string;
   applicationCount?: number;
   socialMediaLink: string;
   status: ProjectStatus;
+  rawStatus?: string; // Birebir backend'den gelen orijinal durum (active, paused, cancelled vb.)
   showCheckmark?: boolean;
   overlayText?: string;
   overlayIcon?: "star-yellow" | "star-green";

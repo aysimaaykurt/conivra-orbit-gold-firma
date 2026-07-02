@@ -66,6 +66,7 @@ export interface Advertisement {
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)
   status?: string; // e.g., "active", "inactive", "pending"
+  viewCount?: number; // Eklendi: İlan tekil görüntülenme sayısı
 }
 
 // Add Advertisement Response Models (POST)

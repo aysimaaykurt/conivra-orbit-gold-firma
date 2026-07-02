@@ -6,6 +6,12 @@ export interface ProjectItem {
   type: string;
   imageUrl?: string;
   applicantCount?: number;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  sector?: string;
+  platforms?: string;
+  image?: string;
   [key: string]: any;
 }
 

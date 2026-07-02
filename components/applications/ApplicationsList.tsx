@@ -5,7 +5,7 @@ import { Link } from "@/src/navigation";
 import { useTranslations } from "next-intl";
 import { adTypeTabs, ApplicationListItem, AdType } from "@/src/mocks/applications";
 import { useApplications } from "@/src/hooks/useApplications";
-import { updateApplicationStatus, bulkUpdateApplicationStatus } from "@/src/api/applications/applications.service";
+import { updateApplicationStatus, bulkUpdateApplicationStatus, approveSubmission } from "@/src/api/applications/applications.service";
 import { ApplicationStatus } from "@/src/api/applications/applicationStatus.enum";
 import { Toast } from "primereact/toast";
 import { BASE_URL } from "@/src/api/axios";
@@ -18,7 +18,7 @@ export default function ApplicationsList() {
   const [selectedAppIds, setSelectedAppIds] = useState<string[]>([]);
   const [confirmModal, setConfirmModal] = useState<{
     visible: boolean;
-    type: "approve" | "reject" | "bulk-approve" | "bulk-reject" | null;
+    type: "approve" | "reject" | "bulk-approve" | "bulk-reject" | "approve-submission" | null;
     id: string;
   }>({
     visible: false,
@@ -56,6 +56,10 @@ export default function ApplicationsList() {
 
   const handleReject = (id: string) => {
     setConfirmModal({ visible: true, type: "reject", id });
+  };
+
+  const handleApproveSubmissionClick = (id: string) => {
+    setConfirmModal({ visible: true, type: "approve-submission", id });
   };
 
   const handleBulkAction = (actionType: "approve" | "reject") => {
@@ -110,6 +114,26 @@ export default function ApplicationsList() {
           severity: "error",
           summary: "Hata",
           detail: err.message || "Başvuru reddedilirken bir hata oluştu.",
+          life: 3000,
+        });
+      }
+    } else if (type === "approve-submission") {
+      if (!id) return;
+      try {
+        await approveSubmission(id);
+        toastRef.current?.show({
+          severity: "success",
+          summary: "Başarılı",
+          detail: "İş onaylandı, başvuru durumu güncellendi.",
+          life: 3000,
+        });
+        refetch();
+      } catch (err: any) {
+        console.error("Failed to approve submission:", err);
+        toastRef.current?.show({
+          severity: "error",
+          summary: "Hata",
+          detail: err.message || "İş onaylanırken bir hata oluştu.",
           life: 3000,
         });
       }
@@ -309,6 +333,7 @@ export default function ApplicationsList() {
                 application={app}
                 onApprove={handleApprove}
                 onReject={handleReject}
+                onApproveSubmission={handleApproveSubmissionClick}
                 onShare={handleShare}
                 selected={selectedAppIds.includes(app.id)}
                 onSelectChange={(id, checked) => {
@@ -390,7 +415,7 @@ export default function ApplicationsList() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-100 transform scale-100 transition-transform duration-300">
             <div className="flex flex-col items-center text-center space-y-4">
-              {confirmModal.type === "approve" || confirmModal.type === "bulk-approve" ? (
+              {confirmModal.type === "approve" || confirmModal.type === "bulk-approve" || confirmModal.type === "approve-submission" ? (
                 <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500">
                   <i className="pi pi-check-circle text-3xl" />
                 </div>
@@ -400,18 +425,27 @@ export default function ApplicationsList() {
                 </div>
               )}
               
-              <h3 className="text-xl font-bold text-gray-800">
-                {confirmModal.type === "approve" || confirmModal.type === "bulk-approve" ? "Başvuruları Onayla" : "Başvuruları Reddet"}
-              </h3>
-              
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {confirmModal.type === "approve" 
-                  ? "Bu influencer başvurusunu onaylamak istediğinize emin misiniz? Bu işlem geri alınamaz."
-                  : confirmModal.type === "bulk-approve"
-                  ? `Seçilen ${selectedAppIds.length} başvuruyu onaylamak istediğinize emin misiniz? Bu işlem geri alınamaz.`
+              <h3 className="text-xl font-bold text-gray-900">
+                {confirmModal.type === "approve"
+                  ? "Başvuruyu Onayla"
+                  : confirmModal.type === "approve-submission"
+                  ? "İşi Onayla"
                   : confirmModal.type === "reject"
-                  ? "Bu influencer başvurusunu reddetmek istediğinize emin misiniz? Bu işlem geri alınamaz."
-                  : `Seçilen ${selectedAppIds.length} başvuruyu reddetmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
+                  ? "Başvuruyu Reddet"
+                  : confirmModal.type === "bulk-approve"
+                  ? "Toplu Onaylama"
+                  : "Toplu Reddetme"}
+              </h3>
+              <p className="text-sm text-gray-500 max-w-sm">
+                {confirmModal.type === "approve"
+                  ? "Bu başvuruyu onaylamak istediğinize emin misiniz? Bu işlem geri alınamaz."
+                  : confirmModal.type === "approve-submission"
+                  ? "Teslim edilen işi onaylamak istediğinize emin misiniz? Bu işlem geri alınamaz."
+                  : confirmModal.type === "reject"
+                  ? "Bu başvuruyu reddetmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+                  : confirmModal.type === "bulk-approve"
+                  ? "Seçilen başvuruları onaylamak istediğinize emin misiniz?"
+                  : "Seçilen başvuruları reddetmek istediğinize emin misiniz?"}
               </p>
               
               <div className="flex items-center gap-3 w-full mt-6">
@@ -445,13 +479,15 @@ function ApplicationTableRow({
   application,
   onApprove,
   onReject,
+  onApproveSubmission,
   onShare,
   selected,
   onSelectChange,
 }: {
   application: ApplicationListItem;
-  onApprove: (id: string, app?: any) => void;
-  onReject: (id: string, app?: any) => void;
+  onApprove: (id: string, item: ApplicationListItem) => void;
+  onReject: (id: string, item: ApplicationListItem) => void;
+  onApproveSubmission: (id: string) => void;
   onShare: (id: string) => void;
   selected: boolean;
   onSelectChange: (id: string, checked: boolean) => void;
@@ -520,8 +556,7 @@ function ApplicationTableRow({
       <td className="py-4 px-4 min-w-[200px]">
         <div className="flex flex-col gap-1">
           <Link
-            href={`/ad-management/detail/${urlCategory}/${adId}`}
-            target="_blank"
+            href={`/applications/${application.id}`}
             className="text-sm font-semibold text-purple-700 hover:text-purple-900 hover:underline transition-colors"
           >
             {((application as any).advertisementTitle || 
@@ -609,18 +644,36 @@ function ApplicationTableRow({
                 </span>
               );
             }
-            if (status === 4 || status === "4" || status === "RevisionRequested" || status === "revisionrequested") {
+            if (status === 4 || status === "4" || status === "RevisionRequested" || status === "revision_requested" || status === "revisionrequested") {
               return (
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
                   Revizyon İstendi
                 </span>
               );
             }
-            if (status === 5 || status === "5" || status === "Completed" || status === "completed") {
+            if (status === 5 || status === "5" || status === "Withdrawn" || status === "withdrawn" || status === "Geri Çekildi") {
+              return (
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                  Geri Çekildi
+                </span>
+              );
+            }
+            if (status === 6 || status === "6" || status === "Completed" || status === "completed") {
               return (
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
                   Tamamlandı
                 </span>
+              );
+            }
+            if (status === 7 || status === "7" || status === "Submitted" || status === "submitted") {
+              return (
+                <button
+                  onClick={() => onApproveSubmission(application.id)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-1"
+                  style={{ backgroundColor: "#10B981" }}
+                >
+                  <i className="pi pi-check-circle text-xs" /> İşi Onayla
+                </button>
               );
             }
             return (

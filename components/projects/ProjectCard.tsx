@@ -8,18 +8,22 @@ interface ProjectCardProps {
   project: Project;
   colorIndex?: number;
   onEvaluateClick?: () => void;
+  onClick?: () => void;
 }
 
-const cardColors = ["#E3D2EC", "#D2ABC7", "#C9B7C1"];
-
-export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }: ProjectCardProps) {
+export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick, onClick }: ProjectCardProps) {
+  const cardColors = ["#E3D2EC", "#D2ABC7", "#C9B7C1"];
   const t = useTranslations("projects");
   const {
     imageSrc,
     title,
     location,
     date,
+    startDate,
+    endDate,
     type,
+    sector,
+    platforms,
     assignee,
     socialMediaLink,
     showCheckmark,
@@ -42,7 +46,11 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
   };
 
   return (
-    <div className="rounded-lg p-2 flex gap-2 relative" style={{ backgroundColor: cardColor }}>
+    <div 
+      className="rounded-lg p-2 flex gap-2 relative cursor-pointer hover:shadow-md transition-shadow" 
+      style={{ backgroundColor: cardColor }}
+      onClick={onClick}
+    >
       {/* Checkmark for completed projects - outside card */}
       {showCheckmark && (
         <div className="absolute -top-2 -right-2 z-20">
@@ -63,7 +71,10 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
         {overlayText && (
           <div
             className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-black/80 transition-colors"
-            onClick={onEvaluateClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onEvaluateClick) onEvaluateClick();
+            }}
             style={{ backgroundColor: "rgba(76, 34, 106, 0.7)" }}
           >
             <i className={`${getOverlayIconClass()} text-3xl mb-2`} />
@@ -79,7 +90,7 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
         {/* Title */}
         <h3 className="font-bold text-dark mb-3 text-base line-clamp-1">{title}</h3>
 
-        {/* Details Grid (2x2) */}
+        {/* Details Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
           {/* Row 1 - Left: Location */}
           {location && (
@@ -89,19 +100,23 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
             </div>
           )}
           
-          {/* Row 1 - Right: Date */}
-          {date && (
+          {/* Row 1 - Right: Date / Date Range */}
+          {(startDate || date) && (
             <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
               <i className="pi pi-calendar text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
-              <span className="text-[11px] text-gray-800 font-medium truncate">{date}</span>
+              <span className="text-[11px] text-gray-800 font-medium truncate">
+                {startDate && endDate ? `${startDate} - ${endDate}` : startDate || date}
+              </span>
             </div>
           )}
 
-          {/* Row 2 - Left: Type */}
-          {type && (
-            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+          {/* Row 2 - Left: Type & Sector */}
+          {(type || sector) && (
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0" title={sector ? `${type} - ${sector}` : type}>
               <i className="pi pi-tag text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
-              <span className="text-[11px] text-gray-800 font-medium truncate capitalize">{type === "campaign" ? "Kampanya" : type}</span>
+              <span className="text-[11px] text-gray-800 font-medium truncate capitalize">
+                {type === "campaign" ? "Kampanya" : type === "giftkit" ? "Hediye Kiti" : type} {sector ? `(${sector})` : ""}
+              </span>
             </div>
           )}
 
@@ -117,19 +132,16 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick }
               <span className="text-[11px] text-gray-800 font-medium truncate">{assignee}</span>
             </div>
           )}
+          
+          {/* Row 3 - Platforms */}
+          {platforms && (
+             <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0 sm:col-span-2">
+               <i className="pi pi-share-alt text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+               <span className="text-[11px] text-gray-800 font-medium truncate capitalize">{platforms}</span>
+             </div>
+          )}
         </div>
 
-        {/* Social Media Icon - Bottom Right */}
-        <div className="flex justify-end mt-auto">
-          <a
-            href={socialMediaLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-80 transition-opacity"
-          >
-            <i className="pi pi-instagram text-base" style={{ color: "#4C226A" }} />
-          </a>
-        </div>
       </div>
     </div>
   );

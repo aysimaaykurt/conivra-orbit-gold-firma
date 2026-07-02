@@ -5,7 +5,7 @@ import Tabs from "@/components/ad-management/Tabs";
 import Toolbar from "@/components/ad-management/Toolbar";
 import CalendarGrid from "@/components/ad-management/CalendarGrid";
 import EventCard from "@/components/ad-management/EventCard";
-import { getAdvertisements, deleteAdvertisement, pauseAdvertisement, duplicateAdvertisement } from "@/src/api/advertisements/advertisements.service";
+import { getAdvertisements, deleteAdvertisement, pauseAdvertisement, duplicateAdvertisement, updateAdvertisementStatus } from "@/src/api/advertisements/advertisements.service";
 import { getWorkshops, deleteWorkshop } from "@/src/api/advertisements/workshops.service";
 import { getGiftKits, deleteGiftKit } from "@/src/api/advertisements/giftKits.service";
 import type { Advertisement } from "@/src/api/advertisements/advertisements.models";
@@ -33,6 +33,8 @@ export default function AdManagementPage() {
   const { data: rawData, isLoading, error, refetch } = useAdManagement(active, filters);
   const [events, setEvents] = useState<AdEvent[]>([]);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string; category: string } | null>(null);
+  const [pauseModal, setPauseModal] = useState<{ isOpen: boolean; id: string; category: string; action: "pause" | "resume" } | null>(null);
+  const [duplicateModal, setDuplicateModal] = useState<{ isOpen: boolean; id: string; category: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const toastRef = useRef<any>(null);
 
@@ -110,6 +112,7 @@ export default function AdManagementPage() {
         id: item.id,
         category,
         title: item.title,
+        status: item.status,
         city: "city" in item ? item.city : "",
         formattedDate,
         startTime,
@@ -121,7 +124,7 @@ export default function AdManagementPage() {
           : "/images/soiree.png",
         images: (item as any).images || [],
         type: category === "ilan" ? "Reklam" : category === "workshop" ? "Workshop" : "Hediye Kiti",
-        views: 0, // API'den gelmiyorsa varsayılan değer
+        views: (item as any).viewCount || 0,
         comments: 0, // API'den gelmiyorsa varsayılan değer
         subCategory: (item as any).category || "",
         platform: (item as any).platformPreference || "",
@@ -194,9 +197,26 @@ export default function AdManagementPage() {
     }
   };
 
-  const handlePause = async (id: string, cat: string) => {
+  const handlePause = (id: string, cat: string) => {
+    const event = events.find(e => e.id === id);
+    const isCurrentlyActive = event?.status === "active";
+    
+    if (isCurrentlyActive) {
+      setPauseModal({ isOpen: true, id, category: cat, action: "pause" });
+    } else {
+      setPauseModal({ isOpen: true, id, category: cat, action: "resume" });
+    }
+  };
+
+  const confirmPause = async (id: string, cat: string, isPauseAction: boolean) => {
     try {
-      const response = await pauseAdvertisement(id);
+      let response;
+      if (isPauseAction) {
+        response = await pauseAdvertisement(id);
+      } else {
+        response = await updateAdvertisementStatus(id, "active");
+      }
+
       if (response && response.success) {
         toastRef.current?.show({
           severity: "success",
@@ -205,6 +225,13 @@ export default function AdManagementPage() {
           life: 3000,
         });
         refetch();
+      } else {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "İşlem Başarısız",
+          detail: response?.message || (!isPauseAction ? "Aktifleştirme başarısız: Tarihler çakışıyor." : "İlan durumu güncellenemedi."),
+          life: 4000,
+        });
       }
     } catch (err: any) {
       toastRef.current?.show({
@@ -213,28 +240,43 @@ export default function AdManagementPage() {
         detail: err.message || "İlan durdurulurken/başlatılırken bir hata oluştu.",
         life: 3000,
       });
+    } finally {
+      setPauseModal(null);
     }
   };
 
-  const handleDuplicate = async (id: string, cat: string) => {
+  const handleDuplicate = (id: string, cat: string) => {
+    setDuplicateModal({ isOpen: true, id, category: cat });
+  };
+
+  const confirmDuplicate = async (id: string, cat: string) => {
     try {
       const response = await duplicateAdvertisement(id);
       if (response && response.success) {
         toastRef.current?.show({
           severity: "success",
           summary: "Başarılı",
-          detail: response.message || "İlan başarıyla kopyalandı.",
-          life: 3000,
+          detail: response.message || "İlan başarıyla kopyalandı. Ancak kopyalanan ilan tekrar aktifleştirilirse tarihler çakışacaktır.",
+          life: 4000,
         });
         refetch();
+      } else {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "İşlem Başarısız",
+          detail: response?.message || "Kopyalanan ilan aktif olduğu için tarihler çakışıyor.",
+          life: 4000,
+        });
       }
     } catch (err: any) {
       toastRef.current?.show({
         severity: "error",
         summary: "Hata",
-        detail: err.message || "İlan kopyalanırken bir hata oluştu.",
-        life: 3000,
+        detail: err.message || err.response?.data?.message || "İlan kopyalanırken bir hata oluştu.",
+        life: 4000,
       });
+    } finally {
+      setDuplicateModal(null);
     }
   };
 
@@ -358,6 +400,105 @@ export default function AdManagementPage() {
                 >
                   {isDeleting ? <i className="pi pi-spinner pi-spin"></i> : <i className="pi pi-trash"></i>}
                   {isDeleting ? "Siliniyor..." : "Evet, Sil"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Pause Confirmation Modal */}
+      {pauseModal?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl transform transition-all">
+            <div className="flex flex-col items-center text-center">
+              {pauseModal.action === "pause" ? (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-4">
+                    <i className="pi pi-pause text-orange-500 text-3xl"></i>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Durdur</h3>
+                  <p className="text-gray-500 mb-6">
+                    Bu ilanı durdurmak istediğinize emin misiniz? İlan yayından kaldırılacaktır.
+                  </p>
+                  <div className="flex w-full gap-3">
+                    <button
+                      onClick={() => setPauseModal(null)}
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      Vazgeç
+                    </button>
+                    <button
+                      onClick={() => confirmPause(pauseModal.id, pauseModal.category, true)}
+                      className="flex-1 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <i className="pi pi-pause"></i>
+                      Evet, Durdur
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                    <i className="pi pi-play text-green-500 text-3xl"></i>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Yayınla</h3>
+                  <p className="text-gray-500 mb-4">
+                    Bu ilanı tekrar yayınlamak istediğinizden emin misiniz? İlan yayına alınacaktır.
+                  </p>
+                  <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3 mb-6">
+                    <p className="text-xs text-blue-800 text-left flex gap-2">
+                      <i className="pi pi-info-circle mt-0.5"></i>
+                      <span>
+                        <strong>Uyarı:</strong> Kopyalanmış pasif bir ilanı aktifleştiriyorsanız ve orijinal ilan halihazırda yayındaysa, tarihler çakışacağından dolayı işlem gerçekleşmeyecektir.
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex w-full gap-3">
+                    <button
+                      onClick={() => setPauseModal(null)}
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      Vazgeç
+                    </button>
+                    <button
+                      onClick={() => confirmPause(pauseModal.id, pauseModal.category, false)}
+                      className="flex-1 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <i className="pi pi-play"></i>
+                      Evet, Yayınla
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Duplicate Confirmation Modal */}
+      {duplicateModal?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl transform transition-all">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                <i className="pi pi-copy text-blue-500 text-3xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Kopyala</h3>
+              <p className="text-gray-500 mb-6">
+                Aynı ilan kaydından tekrar oluşturacaksınız. Bu işlemi onaylıyor musunuz?
+              </p>
+              <div className="flex w-full gap-3">
+                <button
+                  onClick={() => setDuplicateModal(null)}
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  onClick={() => confirmDuplicate(duplicateModal.id, duplicateModal.category)}
+                  className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <i className="pi pi-copy"></i>
+                  Evet, Kopyala
                 </button>
               </div>
             </div>

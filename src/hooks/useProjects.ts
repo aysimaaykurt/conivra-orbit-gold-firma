@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getProjectsList } from '../api/projects/projects.service';
 import type { ProjectItem, GetProjectsParams } from '../api/projects/projects.models';
 import { Project, ProjectStatus, OverlayAction } from '../mocks/projects';
+import { BASE_URL } from '../api/axios';
 
 export const useProjects = (filters?: GetProjectsParams) => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -39,11 +40,15 @@ export const useProjects = (filters?: GetProjectsParams) => {
             // Map backend model to frontend Project interface
             const mappedProjects: Project[] = dataArray.map((item: any) => {
               // Extract status and map to frontend ProjectStatus
-              let status: ProjectStatus = "pending";
-              const rawStatus = String(item.status || "").toLowerCase();
-              if (rawStatus === "ongoing" || rawStatus === "devam eden" || rawStatus === "active" || rawStatus === "approved" || rawStatus === "2") {
-                status = "ongoing";
-              } else if (rawStatus === "completed" || rawStatus === "tamamlanan" || rawStatus === "finished" || rawStatus === "5") {
+              let status: ProjectStatus = "inactive";
+              const rawStatusStr = String(item.status || "").toLowerCase();
+              if (["draft", "pending", "active", "completed", "cancelled", "expired", "paused", "inactive"].includes(rawStatusStr)) {
+                status = rawStatusStr as ProjectStatus;
+              } else if (rawStatusStr === "1") {
+                status = "pending";
+              } else if (rawStatusStr === "2" || rawStatusStr === "ongoing" || rawStatusStr === "devam eden") {
+                status = "active";
+              } else if (rawStatusStr === "6" || rawStatusStr === "tamamlanan") {
                 status = "completed";
               }
 
@@ -76,23 +81,38 @@ export const useProjects = (filters?: GetProjectsParams) => {
               }
 
               // Resolve image URL
-              let imageSrc = item.imageUrl || item.image || "/images/soiree.png";
-              if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                 imageSrc = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://complexity-cloud-awarded-mug.trycloudflare.com'}/${imageSrc.replace(/\\/g, '/').replace(/^\//, '')}`;
+              let imageSrc = item.image || item.imageUrl || "/images/soiree.png";
+              if (imageSrc && imageSrc !== "/images/soiree.png") {
+                if (imageSrc.includes('localhost:5100')) {
+                  const tunnelOrigin = new URL(BASE_URL).origin;
+                  imageSrc = imageSrc.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+                } else if (!imageSrc.startsWith('http')) {
+                  const tunnelOrigin = new URL(BASE_URL).origin;
+                  imageSrc = `${tunnelOrigin}/${imageSrc.replace(/\\/g, '/').replace(/^\//, '')}`;
+                }
               }
+
+              // Extract and format new dates
+              const sDate = item.startDate ? new Date(item.startDate).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : undefined;
+              const eDate = item.endDate ? new Date(item.endDate).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : undefined;
 
               return {
                 id: item.id || Math.random().toString(),
                 title: item.name || item.title || "İsimsiz Proje",
                 description: item.description || "",
                 imageSrc,
-                location: item.city || item.location || "-",
+                location: item.location || item.city || "-",
                 date: formattedDate,
+                startDate: sDate,
+                endDate: eDate,
                 type: item.type || item.category || "-",
+                sector: item.sector,
+                platforms: item.platforms,
                 assignee: item.influencerName || item.assignee || "-",
                 applicationCount: item.applicationCount,
                 socialMediaLink: item.socialMediaLink || "",
                 status,
+                rawStatus: String(item.status || ""),
                 showCheckmark,
                 overlayText,
                 overlayIcon,

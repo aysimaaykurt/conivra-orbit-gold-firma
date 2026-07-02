@@ -4,6 +4,8 @@ import { useState } from "react";
 import ProjectCard from "./ProjectCard";
 import EvaluationModal from "./EvaluationModal";
 import { Project, EvaluationData, mockEvaluation } from "@/src/mocks/projects";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 interface ProjectsListProps {
   projects: Project[];
@@ -13,6 +15,9 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewOnly, setIsViewOnly] = useState(false);
+  
+  const router = useRouter();
+  const locale = useLocale();
 
   const handleEvaluateClick = (project: Project) => {
     setSelectedProject(project);
@@ -24,6 +29,14 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
     setIsModalOpen(false);
     setSelectedProject(null);
     setIsViewOnly(false);
+  };
+
+  const handleCardClick = (project: Project) => {
+    let category = "ilan";
+    if (project.type === "workshop") category = "workshop";
+    if (project.type === "giftkit" || project.type === "hediye_kiti") category = "hediye_kiti";
+    
+    router.push(`/${locale}/ad-management/detail/${category}/${project.id}`);
   };
 
   const handleSubmit = (data: EvaluationData) => {
@@ -40,6 +53,7 @@ export default function ProjectsList({ projects }: ProjectsListProps) {
             project={project}
             colorIndex={index}
             onEvaluateClick={() => handleEvaluateClick(project)}
+            onClick={() => handleCardClick(project)}
           />
         ))}
       </div>

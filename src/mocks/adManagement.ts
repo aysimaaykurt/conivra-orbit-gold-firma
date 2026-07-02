@@ -19,6 +19,7 @@ export interface AdEvent {
   subCategory?: string; // e.g. "restaurant-cafe"
   platform?: string; // e.g. "instagram"
   targetAudience?: string; // e.g. "teens"
+  status?: string; // e.g. "active", "inactive"
   month: string; // "Eylül", "Ekim" gibi - Calendar section'ında gösterilecek ay
   dayOfWeek: string; // "Pazartesi", "Salı" gibi
   dayNumber: number; // 7, 8, 9 gibi - Event'in gösterileceği gün

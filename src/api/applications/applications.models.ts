@@ -12,8 +12,24 @@ export interface Application {
 // Application List Item Models (Applications sayfası için detaylı tip)
 export type AdType = "campaign" | "giftkit" | "workshop" | "soiree-menu" | "beach-cocktail" | "soiree-breakfast";
 
+export interface ApplicationDocumentDto {
+  id: string;
+  url: string;
+  type: "image" | "video";
+}
+
+export interface InfluencerEvaluationDto {
+  collaborationSatisfaction: number;
+  agreementRespected: "yes" | "no";
+  agreementViolationNote?: string;
+  companyBehaviorScore: number;
+  representativeBehaviorScore: number;
+  createDate: string;
+}
+
 export interface ApplicationListItem {
   id: string;
+  adId?: number;
   adType: AdType;
   profileImageSrc?: string;
   fullName: string;
@@ -21,8 +37,14 @@ export interface ApplicationListItem {
   location: string;
   socialMedia: {
     instagram?: boolean;
+    instagramLink?: string;
+    instagramFollowers?: string | null;
     tiktok?: boolean;
+    tiktokLink?: string;
+    tiktokFollowers?: string | null;
     youtube?: boolean;
+    youtubeLink?: string;
+    youtubeFollowers?: string | null;
   };
   status: ApplicationStatus; // 1: Bekliyor, 2: Onaylandı, 3: Reddedildi
 }
@@ -69,10 +91,17 @@ export interface GetApplicationsParams {
   sortOrder?: string;
 }
 
+export interface ApplicationDetailDto extends ApplicationListItem {
+  documents?: ApplicationDocumentDto[];
+  influencerEvaluation?: any | null; // Company's evaluation of the influencer
+  companyEvaluation?: any | null; // Influencer's evaluation of the company
+  [key: string]: any;
+}
+
 // Application Detail Response
 export interface ApplicationDetailResponse {
   success: boolean;
-  data: any; // We'll refine this later if needed
+  data: ApplicationDetailDto;
   message?: string;
 }
 

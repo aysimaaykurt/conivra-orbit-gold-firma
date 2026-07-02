@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { getAdvertisement, pauseAdvertisement, duplicateAdvertisement } from "@/src/api/advertisements/advertisements.service";
+import { getAdvertisement, pauseAdvertisement, duplicateAdvertisement, updateAdvertisementStatus } from "@/src/api/advertisements/advertisements.service";
 import { getWorkshop } from "@/src/api/advertisements/workshops.service";
 import { getGiftKit } from "@/src/api/advertisements/giftKits.service";
 import { Advertisement } from "@/src/api/advertisements/advertisements.models";
@@ -27,6 +27,8 @@ export default function AdDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdatingState, setIsUpdatingState] = useState(false);
+  const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
+  const [showPauseConfirm, setShowPauseConfirm] = useState(false);
   const toastRef = useRef<any>(null);
 
   useEffect(() => {
@@ -79,10 +81,18 @@ export default function AdDetailPage() {
   };
 
   const handlePauseAd = async () => {
-    if (!id || isUpdatingState) return;
+    if (!id || isUpdatingState || !ad) return;
     try {
       setIsUpdatingState(true);
-      const res = await pauseAdvertisement(id);
+      const isCurrentlyActive = ad.status === "active";
+      
+      let res;
+      if (isCurrentlyActive) {
+        res = await pauseAdvertisement(id);
+      } else {
+        res = await updateAdvertisementStatus(id, "active");
+      }
+
       if (res && res.success) {
         toastRef.current?.show({
           severity: "success",
@@ -91,6 +101,13 @@ export default function AdDetailPage() {
           life: 3000,
         });
         await fetchAdDetail();
+      } else {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "İşlem Başarısız",
+          detail: res?.message || (isCurrentlyActive ? "İlan durdurulamadı." : "Aktifleştirme başarısız: Tarihler çakışıyor."),
+          life: 4000,
+        });
       }
     } catch (err: any) {
       toastRef.current?.show({
@@ -101,6 +118,7 @@ export default function AdDetailPage() {
       });
     } finally {
       setIsUpdatingState(false);
+      setShowPauseConfirm(false);
     }
   };
 
@@ -111,24 +129,32 @@ export default function AdDetailPage() {
       const res = await duplicateAdvertisement(id);
       if (res && res.success) {
         toastRef.current?.show({
-          severity: "success",
+          severity: "success", // or "info" depending on if you want it to be green/blue
           summary: "Başarılı",
-          detail: res.message || "İlan başarıyla kopyalandı.",
-          life: 3000,
+          detail: res.message || "İlan başarıyla kopyalandı. Ancak kopyalanan ilan tekrar aktifleştirilirse tarihler çakışacaktır.",
+          life: 4000,
         });
         setTimeout(() => {
           router.push(`/${locale}/ad-management?tab=${categoryParam}`);
         }, 1500);
+      } else {
+        toastRef.current?.show({
+          severity: "error",
+          summary: "İşlem Başarısız",
+          detail: res?.message || "Kopyalanan ilan aktif olduğu için tarihler çakışıyor.",
+          life: 4000,
+        });
       }
     } catch (err: any) {
       toastRef.current?.show({
         severity: "error",
         summary: "Hata",
-        detail: err.message || "İlan kopyalanırken bir hata oluştu.",
-        life: 3000,
+        detail: err.message || err.response?.data?.message || "İlan kopyalanırken bir hata oluştu.",
+        life: 4000,
       });
     } finally {
       setIsUpdatingState(false);
+      setShowDuplicateConfirm(false);
     }
   };
 
@@ -209,20 +235,31 @@ export default function AdDetailPage() {
               <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
                 <i className="pi pi-calendar-plus text-xs"></i> 
                 Oluşturulma: {new Date(ad.createDate).toLocaleDateString("tr-TR")}
+                {ad.viewCount !== undefined && (
+                  <>
+                    <span className="mx-1 text-gray-300">|</span>
+                    <i className="pi pi-eye text-xs"></i>
+                    Görüntülenme Sayısı: {ad.viewCount}
+                  </>
+                )}
               </p>
             )}
           </div>
         </div>
         <div className="flex gap-3">
           <button
-            onClick={handlePauseAd}
+            onClick={() => setShowPauseConfirm(true)}
             disabled={isUpdatingState}
-            className="px-4 py-2 bg-white text-[#4C226A] font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className={`px-4 py-2 font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 ${
+              ad.status === "active"
+                ? "bg-red-600 text-white hover:bg-red-700 border border-transparent"
+                : "bg-green-600 text-white hover:bg-green-700 border border-transparent"
+            }`}
           >
-            <i className={`pi pi-${ad.status === "active" ? "pause" : "play"}`}></i> {ad.status === "active" ? "Durdur" : "Başlat"}
+            <i className={`pi pi-${ad.status === "active" ? "pause" : "play"}`}></i> {ad.status === "active" ? "Durdur" : "Yayınla"}
           </button>
           <button
-            onClick={handleDuplicateAd}
+            onClick={() => setShowDuplicateConfirm(true)}
             disabled={isUpdatingState}
             className="px-4 py-2 bg-white text-[#4C226A] font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
@@ -292,8 +329,22 @@ export default function AdDetailPage() {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Durum</p>
                 <div className="flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${ad.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                  <p className="font-semibold text-gray-800 capitalize">{ad.status}</p>
+                  <span className={`w-2.5 h-2.5 rounded-full ${
+                    ad.status === 'active' 
+                      ? 'bg-green-500' 
+                      : (ad.status === 'inactive' || ad.status === 'paused')
+                        ? 'bg-red-500'
+                        : 'bg-amber-500'
+                  }`}></span>
+                  <p className="font-semibold text-gray-800">
+                    {ad.status === 'active' 
+                      ? 'Aktif' 
+                      : (ad.status === 'inactive' || ad.status === 'paused') 
+                        ? 'Durduruldu' 
+                        : ad.status === 'draft' 
+                          ? 'Taslak' 
+                          : ad.status}
+                  </p>
                 </div>
               </div>
               
@@ -309,21 +360,25 @@ export default function AdDetailPage() {
                 </div>
               </div>
 
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Lokasyon</p>
-                <div className="flex items-center gap-2 text-gray-800 font-medium">
-                  <i className="pi pi-map-marker text-[#4C226A]"></i>
-                  {ad.city} {ad.district ? `/ ${ad.district}` : ''}
+              {categoryParam !== "hediye_kiti" && categoryParam !== "gift-kit" && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Lokasyon</p>
+                  <div className="flex items-center gap-2 text-gray-800 font-medium">
+                    <i className="pi pi-map-marker text-[#4C226A]"></i>
+                    {ad.city || "-"} {ad.district ? `/ ${ad.district}` : ''}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Tarih Aralığı</p>
-                <div className="flex items-center gap-2 text-gray-800 font-medium">
-                  <i className="pi pi-calendar text-[#4C226A]"></i>
-                  {new Date(ad.startDate).toLocaleDateString("tr-TR")} - {new Date(ad.endDate).toLocaleDateString("tr-TR")}
+              {categoryParam !== "hediye_kiti" && categoryParam !== "gift-kit" && ad.startDate && ad.endDate && !isNaN(new Date(ad.startDate).getTime()) && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Tarih Aralığı</p>
+                  <div className="flex items-center gap-2 text-gray-800 font-medium">
+                    <i className="pi pi-calendar text-[#4C226A]"></i>
+                    {new Date(ad.startDate).toLocaleDateString("tr-TR")} - {new Date(ad.endDate).toLocaleDateString("tr-TR")}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {ad.guestCount && (
                 <div>
@@ -400,7 +455,7 @@ export default function AdDetailPage() {
               </div>
             )}
 
-            {ad.address && ad.address.toLowerCase() !== "test" && (
+            {categoryParam !== "hediye_kiti" && categoryParam !== "gift-kit" && ad.address && ad.address.toLowerCase() !== "test" && (
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <p className="text-sm text-gray-500 font-medium mb-2 flex items-center gap-2"><i className="pi pi-map text-[#4C226A]"></i> Açık Adres</p>
                 <p className="text-gray-800 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100">{ad.address}</p>
@@ -409,6 +464,107 @@ export default function AdDetailPage() {
           </div>
         </div>
       </div>
+      
+      {/* Pause/Resume Confirmation Modal */}
+      {showPauseConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl transform transition-all">
+            <div className="flex flex-col items-center text-center">
+              {ad.status === "active" ? (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-4">
+                    <i className="pi pi-pause text-orange-500 text-3xl"></i>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Durdur</h3>
+                  <p className="text-gray-500 mb-6">
+                    Bu ilanı durdurmak istediğinize emin misiniz? İlan yayından kaldırılacaktır.
+                  </p>
+                  <div className="flex w-full gap-3">
+                    <button
+                      onClick={() => setShowPauseConfirm(false)}
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      Vazgeç
+                    </button>
+                    <button
+                      onClick={handlePauseAd}
+                      className="flex-1 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <i className="pi pi-pause"></i>
+                      Evet, Durdur
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                    <i className="pi pi-play text-green-500 text-3xl"></i>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Yayınla</h3>
+                  <p className="text-gray-500 mb-4">
+                    Bu ilanı tekrar yayınlamak istediğinizden emin misiniz? İlan yayına alınacaktır.
+                  </p>
+                  <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3 mb-6">
+                    <p className="text-xs text-blue-800 text-left flex gap-2">
+                      <i className="pi pi-info-circle mt-0.5"></i>
+                      <span>
+                        <strong>Uyarı:</strong> Kopyalanmış pasif bir ilanı aktifleştiriyorsanız ve orijinal ilan halihazırda yayındaysa, tarihler çakışacağından dolayı işlem gerçekleşmeyecektir.
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex w-full gap-3">
+                    <button
+                      onClick={() => setShowPauseConfirm(false)}
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      Vazgeç
+                    </button>
+                    <button
+                      onClick={handlePauseAd}
+                      className="flex-1 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <i className="pi pi-play"></i>
+                      Evet, Yayınla
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Duplicate Confirmation Modal */}
+      {showDuplicateConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl transform transition-all">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                <i className="pi pi-copy text-blue-500 text-3xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Kopyala</h3>
+              <p className="text-gray-500 mb-6">
+                Aynı ilan kaydından tekrar oluşturacaksınız. Bu işlemi onaylıyor musunuz?
+              </p>
+              <div className="flex w-full gap-3">
+                <button
+                  onClick={() => setShowDuplicateConfirm(false)}
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  onClick={handleDuplicateAd}
+                  className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <i className="pi pi-copy"></i>
+                  Evet, Kopyala
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <Toast ref={toastRef} />
     </div>
   );

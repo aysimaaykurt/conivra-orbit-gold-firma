@@ -193,32 +193,33 @@ export default function Header() {
           </button>
 
           {/* User Profile */}
-          <Menu 
-            model={profileItems} 
-            popup 
-            popupAlignment="right"
-            ref={profileMenu} 
-            id="popup_profile_menu"
-            className="w-36 mt-1 shadow-lg border border-lightGray/20 rounded-lg"
-            appendTo="self"
-            pt={{
-              root: { className: "p-1" }
-            }}
-          />
-          <button 
-            onClick={(event) => profileMenu.current?.toggle(event)}
-            aria-controls="popup_profile_menu"
-            aria-haspopup
-            className="flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1.5 hover:bg-gray-50 rounded transition-colors"
-          >
-            <div className="w-7 h-7 md:w-8 md:h-8 bg-gray-300 rounded flex items-center justify-center flex-shrink-0">
-              <i className="pi pi-user text-dark text-xs"></i>
-            </div>
-            <span className="hidden sm:inline text-xs md:text-sm font-semibold text-dark truncate max-w-[100px] md:max-w-[150px]">
-              {organization?.name || (user ? `${user.firstName} ${user.lastName}` : "Yükleniyor...")}
-            </span>
-            <i className="pi pi-chevron-down text-[8px] md:text-[10px] text-lightGray"></i>
-          </button>
+          <div className="relative">
+            <Menu 
+              model={profileItems} 
+              popup 
+              popupAlignment="right"
+              ref={profileMenu} 
+              id="popup_profile_menu"
+              className="w-40 mt-1 shadow-lg border border-lightGray/20 rounded-lg"
+              pt={{
+                root: { className: "p-1" }
+              }}
+            />
+            <button 
+              onClick={(event) => profileMenu.current?.toggle(event)}
+              aria-controls="popup_profile_menu"
+              aria-haspopup
+              className="flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1.5 hover:bg-gray-50 rounded transition-colors"
+            >
+              <div className="w-7 h-7 md:w-8 md:h-8 bg-gray-300 rounded flex items-center justify-center flex-shrink-0">
+                <i className="pi pi-user text-dark text-xs"></i>
+              </div>
+              <span className="hidden sm:inline text-xs md:text-sm font-semibold text-dark truncate max-w-[100px] md:max-w-[150px]">
+                {organization?.name || (user ? `${user.firstName} ${user.lastName}` : "Yükleniyor...")}
+              </span>
+              <i className="pi pi-chevron-down text-[8px] md:text-[10px] text-lightGray"></i>
+            </button>
+          </div>
         </div>
       </div>
     </header>

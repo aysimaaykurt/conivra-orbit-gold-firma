@@ -71,7 +71,9 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
     <>
       <div 
         onClick={handleClick}
-        className="group relative rounded-xl bg-[#D4C5D9] shadow-sm cursor-pointer hover:shadow-md transition-all duration-300 w-full h-full flex overflow-hidden min-h-[80px]"
+        className={`group relative rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-all duration-300 w-full h-full flex overflow-hidden min-h-[80px] ${
+          (event.status === "inactive" || event.status === "paused" || event.status === "draft") ? "bg-[#E2DCE4] opacity-85" : "bg-[#D4C5D9]"
+        }`}
       >
         
         {/* Left Full Height Image */}
@@ -108,6 +110,34 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
           
           {/* Capsules Grid */}
           <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            {/* Status Badge */}
+            {event.status && (
+              <div className={`flex items-center gap-1 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm font-bold ${
+                event.status === "active" 
+                  ? "bg-green-100/90 text-green-700 border border-green-200" 
+                  : (event.status === "inactive" || event.status === "paused")
+                    ? "bg-red-100/90 text-red-700 border border-red-200"
+                    : "bg-amber-100/90 text-amber-700 border border-amber-200"
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  event.status === "active" 
+                    ? "bg-green-500" 
+                    : (event.status === "inactive" || event.status === "paused")
+                      ? "bg-red-500"
+                      : "bg-amber-500"
+                }`}></span>
+                <span className="text-[10px] uppercase font-bold tracking-wider">
+                  {event.status === "active" 
+                    ? "Aktif" 
+                    : (event.status === "inactive" || event.status === "paused") 
+                      ? "Durduruldu" 
+                      : event.status === "draft" 
+                        ? "Taslak" 
+                        : event.status}
+                </span>
+              </div>
+            )}
+
             {event.city && (
               <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700">
                 <i className="pi pi-map-marker text-[10px] text-[#4C226A]"></i>
@@ -150,9 +180,9 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
                 onPause(event.id, event.category);
               }}
               className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 hover:bg-white text-[#4C226A] shadow-sm transition-colors cursor-pointer"
-              title={(event as any).status === "active" ? "Duraklat" : "Başlat"}
+              title={event.status === "active" ? "Duraklat" : "Yayınla"}
             >
-              <i className={`pi pi-${(event as any).status === "active" ? "pause" : "play"} text-[10px]`} />
+              <i className={`pi pi-${event.status === "active" ? "pause" : "play"} text-[10px]`} />
             </button>
           )}
           {onDuplicate && (

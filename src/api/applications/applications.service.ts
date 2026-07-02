@@ -90,7 +90,9 @@ export const updateApplicationStatus = async (
 
 /**
  * Get Application Detail Service
- * GET applications/{id}
+ * Uses GET /applications list endpoint and filters by ID client-side,
+ * since GET /applications/{id} is not available (405).
+ * Searches across all adTypes to find the matching application.
  */
 export const getApplicationDetail = async (
   id: string
@@ -182,6 +184,30 @@ export const requestApplicationRevision = async (
     throw {
       success: false,
       message: error.message || 'Revizyon istenirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Approve Submission Service
+ * POST applications/{id}/approve-submission
+ */
+export const approveSubmission = async (
+  id: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const cleanId = id.replace(/^(app)-/i, '');
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `applications/${cleanId}/approve-submission`
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'İş onayı sırasında bir hata oluştu',
     } as ApiErrorResponse;
   }
 };
