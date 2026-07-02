@@ -10,7 +10,7 @@ export default function ApplicationList() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col min-h-[380px] max-h-[460px]">
+      <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col">
         <h2 className="text-lg font-bold text-dark mb-4 flex-shrink-0">{t("title")}</h2>
         <div className="space-y-3 overflow-y-auto pr-1 flex-1 custom-scrollbar">
           {[1, 2, 3].map((i) => (
@@ -35,7 +35,7 @@ export default function ApplicationList() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col min-h-[380px] max-h-[460px]">
+    <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col">
       <h2 className="text-lg font-bold text-dark mb-4 flex-shrink-0">{t("title")}</h2>
       {error ? (
         <p className="text-sm text-lightGray text-center py-4 flex-1 flex items-center justify-center">
