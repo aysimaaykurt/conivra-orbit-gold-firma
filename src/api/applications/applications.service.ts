@@ -173,7 +173,7 @@ export const requestApplicationRevision = async (
   try {
     const cleanId = id.replace(/^(app)-/i, '');
     const response = await apiClient.post<{ success: boolean; message: string }>(
-      `applications/${cleanId}/revision`,
+      `applications/${cleanId}/request-revision`,
       data
     );
     return response.data;

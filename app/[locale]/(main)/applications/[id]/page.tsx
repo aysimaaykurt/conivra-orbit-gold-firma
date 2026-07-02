@@ -170,8 +170,8 @@ export default function ApplicationDetailPage({
       toastRef.current?.show({
         severity: "error",
         summary: "Hata",
-        detail: err.message || "Revizyon talebi gönderilirken bir hata oluştu.",
-        life: 3000,
+        detail: err.message || err.response?.data?.message || "Revizyon talebi gönderilirken bir hata oluştu.",
+        life: 4000,
       });
     } finally {
       setIsSubmittingRevision(false);
