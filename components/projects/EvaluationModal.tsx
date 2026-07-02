@@ -132,7 +132,7 @@ export default function EvaluationModal({
 
     setIsLoading(true);
     try {
-      const response = await createEvaluation({
+      const payload = {
         applicationId,
         influencerId,
         serviceSatisfaction,
@@ -140,7 +140,9 @@ export default function EvaluationModal({
         agreementAdherence,
         agreementExplanation: agreementAdherence === "no" ? agreementExplanation : undefined,
         effects,
-      });
+      };
+      console.log("Submitting evaluation payload:", payload);
+      const response = await createEvaluation(payload);
 
       if (response.success) {
         toastRef.current?.show({
