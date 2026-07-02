@@ -14,9 +14,14 @@ export const createEvaluation = async (
   data: CreateEvaluationRequest
 ): Promise<CreateEvaluationResponse> => {
   try {
+    const cleanData = {
+      ...data,
+      applicationId: data.applicationId ? data.applicationId.replace(/^(app)-/i, '') : data.applicationId,
+      influencerId: data.influencerId ? data.influencerId.replace(/^(inf)-/i, '') : data.influencerId,
+    };
     const response = await apiClient.post<CreateEvaluationResponse>(
       'applications/Evaluation',
-      data
+      cleanData
     );
     return response.data;
   } catch (error: any) {
@@ -38,8 +43,9 @@ export const getEvaluation = async (
   id: string
 ): Promise<GetEvaluationResponse> => {
   try {
+    const cleanId = id.replace(/^(app)-/i, '');
     const response = await apiClient.get<GetEvaluationResponse>(
-      `applications/Evaluation/${id}`
+      `applications/Evaluation/${cleanId}`
     );
     return response.data;
   } catch (error: any) {
