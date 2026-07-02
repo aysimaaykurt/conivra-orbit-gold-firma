@@ -130,6 +130,16 @@ export default function EvaluationModal({
       return;
     }
 
+    if (agreementAdherence === "no" && !agreementExplanation.trim()) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: "Hata",
+        detail: "Lütfen anlaşmaya uyulmama nedenini açıklayınız",
+        life: 3000,
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const payload = {
@@ -138,7 +148,7 @@ export default function EvaluationModal({
         serviceSatisfaction,
         collaborationEffectiveness,
         agreementAdherence,
-        agreementExplanation: agreementAdherence === "no" ? agreementExplanation : undefined,
+        agreementExplanation: agreementAdherence === "no" ? agreementExplanation : "Anlaşmaya uyuldu.",
         effects,
       };
       console.log("Submitting evaluation payload:", payload);
