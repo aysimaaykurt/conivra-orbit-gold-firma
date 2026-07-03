@@ -52,12 +52,24 @@ export default function InfoCards() {
     );
   }
 
-  // Override the last card's labels to "Tamamlanan Başvurular"
-  const mappedCards = cards.map((card, index) => {
-    if (card.id === "card-11" || index === cards.length - 1) {
-      return { ...card, title: "Tamamlanan Başvurular", description: "Tamamlanmış başvuru sayısı" };
-    }
-    return card;
+  // Fixed 4 cards with desired labels — map backend values by index
+  const cardOverrides = [
+    { title: "Aktif Kampanyalar", description: "Devam eden aktif ilan sayınız", icon: "pi pi-megaphone", color: "#4C226A" },
+    { title: "Toplam Başvuru", description: "Tüm ilanlara yapılan başvurular", icon: "pi pi-users", color: "#F59E0B" },
+    { title: "Bekleyen Başvurular", description: "Değerlendirme bekleyen başvurular", icon: "pi pi-clock", color: "#3B82F6" },
+    { title: "Tamamlanan Başvurular", description: "Tamamlanmış başvuru sayısı", icon: "pi pi-check-square", color: "#00BCD4" },
+  ];
+
+  const mappedCards = cardOverrides.map((override, index) => {
+    const backendCard = cards[index];
+    return {
+      id: backendCard?.id || `card-${index}`,
+      value: backendCard?.value ?? 0,
+      icon: backendCard?.icon || override.icon,
+      color: backendCard?.color || override.color,
+      title: override.title,
+      description: override.description,
+    };
   });
 
   return (
