@@ -52,16 +52,23 @@ export default function InfoCards() {
     );
   }
 
-  // Fixed 4 cards with desired labels — map backend values by index
+  // Fixed 4 cards with desired labels — find matching backend card by ID or keyword
   const cardOverrides = [
-    { title: "Aktif Kampanyalar", description: "Devam eden aktif ilan sayınız", icon: "pi pi-megaphone", color: "#4C226A" },
-    { title: "Toplam Başvuru", description: "Tüm ilanlara yapılan başvurular", icon: "pi pi-users", color: "#F59E0B" },
-    { title: "Bekleyen Başvurular", description: "Değerlendirme bekleyen başvurular", icon: "pi pi-clock", color: "#3B82F6" },
-    { title: "Tamamlanan Başvurular", description: "Tamamlanmış başvuru sayısı", icon: "pi pi-check-square", color: "#00BCD4" },
+    { title: "Aktif Kampanyalar", description: "Devam eden aktif ilan sayınız", icon: "pi pi-megaphone", color: "#4C226A", matchKeys: ["aktif", "active", "kampanya", "card-1"] },
+    { title: "Toplam Başvuru", description: "Tüm ilanlara yapılan başvurular", icon: "pi pi-users", color: "#F59E0B", matchKeys: ["toplam", "total", "başvuru", "card-2"] },
+    { title: "Bekleyen Başvurular", description: "Değerlendirme bekleyen başvurular", icon: "pi pi-clock", color: "#3B82F6", matchKeys: ["bekleyen", "pending", "card-3"] },
+    { title: "Tamamlanan Başvurular", description: "Tamamlanmış başvuru sayısı", icon: "pi pi-check-square", color: "#00BCD4", matchKeys: ["tamamla", "completed", "card-11"] },
   ];
 
+  const findBackendCard = (matchKeys: string[]) => {
+    return cards.find((card) => {
+      const searchText = `${card.id} ${card.title} ${card.description}`.toLowerCase();
+      return matchKeys.some((key) => searchText.includes(key.toLowerCase()));
+    });
+  };
+
   const mappedCards = cardOverrides.map((override, index) => {
-    const backendCard = cards[index];
+    const backendCard = findBackendCard(override.matchKeys) || cards[index];
     return {
       id: backendCard?.id || `card-${index}`,
       value: backendCard?.value ?? 0,
