@@ -52,9 +52,17 @@ export default function InfoCards() {
     );
   }
 
+  // Override the last card's labels to "Tamamlanan Başvurular"
+  const mappedCards = cards.map((card, index) => {
+    if (card.id === "card-11" || index === cards.length - 1) {
+      return { ...card, title: "Tamamlanan Başvurular", description: "Tamamlanmış başvuru sayısı" };
+    }
+    return card;
+  });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {cards.map((card) => (
+      {mappedCards.map((card) => (
         <InfoCard key={card.id} card={card} />
       ))}
     </div>
