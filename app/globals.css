@@ -416,3 +416,12 @@ body .p-multiselect-panel .p-checkbox .p-checkbox-box.p-highlight {
   color: #202020;
   cursor: pointer;
 }
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

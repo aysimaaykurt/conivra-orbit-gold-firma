@@ -9,9 +9,9 @@ export default function InfoCards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-lg p-4 shadow-sm h-full animate-pulse">
+          <div key={i} className="bg-white rounded-lg p-4 shadow-sm min-w-[220px] flex-shrink-0 animate-pulse">
             <div className="mb-4">
               <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
             </div>
@@ -30,58 +30,27 @@ export default function InfoCards() {
 
   if (error) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="col-span-4 bg-white rounded-lg p-4 shadow-sm">
-          <p className="text-sm text-lightGray text-center py-4">
-            {error}
-          </p>
-        </div>
+      <div className="bg-white rounded-lg p-4 shadow-sm">
+        <p className="text-sm text-lightGray text-center py-4">
+          {error}
+        </p>
       </div>
     );
   }
 
   if (cards.length === 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="col-span-4 bg-white rounded-lg p-4 shadow-sm">
-          <p className="text-sm text-lightGray text-center py-4">
-            Henüz istatistik bulunmamaktadır.
-          </p>
-        </div>
+      <div className="bg-white rounded-lg p-4 shadow-sm">
+        <p className="text-sm text-lightGray text-center py-4">
+          Henüz istatistik bulunmamaktadır.
+        </p>
       </div>
     );
   }
 
-  // Fixed 4 cards with desired labels — find matching backend card by ID or keyword
-  const cardOverrides = [
-    { title: "Aktif Kampanyalar", description: "Devam eden aktif ilan sayınız", icon: "pi pi-megaphone", color: "#4C226A", matchKeys: ["aktif", "active", "kampanya", "card-1"] },
-    { title: "Toplam Başvuru", description: "Tüm ilanlara yapılan başvurular", icon: "pi pi-users", color: "#F59E0B", matchKeys: ["toplam", "total", "başvuru", "card-2"] },
-    { title: "Bekleyen Başvurular", description: "Değerlendirme bekleyen başvurular", icon: "pi pi-clock", color: "#3B82F6", matchKeys: ["bekleyen", "pending", "card-3"] },
-    { title: "Tamamlanan Başvurular", description: "Tamamlanmış başvuru sayısı", icon: "pi pi-check-square", color: "#00BCD4", matchKeys: ["tamamla", "completed", "card-11"] },
-  ];
-
-  const findBackendCard = (matchKeys: string[]) => {
-    return cards.find((card) => {
-      const searchText = `${card.id} ${card.title} ${card.description}`.toLowerCase();
-      return matchKeys.some((key) => searchText.includes(key.toLowerCase()));
-    });
-  };
-
-  const mappedCards = cardOverrides.map((override, index) => {
-    const backendCard = findBackendCard(override.matchKeys) || cards[index];
-    return {
-      id: backendCard?.id || `card-${index}`,
-      value: backendCard?.value ?? 0,
-      icon: backendCard?.icon || override.icon,
-      color: backendCard?.color || override.color,
-      title: override.title,
-      description: override.description,
-    };
-  });
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {mappedCards.map((card) => (
+    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      {cards.map((card) => (
         <InfoCard key={card.id} card={card} />
       ))}
     </div>
@@ -90,7 +59,7 @@ export default function InfoCards() {
 
 function InfoCard({ card }: { card: DashboardStatsItem }) {
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm h-full">
+    <div className="bg-white rounded-lg p-4 shadow-sm min-w-[220px] flex-shrink-0">
        <div className="mb-4">
         <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
           <i className={`${card.icon} text-2xl text-gray-600`}></i>
@@ -99,8 +68,8 @@ function InfoCard({ card }: { card: DashboardStatsItem }) {
 
        <div className="flex items-center justify-between gap-2">
          <div className="flex flex-col flex-1 min-w-0">
-          <h3 className="text-base font-bold text-dark mb-1">{card.title}</h3>
-          <p className="text-xs text-lightGray">{card.description}</p>
+          <h3 className="text-base font-bold text-dark mb-1 whitespace-nowrap">{card.title}</h3>
+          <p className="text-xs text-lightGray whitespace-nowrap">{card.description}</p>
         </div>
 
          <div
@@ -113,4 +82,3 @@ function InfoCard({ card }: { card: DashboardStatsItem }) {
     </div>
   );
 }
-
