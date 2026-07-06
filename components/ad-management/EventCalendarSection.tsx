@@ -107,12 +107,12 @@ export default function EventCalendarSection({ event, onEdit, onDelete, onPause,
               return (
                 <div
                   key={d.dateString}
-                  className={`p-3 border-r border-gray-200 last:border-r-0 text-center ${
+                  className={`py-1.5 px-2 border-r border-gray-200 last:border-r-0 text-center ${
                     isHighlight ? "bg-[#4C226A]/5" : ""
                   }`}
                 >
                   <div className="flex flex-col items-center justify-center">
-                    <span className={`text-xl font-bold leading-none mb-1 ${isHighlight ? "text-[#4C226A]" : "text-gray-700"}`}>
+                    <span className={`text-lg font-bold leading-none mb-0.5 ${isHighlight ? "text-[#4C226A]" : "text-gray-700"}`}>
                       {d.dayNumber.toString().padStart(2, "0")}
                     </span>
                     <span className={`text-[10px] uppercase font-bold tracking-wider ${isHighlight ? "text-[#4C226A]" : "text-gray-400"}`}>

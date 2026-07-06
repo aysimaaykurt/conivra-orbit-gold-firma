@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { useRouter } from "@/src/navigation";
 import { useSearchParams } from "next/navigation";
 import { useCategories } from "@/src/hooks/useCategories";
+import { useSectors } from "@/src/hooks/useSectors";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dropdown } from "@/components/ui/dropdown";
@@ -23,6 +24,7 @@ interface FormValues {
   title: string;
   content: string;
   category: string;
+  sector: string;
   targetAudience: string;
   followerRange: string;
   platformPreference: string[];
@@ -80,17 +82,20 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("editId");
+  const duplicateId = searchParams.get("duplicateId");
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories();
+  const { sectors: sectorOptions, isLoading: isSectorsLoading } = useSectors();
 
   const formik = useFormik<FormValues>({
     initialValues: {
       title: "",
       content: "",
       category: "",
+      sector: "",
       targetAudience: "",
       followerRange: "",
       platformPreference: [],
@@ -100,9 +105,10 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       imagePreviews: [],
     },
     validationSchema: Yup.object({
-      title: Yup.string().required("Başlık zorunludur"),
-      content: Yup.string().required("İçerik açıklaması zorunludur"),
+      title: Yup.string().required("Hediye kiti başlığı zorunludur"),
+      content: Yup.string().required("Hediye kiti içeriği zorunludur"),
       category: Yup.string().required("Kategori seçimi zorunludur"),
+      sector: Yup.string(),
       targetAudience: Yup.string().required("Hedef kitle zorunludur"),
       followerRange: Yup.string().required("Takipçi aralığı zorunludur"),
       platformPreference: Yup.array().min(1, "En az bir platform seçmelisiniz").required("Platform tercihi zorunludur"),
@@ -116,6 +122,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
           title: values.title,
           content: values.content,
           category: values.category,
+          sector: values.sector,
           targetAudience: values.targetAudience,
           followerRange: values.followerRange,
           platformPreference: values.platformPreference,
@@ -162,25 +169,64 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   });
 
   useEffect(() => {
-    if (editId) {
+    const targetId = editId || duplicateId;
+    if (targetId) {
       const fetchAd = async () => {
         setIsLoading(true);
         try {
-          const response = await getGiftKit(editId);
+          const response = await getGiftKit(targetId);
           if (response.success && response.data) {
             const ad = response.data;
+
+            let duplicatedFiles: File[] = [];
+            let duplicatedPreviews: string[] = [];
+
+            if (duplicateId && ad.images && ad.images.length > 0) {
+              const filePromises = ad.images.map(async (img) => {
+                const url = img.imageUrl;
+                if (!url) return null;
+                let finalUrl = url;
+                if (!url.startsWith('/images/')) {
+                  const tunnelOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'https://flooring-lets-function-bright.trycloudflare.com/api/v1/').origin;
+                  if (url.includes('localhost:5100')) {
+                    finalUrl = url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+                  } else {
+                    finalUrl = `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
+                  }
+                }
+                try {
+                  const res = await fetch(finalUrl);
+                  const blob = await res.blob();
+                  let filename = finalUrl.split('/').pop() || 'image.jpg';
+                  filename = filename.split('?')[0];
+                  const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+                  return { file, preview: finalUrl };
+                } catch (e) {
+                  console.error("Failed to fetch image file for duplication:", e);
+                  return null;
+                }
+              });
+              const results = await Promise.all(filePromises);
+              results.forEach((res) => {
+                if (res) {
+                  duplicatedFiles.push(res.file);
+                  duplicatedPreviews.push(res.preview);
+                }
+              });
+            }
 
             formik.setValues({
               title: ad.title || "",
               content: ad.content || "",
               category: ad.category ? String(ad.category) : "",
+              sector: ad.sector || "",
               targetAudience: ad.targetAudience || "",
               followerRange: ad.followerRange || "",
               platformPreference: typeof (ad as any).platformPreference === 'string' ? ((ad as any).platformPreference as string).split(',').map((p: string) => p.trim()) : (Array.isArray((ad as any).platformPreference) ? (ad as any).platformPreference : []),
               businessType: ad.businessType || "",
               contentType: Array.isArray(ad.contentType) ? ad.contentType : (ad.contentType ? [ad.contentType] : []),
-              images: [],
-              imagePreviews: ad.images && ad.images.length > 0 
+              images: duplicateId ? duplicatedFiles : [],
+              imagePreviews: duplicateId ? duplicatedPreviews : (ad.images && ad.images.length > 0 
                 ? ad.images.map(img => {
                     const url = img.imageUrl;
                     if (!url) return '';
@@ -194,7 +240,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                     if (url.startsWith('http')) return url;
                     return `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
                   })
-                : [],
+                : []),
             });
           }
         } catch (error) {
@@ -212,7 +258,7 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       };
       fetchAd();
     }
-  }, [editId]);
+  }, [editId, duplicateId]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
@@ -351,6 +397,17 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                         error={touched.category ? errors.category : undefined}
                         options={categoryOptions}
                         placeholder="Bir Kategori seçiniz"
+                      />
+
+                      <Dropdown
+                        label="Sektör (İsteğe Bağlı)"
+                        name="sector"
+                        value={values.sector}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.sector ? errors.sector : undefined}
+                        options={sectorOptions}
+                        placeholder="Bir Sektör seçiniz"
                       />
 
                       <Dropdown
@@ -639,6 +696,15 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                         : "Kategori seçilmedi"}
                     </span>
                   </div>
+                  
+                  {values.sector && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <i className="pi pi-briefcase text-primary" />
+                      <span className="text-gray-700">
+                        {sectorOptions.find((opt) => opt.value === values.sector)?.label || values.sector}
+                      </span>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2 text-sm">
                     <i className="pi pi-users text-primary" />

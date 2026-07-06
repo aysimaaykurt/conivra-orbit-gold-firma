@@ -7,11 +7,12 @@ import React from "react";
 interface ProjectCardProps {
   project: Project;
   colorIndex?: number;
+  sectors?: {value: string, label: string}[];
   onEvaluateClick?: () => void;
   onClick?: () => void;
 }
 
-export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick, onClick }: ProjectCardProps) {
+export default function ProjectCard({ project, colorIndex = 0, sectors, onEvaluateClick, onClick }: ProjectCardProps) {
   const cardColors = ["#E3D2EC", "#D2ABC7", "#C9B7C1"];
   const t = useTranslations("projects");
   const {
@@ -44,6 +45,8 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick, 
     if (overlayIcon === "star-green") return "pi pi-star text-green-500";
     return "";
   };
+
+  const sectorLabel = sectors?.find(s => s.value === project.sector)?.label || project.sector;
 
   return (
     <div 
@@ -92,13 +95,20 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick, 
 
         {/* Details Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-          {/* Row 1 - Left: Location */}
-          {location && (
+          {/* Row 1 - Left: Location or Sector (for Gift Kits) */}
+          {(type === "giftkit" || type === "hediye_kiti") ? (
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
+              <i className="pi pi-briefcase text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
+              <span className="text-[11px] text-gray-800 font-medium truncate capitalize">
+                {sectorLabel && sectorLabel !== "-" ? sectorLabel : "-"}
+              </span>
+            </div>
+          ) : location ? (
             <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0">
               <i className="pi pi-map-marker text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
               <span className="text-[11px] text-gray-800 font-medium truncate">{location}</span>
             </div>
-          )}
+          ) : null}
           
           {/* Row 1 - Right: Date / Date Range */}
           {(startDate || date) && (
@@ -111,11 +121,11 @@ export default function ProjectCard({ project, colorIndex = 0, onEvaluateClick, 
           )}
 
           {/* Row 2 - Left: Type & Sector */}
-          {(type || sector) && (
-            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0" title={sector ? `${type} - ${sector}` : type}>
+          {(type || sectorLabel) && (
+            <div className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 min-w-0" title={sectorLabel ? `${type} - ${sectorLabel}` : type}>
               <i className="pi pi-tag text-xs flex-shrink-0" style={{ color: "#4C226A" }} />
               <span className="text-[11px] text-gray-800 font-medium truncate capitalize">
-                {type === "campaign" ? "Kampanya" : type === "giftkit" ? "Hediye Kiti" : type} {sector ? `(${sector})` : ""}
+                {type === "campaign" ? "İlan" : type === "giftkit" ? "Hediye Kiti" : type} {sectorLabel ? `(${sectorLabel})` : ""}
               </span>
             </div>
           )}

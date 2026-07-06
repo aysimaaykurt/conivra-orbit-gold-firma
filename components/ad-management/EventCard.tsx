@@ -72,7 +72,7 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
       <div 
         onClick={handleClick}
         className={`group relative rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-all duration-300 w-full h-full flex overflow-hidden min-h-[80px] ${
-          (event.status === "inactive" || event.status === "paused" || event.status === "draft") ? "bg-[#E2DCE4] opacity-85" : "bg-[#D4C5D9]"
+          (event.status === "inactive" || event.status === "paused" || event.status === "draft" || event.status === "expired") ? "bg-[#E2DCE4] opacity-85" : "bg-[#D4C5D9]"
         }`}
       >
         
@@ -115,14 +115,14 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
               <div className={`flex items-center gap-1 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm font-bold ${
                 event.status === "active" 
                   ? "bg-green-100/90 text-green-700 border border-green-200" 
-                  : (event.status === "inactive" || event.status === "paused")
+                  : (event.status === "inactive" || event.status === "paused" || event.status === "expired")
                     ? "bg-red-100/90 text-red-700 border border-red-200"
                     : "bg-amber-100/90 text-amber-700 border border-amber-200"
               }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${
                   event.status === "active" 
                     ? "bg-green-500" 
-                    : (event.status === "inactive" || event.status === "paused")
+                    : (event.status === "inactive" || event.status === "paused" || event.status === "expired")
                       ? "bg-red-500"
                       : "bg-amber-500"
                 }`}></span>
@@ -131,9 +131,11 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
                     ? "Aktif" 
                     : (event.status === "inactive" || event.status === "paused") 
                       ? "Durduruldu" 
-                      : event.status === "draft" 
-                        ? "Taslak" 
-                        : event.status}
+                      : event.status === "expired"
+                        ? "Süresi Doldu"
+                        : event.status === "draft" 
+                          ? "Taslak" 
+                          : event.status}
                 </span>
               </div>
             )}

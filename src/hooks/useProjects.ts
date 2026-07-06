@@ -109,6 +109,7 @@ export const useProjects = (filters?: GetProjectsParams) => {
                 startDate: sDate,
                 endDate: eDate,
                 type: item.type || item.category || "-",
+                category: item.category,
                 sector: item.sector,
                 platforms: item.platforms,
                 assignee: item.influencerName || item.assignee || "-",

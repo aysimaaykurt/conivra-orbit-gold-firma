@@ -3,6 +3,7 @@
 import { useState } from "react";
 import ProjectsList from "@/components/projects/ProjectsList";
 import { useProjects } from "@/src/hooks/useProjects";
+import { useSectors } from "@/src/hooks/useSectors";
 
 export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -10,6 +11,7 @@ export default function ProjectsPage() {
 
   // Fetch all projects. Backend might not support search query yet, so we fetch all and filter on the client.
   const { projects, isLoading, error, refetch } = useProjects({ page: 1, pageSize: 100 });
+  const { sectors } = useSectors();
 
   // Filter by search query
   const filteredProjects = projects.filter(
@@ -20,13 +22,11 @@ export default function ProjectsPage() {
 
   // Group projects by exactly 8 statuses
   const draftProjects = filteredProjects.filter((p) => p.status === "draft");
-  const pendingProjects = filteredProjects.filter((p) => p.status === "pending");
   const activeProjects = filteredProjects.filter((p) => p.status === "active");
   const completedProjects = filteredProjects.filter((p) => p.status === "completed");
   const cancelledProjects = filteredProjects.filter((p) => p.status === "cancelled");
   const expiredProjects = filteredProjects.filter((p) => p.status === "expired");
   const pausedProjects = filteredProjects.filter((p) => p.status === "paused");
-  const inactiveProjects = filteredProjects.filter((p) => p.status === "inactive");
 
   const tabConfigs = [
     { 
@@ -39,16 +39,7 @@ export default function ProjectsPage() {
       badgeBgClass: "bg-gray-100", 
       emptyText: "Taslak bulunmuyor." 
     },
-    { 
-      id: "pending", 
-      label: "Onay Bekliyor", 
-      icon: "pi-clock", 
-      projects: pendingProjects, 
-      iconColor: "text-orange-500", 
-      badgeTextClass: "text-orange-700", 
-      badgeBgClass: "bg-orange-100", 
-      emptyText: "Bekleyen bulunmuyor." 
-    },
+
     { 
       id: "active", 
       label: "Aktif / Yayında", 
@@ -99,16 +90,7 @@ export default function ProjectsPage() {
       badgeBgClass: "bg-slate-100", 
       emptyText: "Süresi dolan bulunmuyor." 
     },
-    { 
-      id: "inactive", 
-      label: "Diğer Pasif", 
-      icon: "pi-minus-circle", 
-      projects: inactiveProjects, 
-      iconColor: "text-gray-400", 
-      badgeTextClass: "text-gray-700", 
-      badgeBgClass: "bg-gray-100", 
-      emptyText: "Pasif ilan bulunmuyor." 
-    }
+
   ];
 
   const populatedTabs = tabConfigs.filter(t => t.projects.length > 0);
@@ -188,7 +170,7 @@ export default function ProjectsPage() {
                 <div className="flex-1 overflow-y-auto pr-2 pb-4">
                   {tab.projects.length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-8 bg-white/50 rounded-lg border border-dashed border-gray-300">{tab.emptyText}</p>
-                  ) : <ProjectsList projects={tab.projects} onRefresh={refetch} />}
+                  ) : <ProjectsList projects={tab.projects} onRefresh={refetch} sectors={sectors} />}
                 </div>
               </div>
             ))}

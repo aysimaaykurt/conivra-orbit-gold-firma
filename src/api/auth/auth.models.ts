@@ -89,6 +89,18 @@ export interface GetCurrentUserResponse {
   message?: string;
 }
 
+// Send OTP Request Models
+export interface SendOtpRequest {
+  email: string;
+  purpose: string;
+}
+
+// Send OTP Response Models
+export interface SendOtpResponse {
+  success: boolean;
+  message: string;
+}
+
 // Send Password Mail Request Models
 export interface SendPasswordMailRequest {
   email: string;

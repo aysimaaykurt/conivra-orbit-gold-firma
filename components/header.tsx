@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Dropdown as PrimeDropdown } from "primereact/dropdown";
 import { Menu } from "primereact/menu";
+import { Toast } from "primereact/toast";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/src/navigation";
 import goldStatue from "@/src/images/goldStatue.png";
@@ -18,6 +19,7 @@ export default function Header() {
   const t = useTranslations("header");
   const [notificationCount] = useState(4); // Bildirimler ileride dinamik yapılabilir
   const profileMenu = useRef<Menu>(null);
+  const toastRef = useRef<Toast>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -68,12 +70,14 @@ export default function Header() {
   ];
 
   function getStatusLabel(status: string | null | undefined) {
-    switch (status) {
-      case "Gold":
+    if (!status) return t("status.standard");
+    const normalized = status.toLowerCase();
+    switch (normalized) {
+      case "gold":
         return t("status.gold");
-      case "Silver":
+      case "silver":
         return t("status.silver");
-      case "Bronze":
+      case "bronze":
         return t("status.bronze");
       default:
         return t("status.standard");
@@ -96,13 +100,22 @@ export default function Header() {
   };
 
   const copyReferralCode = () => {
-    if (organization?.code) {
-      navigator.clipboard.writeText(organization.code);
+    const code = organization?.code || organization?.Code;
+    if (code) {
+      navigator.clipboard.writeText(code);
+      toastRef.current?.show({
+        severity: "success",
+        summary: "Başarılı",
+        detail: "Referans kodu kopyalandı",
+        life: 3000,
+      });
     }
   };
 
   return (
-    <header className="sticky top-0 z-20 w-full bg-white" style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
+    <>
+      <Toast ref={toastRef} />
+      <header className="sticky top-0 z-20 w-full bg-white" style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
 
       <div className="ml-1 md:ml-5 flex h-16 items-center justify-between px-3 md:px-6">
         <div className="flex items-center gap-2 md:gap-3">
@@ -123,7 +136,7 @@ export default function Header() {
           </button>
           <Image src={goldStatue} alt="Gold Statue" width={32} height={32} className="object-contain" />
           <span className="hidden sm:inline text-sm font-semibold" style={{ color: "#D99B2B" }}>
-            {getStatusLabel(user?.subscriptionStatus)}
+            {getStatusLabel(organization?.badgeStatus || organization?.BadgeStatus || user?.badgeStatus || user?.BadgeStatus || user?.subscriptionStatus || user?.SubscriptionStatus)}
           </span>
         </div>
 
@@ -184,11 +197,11 @@ export default function Header() {
               borderWidth: "0.5px",
               height: "40px",
             }}
-            title={organization?.code ? t("referralCode") : "Referans kodu yok"}
+            title={(organization?.code || organization?.Code) ? t("referralCode") : "Referans kodu yok"}
           >
             <i className="pi pi-link text-primary text-sm md:text-base"></i>
             <span className="hidden lg:inline text-sm font-semibold text-dark">
-              {organization?.code || t("referralCode")}
+              {(organization?.code || organization?.Code) || t("referralCode")}
             </span>
           </button>
 
@@ -223,5 +236,6 @@ export default function Header() {
         </div>
       </div>
     </header>
+    </>
   );
 }

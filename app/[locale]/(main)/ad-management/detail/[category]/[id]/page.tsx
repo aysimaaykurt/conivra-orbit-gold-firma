@@ -27,7 +27,6 @@ export default function AdDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdatingState, setIsUpdatingState] = useState(false);
-  const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [showPauseConfirm, setShowPauseConfirm] = useState(false);
   const toastRef = useRef<any>(null);
 
@@ -122,41 +121,7 @@ export default function AdDetailPage() {
     }
   };
 
-  const handleDuplicateAd = async () => {
-    if (!id || isUpdatingState) return;
-    try {
-      setIsUpdatingState(true);
-      const res = await duplicateAdvertisement(id);
-      if (res && res.success) {
-        toastRef.current?.show({
-          severity: "success",
-          summary: "Başarılı",
-          detail: res.message || "İlan başarıyla kopyalandı.",
-          life: 4000,
-        });
-        setTimeout(() => {
-          router.push(`/${locale}/ad-management?tab=${categoryParam}`);
-        }, 1500);
-      } else {
-        toastRef.current?.show({
-          severity: "error",
-          summary: "İşlem Başarısız",
-          detail: res?.message || "İlan kopyalanamadı.",
-          life: 4000,
-        });
-      }
-    } catch (err: any) {
-      toastRef.current?.show({
-        severity: "error",
-        summary: "Hata",
-        detail: err.message || err.response?.data?.message || "İlan kopyalanırken bir hata oluştu.",
-        life: 4000,
-      });
-    } finally {
-      setIsUpdatingState(false);
-      setShowDuplicateConfirm(false);
-    }
-  };
+
 
   const getImageUrl = (imgInput: any) => {
     if (!imgInput) return '/images/soiree.png';
@@ -259,7 +224,12 @@ export default function AdDetailPage() {
             <i className={`pi pi-${ad.status === "active" ? "pause" : "play"}`}></i> {ad.status === "active" ? "Durdur" : "Yayınla"}
           </button>
           <button
-            onClick={() => setShowDuplicateConfirm(true)}
+            onClick={() => {
+              let route = `/${locale}/ad-management/add?duplicateId=${ad.id}`;
+              if (categoryParam === "workshop") route = `/${locale}/ad-management/workshop/add?duplicateId=${ad.id}`;
+              else if (categoryParam === "hediye_kiti") route = `/${locale}/ad-management/gift-kit/add?duplicateId=${ad.id}`;
+              router.push(route);
+            }}
             disabled={isUpdatingState}
             className="px-4 py-2 bg-white text-[#4C226A] font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
@@ -332,7 +302,7 @@ export default function AdDetailPage() {
                   <span className={`w-2.5 h-2.5 rounded-full ${
                     ad.status === 'active' 
                       ? 'bg-green-500' 
-                      : (ad.status === 'inactive' || ad.status === 'paused')
+                      : (ad.status === 'inactive' || ad.status === 'paused' || ad.status === 'expired')
                         ? 'bg-red-500'
                         : 'bg-amber-500'
                   }`}></span>
@@ -341,9 +311,11 @@ export default function AdDetailPage() {
                       ? 'Aktif' 
                       : (ad.status === 'inactive' || ad.status === 'paused') 
                         ? 'Durduruldu' 
-                        : ad.status === 'draft' 
-                          ? 'Taslak' 
-                          : ad.status}
+                        : ad.status === 'expired'
+                          ? 'Süresi Doldu'
+                          : ad.status === 'draft' 
+                            ? 'Taslak' 
+                            : ad.status}
                   </p>
                 </div>
               </div>
@@ -534,37 +506,6 @@ export default function AdDetailPage() {
         </div>
       )}
 
-      {/* Duplicate Confirmation Modal */}
-      {showDuplicateConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl transform transition-all">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                <i className="pi pi-copy text-blue-500 text-3xl"></i>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Kopyala</h3>
-              <p className="text-gray-500 mb-6">
-                Aynı ilan kaydından tekrar oluşturacaksınız. Bu işlemi onaylıyor musunuz?
-              </p>
-              <div className="flex w-full gap-3">
-                <button
-                  onClick={() => setShowDuplicateConfirm(false)}
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  Vazgeç
-                </button>
-                <button
-                  onClick={handleDuplicateAd}
-                  className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <i className="pi pi-copy"></i>
-                  Evet, Kopyala
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       <Toast ref={toastRef} />
     </div>
   );

@@ -173,7 +173,7 @@ export default function ApplicationDetailPage({
       toastRef.current?.show({
         severity: "error",
         summary: "Hata",
-        detail: err.message || err.response?.data?.message || "Revizyon talebi gönderilirken bir hata oluştu.",
+        detail: err.response?.data?.message || err.message || "Revizyon talebi gönderilirken bir hata oluştu.",
         life: 4000,
       });
     } finally {
@@ -203,7 +203,7 @@ export default function ApplicationDetailPage({
       toastRef.current?.show({
         severity: "error",
         summary: "Hata",
-        detail: err.message || "İş onaylanırken hata oluştu.",
+        detail: err.response?.data?.message || err.message || "İş onaylanırken hata oluştu.",
         life: 3000,
       });
     } finally {
@@ -227,6 +227,7 @@ export default function ApplicationDetailPage({
     if (s === 4) return { label: "Revizyon İstendi", className: "bg-amber-100 text-amber-800" };
     if (s === 5) return { label: "Geri Çekildi", className: "bg-gray-100 text-gray-600" };
     if (s === 6) return { label: "Tamamlandı", className: "bg-purple-100 text-purple-800" };
+    if (s === 7) return { label: "Teslim Edildi", className: "bg-blue-100 text-blue-800" };
     return { label: String(status), className: "bg-gray-100 text-gray-800" };
   };
 
@@ -348,6 +349,19 @@ export default function ApplicationDetailPage({
           )}
         </div>
       </div>
+
+      {/* isResubmitted Banner */}
+      {detailData.isResubmitted && (
+        <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-orange-50 border border-orange-200 rounded-xl">
+          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <i className="pi pi-refresh text-orange-600 text-sm" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-orange-800">Revize Edilerek Tekrar Teslim Edildi</p>
+            <p className="text-xs text-orange-600">Bu başvuru influencer tarafından revizyon sonrası tekrar teslim edilmiştir.</p>
+          </div>
+        </div>
+      )}
 
       {/* Page Title */}
       <h1 className="text-2xl font-bold mb-6" style={{ color: "#4C226A" }}>

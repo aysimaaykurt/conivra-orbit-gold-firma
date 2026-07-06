@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileForm from "@/components/profile/ProfileForm";
 import ImageUploadModal from "@/components/profile/ImageUploadModal";
+import ChangePasswordSection from "@/components/profile/ChangePasswordSection";
 import { ProfileFormValues } from "@/src/mocks/profile";
 import { getProfile, updateProfile } from "@/src/api/company/profile/profile.service";
 import { Toast } from "@/components/ui/toast";
-import { useRef } from "react";
 import { BASE_URL } from "@/src/api/axios";
 
 export default function ProfilePage() {
@@ -180,6 +180,8 @@ export default function ProfilePage() {
             onSubmit={handleFormSubmit}
             isSaving={isSaving}
           />
+
+          <ChangePasswordSection />
         </div>
 
         <ImageUploadModal

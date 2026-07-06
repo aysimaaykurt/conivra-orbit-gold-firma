@@ -48,6 +48,7 @@ export interface ApplicationListItem {
     youtubeFollowers?: string | null;
   };
   status: ApplicationStatus; // 1: Bekliyor, 2: Onaylandı, 3: Reddedildi
+  isResubmitted?: boolean; // true: revizyon sonrası tekrar teslim edildi
 }
 
 // Dashboard Applications Response Models (Basit liste için)
@@ -94,8 +95,9 @@ export interface GetApplicationsParams {
 
 export interface ApplicationDetailDto extends ApplicationListItem {
   documents?: ApplicationDocumentDto[];
-  influencerEvaluation?: any | null; // Company's evaluation of the influencer
-  companyEvaluation?: any | null; // Influencer's evaluation of the company
+  influencerEvaluation?: any | null;
+  companyEvaluation?: any | null;
+  isResubmitted?: boolean;
   [key: string]: any;
 }
 

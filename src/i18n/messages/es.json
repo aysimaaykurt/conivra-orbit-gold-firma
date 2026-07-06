@@ -30,7 +30,8 @@
     },
     "mostPreferred": {
       "title": "Más Preferidos",
-      "subtitle": "Influencers más preferidos"
+      "subtitle": "Influencers más preferidos",
+      "noItems": "Aún no tienes anuncios populares."
     },
     "applications": {
       "title": "Aplicaciones Recientes",

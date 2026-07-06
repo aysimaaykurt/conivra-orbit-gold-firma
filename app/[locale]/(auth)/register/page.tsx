@@ -11,26 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import { Calendar } from "primereact/calendar";
 import { Dialog } from "primereact/dialog";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import circles from "@/src/images/circles.png";
-
-const sectorOptions = [
-  { label: "Teknoloji", value: "technology" },
-  { label: "Sağlık", value: "healthcare" },
-  { label: "Eğitim", value: "education" },
-  { label: "Finans", value: "finance" },
-  { label: "İnşaat", value: "construction" },
-  { label: "Perakende", value: "retail" },
-  { label: "Üretim", value: "manufacturing" },
-  { label: "Turizm", value: "tourism" },
-  { label: "Gıda", value: "food" },
-  { label: "Enerji", value: "energy" },
-  { label: "Medya", value: "media" },
-  { label: "Danışmanlık", value: "consulting" },
-  { label: "Ulaştırma", value: "transportation" },
-  { label: "Emlak", value: "real-estate" },
-  { label: "Diğer", value: "other" },
-];
+import { useSectors } from "@/src/hooks/useSectors";
+import { getCities, getDistricts, LocationItem } from "@/src/api/locations/locations.service";
 
 const genderOptions = [
   { label: "Kadın", value: "kadın" },
@@ -51,6 +35,55 @@ export default function RegisterPage() {
   const [kvkkData, setKvkkData] = useState<{ title: string; content: string } | null>(null);
   const [isKvkkLoading, setIsKvkkLoading] = useState(false);
 
+  // Dynamic sectors
+  const { sectors, isLoading: isSectorsLoading } = useSectors();
+
+  // Dynamic cities & districts
+  const [cities, setCities] = useState<LocationItem[]>([]);
+  const [districts, setDistricts] = useState<LocationItem[]>([]);
+  const [isCitiesLoading, setIsCitiesLoading] = useState(false);
+  const [isDistrictsLoading, setIsDistrictsLoading] = useState(false);
+  const [selectedCityId, setSelectedCityId] = useState<number | string | null>(null);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      setIsCitiesLoading(true);
+      try {
+        const data = await getCities();
+        setCities(data);
+      } catch (e) {
+        console.error("Şehirler yüklenemedi:", e);
+      } finally {
+        setIsCitiesLoading(false);
+      }
+    };
+    fetchCities();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCityId) {
+      setDistricts([]);
+      return;
+    }
+    const fetchDistricts = async () => {
+      setIsDistrictsLoading(true);
+      try {
+        const data = await getDistricts(selectedCityId);
+        setDistricts(data);
+      } catch (e) {
+        console.error("İlçeler yüklenemedi:", e);
+        setDistricts([]);
+      } finally {
+        setIsDistrictsLoading(false);
+      }
+    };
+    fetchDistricts();
+  }, [selectedCityId]);
+
+  const cityOptions = cities.map((c) => ({ label: c.name, value: String(c.id) }));
+  const districtOptions = districts.map((d) => ({ label: d.name, value: d.name }));
+  const sectorOptions = sectors.length > 0 ? sectors : [];
+
   const handleOpenKvkk = async (e: React.MouseEvent) => {
     e.preventDefault();
     setIsKvkkLoading(true);
@@ -64,7 +97,7 @@ export default function RegisterPage() {
       console.error("KVKK metni yüklenemedi:", err);
       setKvkkData({
         title: "KVKK Aydınlatma Metni",
-        content: "KVKK metni şu anda yüklenemedi. Lütfen daha sonra tekrar deneyiniz."
+        content: "KVKK metni şu anda yüklenemedi. Lütfen daha sonra tekrar deneyiniz.",
       });
     } finally {
       setIsKvkkLoading(false);
@@ -117,7 +150,6 @@ export default function RegisterPage() {
             life: 3000,
           });
 
-          // Kayıt başarılı olduğunda daima login sayfasına yönlendir
           setTimeout(() => {
             router.push("/login");
           }, 1000);
@@ -205,8 +237,10 @@ export default function RegisterPage() {
                     options={companyTypeOptions}
                   />
                   <Input label="Firma" name="company" value={values.company} onChange={handleChange} onBlur={handleBlur} error={touched.company ? errors.company : undefined} />
+                  
+                  {/* Sektör - Dinamik */}
                   <Dropdown 
-                    label="Sektör" 
+                    label={isSectorsLoading ? "Sektör Yükleniyor..." : "Sektör"} 
                     name="sector" 
                     value={values.sector} 
                     onChange={handleChange} 
@@ -287,9 +321,66 @@ export default function RegisterPage() {
                       </p>
                     )}
                   </div>
-                  <Input label="İl" name="city" value={values.city} onChange={handleChange} onBlur={handleBlur} error={touched.city ? errors.city : undefined} />
 
-                  <Input label="İlçe" name="district" value={values.district} onChange={handleChange} onBlur={handleBlur} error={touched.district ? errors.district : undefined} />
+                  {/* İl - Dinamik + Arama + Sanal Sayfalama */}
+                  <Dropdown
+                    label={isCitiesLoading ? "İller Yükleniyor..." : "İl"}
+                    name="city"
+                    value={selectedCityId ? String(selectedCityId) : ""}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selectedCity = cities.find((c) => String(c.id) === selectedId);
+                      formik.setFieldValue("city", selectedCity?.name || "");
+                      formik.setFieldValue("district", "");
+                      setSelectedCityId(selectedId || null);
+                    }}
+                    onBlur={handleBlur}
+                    error={touched.city ? errors.city : undefined}
+                    options={cityOptions}
+                    filter
+                    filterPlaceholder="İl ara..."
+                    filterMatchMode="contains"
+                    filterInputProps={{ style: { height: '32px', padding: '4px 10px', fontSize: '0.8rem' } }}
+                    virtualScrollerOptions={{ itemSize: 38 }}
+                    panelStyle={{ maxHeight: "220px" }}
+                    emptyFilterMessage="Sonuç bulunamadı"
+                    emptyMessage={isCitiesLoading ? "Yükleniyor..." : "İl bulunamadı"}
+                  />
+
+                  {/* İlçe - Dinamik + Arama + Sanal Sayfalama (il seçildikten sonra açılır) */}
+                  <Dropdown
+                    label={
+                      isDistrictsLoading
+                        ? "İlçeler Yükleniyor..."
+                        : !selectedCityId
+                        ? "Önce İl Seçin"
+                        : "İlçe"
+                    }
+                    name="district"
+                    value={values.district}
+                    onChange={(e) => {
+                      formik.setFieldValue("district", e.target.value);
+                    }}
+                    onBlur={handleBlur}
+                    error={touched.district ? errors.district : undefined}
+                    options={districtOptions}
+                    disabled={!selectedCityId || isDistrictsLoading}
+                    filter={!!selectedCityId && districtOptions.length > 0}
+                    filterPlaceholder="İlçe ara..."
+                    filterMatchMode="contains"
+                    filterInputProps={{ style: { height: '32px', padding: '4px 10px', fontSize: '0.8rem' } }}
+                    virtualScrollerOptions={{ itemSize: 38 }}
+                    panelStyle={{ maxHeight: "220px" }}
+                    emptyFilterMessage="Sonuç bulunamadı"
+                    emptyMessage={
+                      isDistrictsLoading
+                        ? "Yükleniyor..."
+                        : !selectedCityId
+                        ? "Önce il seçin"
+                        : "İlçe bulunamadı"
+                    }
+                  />
+
                   <Input label="Şifre" name="password" type="password" value={values.password} onChange={handleChange} onBlur={handleBlur} error={touched.password ? errors.password : undefined} />
 
                   <Input label="Referans Kodu" name="referral" value={values.referral} onChange={handleChange} onBlur={handleBlur} error={touched.referral ? (errors.referral as string | undefined) : undefined} />

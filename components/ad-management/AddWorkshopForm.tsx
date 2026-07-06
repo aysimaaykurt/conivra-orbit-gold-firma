@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { useRouter } from "@/src/navigation";
 import { useSearchParams } from "next/navigation";
 import { useCategories } from "@/src/hooks/useCategories";
+import { useSectors } from "@/src/hooks/useSectors";
 import { Calendar } from "primereact/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +33,7 @@ interface FormValues {
   district: string;
   address: string;
   category: string;
+  sector: string;
   targetAudience: string;
   latitude: string;
   longitude: string;
@@ -101,11 +103,13 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("editId");
+  const duplicateId = searchParams.get("duplicateId");
   const [currentStep, setCurrentStep] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories();
+  const { sectors: sectorOptions, isLoading: isSectorsLoading } = useSectors();
   const { cities: cityOptions, fetchDistricts } = useLocations();
   const [districtOptions, setDistrictOptions] = useState<{label: string, value: string | number}[]>([]);
   const [isMapVisible, setIsMapVisible] = useState(false);
@@ -121,15 +125,16 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       district: "",
       address: "",
       category: "",
+      sector: "",
       targetAudience: "",
-      latitude: "",
-      longitude: "",
       participantCount: "",
       participationCondition: "",
       fee: "",
       contentType: [],
       workshopGoal: "",
       workshopContent: "",
+      latitude: "",
+      longitude: "",
       images: [],
       imagePreviews: [],
     },
@@ -140,15 +145,16 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
         .min(2, "Geçerli bir tarih aralığı seçiniz")
         .required("Tarih aralığı zorunludur")
         .nullable(),
-      duration: Yup.string().required("Süre seçimi zorunludur"),
+      duration: Yup.string().required("Süre zorunludur"),
       city: Yup.string().required("İl seçimi zorunludur"),
       district: Yup.string().required("İlçe seçimi zorunludur"),
       address: Yup.string().required("Adres zorunludur"),
       category: Yup.string().required("Kategori seçimi zorunludur"),
+      sector: Yup.string(),
       targetAudience: Yup.string().required("Hedef kitle zorunludur"),
       participantCount: Yup.string().required("Katılımcı sayısı zorunludur"),
       participationCondition: Yup.string().required("Katılım şartı zorunludur"),
-      fee: Yup.string().optional(),
+      fee: Yup.string().required("Ücret bilgisi zorunludur"),
       contentType: Yup.array().min(1, "En az bir içerik türü seçmelisiniz").required("İçerik türü zorunludur"),
       workshopGoal: Yup.string().required("Workshop amacı zorunludur"),
       workshopContent: Yup.string().required("Workshop içeriği zorunludur"),
@@ -186,6 +192,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
           district: values.district,
           address: values.address,
           category: values.category,
+          sector: values.sector,
           targetAudience: values.targetAudience,
           participantCount: values.participantCount,
           participationCondition: values.participationCondition,
@@ -236,15 +243,53 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   });
 
   useEffect(() => {
-    if (editId) {
+    const targetId = editId || duplicateId;
+    if (targetId) {
       const fetchAd = async () => {
         setIsLoading(true);
         try {
-          const response = await getWorkshop(editId);
+          const response = await getWorkshop(targetId);
           if (response.success && response.data) {
             const ad = response.data;
             const startDate = ad.startDate ? new Date(ad.startDate) : new Date();
             const endDate = ad.endDate ? new Date(ad.endDate) : new Date();
+
+            let duplicatedFiles: File[] = [];
+            let duplicatedPreviews: string[] = [];
+
+            if (duplicateId && ad.images && ad.images.length > 0) {
+              const filePromises = ad.images.map(async (img) => {
+                const url = img.imageUrl;
+                if (!url) return null;
+                let finalUrl = url;
+                if (!url.startsWith('/images/')) {
+                  const tunnelOrigin = new URL(BASE_URL).origin;
+                  if (url.includes('localhost:5100')) {
+                    finalUrl = url.replace(/https?:\/\/localhost:5100/g, tunnelOrigin);
+                  } else if (!url.startsWith('http')) {
+                    finalUrl = `${tunnelOrigin}/${url.replace(/\\/g, '/').replace(/^\//, '')}`;
+                  }
+                }
+                try {
+                  const res = await fetch(finalUrl);
+                  const blob = await res.blob();
+                  let filename = finalUrl.split('/').pop() || 'image.jpg';
+                  filename = filename.split('?')[0];
+                  const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+                  return { file, preview: finalUrl };
+                } catch (e) {
+                  console.error("Failed to fetch image file for duplication:", e);
+                  return null;
+                }
+              });
+              const results = await Promise.all(filePromises);
+              results.forEach((res) => {
+                if (res) {
+                  duplicatedFiles.push(res.file);
+                  duplicatedPreviews.push(res.preview);
+                }
+              });
+            }
 
             formik.setValues({
               title: ad.title || "",
@@ -253,8 +298,9 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               duration: ad.duration || "",
               city: ad.city || "",
               district: ad.district || "",
-              address: ad.address && ad.address.toLowerCase() !== "test" ? ad.address : "",
+              address: ad.address || "",
               category: ad.category ? String(ad.category) : "",
+              sector: ad.sector || "",
               targetAudience: ad.targetAudience || "",
               participantCount: ad.participantCount || "",
               participationCondition: ad.participationCondition || "",
@@ -264,8 +310,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
               workshopContent: ad.workshopContent || "",
               latitude: ad.latitude && !isNaN(Number(ad.latitude.toString().replace(',', '.'))) ? ad.latitude.toString().replace(',', '.') : "",
               longitude: ad.longitude && !isNaN(Number(ad.longitude.toString().replace(',', '.'))) ? ad.longitude.toString().replace(',', '.') : "",
-              images: [],
-              imagePreviews: (() => {
+              images: duplicateId ? duplicatedFiles : [],
+              imagePreviews: duplicateId ? duplicatedPreviews : (() => {
                 const previewsMap: Record<string, string> = {};
                 const previews = ad.images && ad.images.length > 0 
                   ? ad.images.map(img => {
@@ -319,7 +365,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       };
       fetchAd();
     }
-  }, [editId]);
+  }, [editId, duplicateId]);
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
@@ -667,30 +713,21 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                       onBlur={handleBlur}
                       error={touched.address ? errors.address : undefined}
                       placeholder="Adres giriniz"
-                    />
-
-                    <div className="flex flex-col gap-2 mt-1 mb-3">
-                      <div className="flex gap-2">
+                      inputClassName="!pr-14"
+                      rightIcon={
                         <button
                           type="button"
                           onClick={() => setIsMapVisible(true)}
-                          className="flex items-center gap-2 text-xs font-semibold px-3 py-2 bg-white border border-[#4C226A] text-[#4C226A] rounded-lg hover:bg-purple-50 transition-colors shadow-sm cursor-pointer"
+                          className="pointer-events-auto cursor-pointer flex items-center gap-1 text-[#4C226A] hover:text-purple-900 transition-colors"
+                          title="Haritadan Konum Seç"
                         >
-                          <i className="pi pi-map text-[#4C226A] text-xs"></i>
-                          Haritadan Konum Bilgisi Al
+                          <i className="pi pi-search text-xs"></i>
+                          <i className="pi pi-map text-xs"></i>
                         </button>
-                        
-                        <button
-                          type="button"
-                          onClick={handleGetCoordinatesFromAddress}
-                          disabled={isLoading}
-                          className="flex items-center gap-2 text-xs font-medium px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
-                        >
-                          <i className="pi pi-search text-gray-500 text-xs"></i>
-                          Adresten Konum Sorgula
-                        </button>
-                      </div>
+                      }
+                    />
 
+                    <div className="flex flex-col gap-2 mt-1 mb-3">
                       {values.latitude && values.longitude ? (
                         <div className="flex items-center justify-between p-2.5 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800">
                           <div className="flex items-center gap-1.5 font-medium">
@@ -714,7 +751,7 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                       ) : (
                         <div className="flex items-center gap-1.5 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
                           <i className="pi pi-exclamation-triangle text-amber-600 text-sm"></i>
-                          <span>Workshopun haritada doğru görünmesi için lütfen konum seçiniz.</span>
+                          <span>İlanın haritada doğru görünmesi için lütfen konum seçiniz.</span>
                         </div>
                       )}
                     </div>
@@ -729,6 +766,17 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                         error={touched.category ? errors.category : undefined}
                         options={categoryOptions}
                         placeholder="Bir Kategori seçiniz"
+                      />
+
+                      <Dropdown
+                        label="Sektör (İsteğe Bağlı)"
+                        name="sector"
+                        value={values.sector}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.sector ? errors.sector : undefined}
+                        options={sectorOptions}
+                        placeholder="Bir Sektör seçiniz"
                       />
 
                       <Dropdown

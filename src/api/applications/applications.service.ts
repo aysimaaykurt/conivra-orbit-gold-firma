@@ -171,9 +171,8 @@ export const requestApplicationRevision = async (
   data: import('./applications.models').RequestRevisionRequest
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const cleanId = id.replace(/^(app)-/i, '');
     const response = await apiClient.post<{ success: boolean; message: string }>(
-      `applications/${cleanId}/request-revision`,
+      `applications/${id}/revision`,
       data
     );
     return response.data;

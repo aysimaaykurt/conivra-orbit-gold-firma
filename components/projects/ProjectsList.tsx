@@ -9,10 +9,11 @@ import { useLocale } from "next-intl";
 
 interface ProjectsListProps {
   projects: Project[];
+  sectors?: {value: string, label: string}[];
   onRefresh?: () => void;
 }
 
-export default function ProjectsList({ projects, onRefresh }: ProjectsListProps) {
+export default function ProjectsList({ projects, onRefresh, sectors }: ProjectsListProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewOnly, setIsViewOnly] = useState(false);
@@ -55,6 +56,7 @@ export default function ProjectsList({ projects, onRefresh }: ProjectsListProps)
             key={project.id}
             project={project}
             colorIndex={index}
+            sectors={sectors}
             onEvaluateClick={() => handleEvaluateClick(project)}
             onClick={() => handleCardClick(project)}
           />

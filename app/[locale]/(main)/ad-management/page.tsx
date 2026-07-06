@@ -246,38 +246,10 @@ export default function AdManagementPage() {
   };
 
   const handleDuplicate = (id: string, cat: string) => {
-    setDuplicateModal({ isOpen: true, id, category: cat });
-  };
-
-  const confirmDuplicate = async (id: string, cat: string) => {
-    try {
-      const response = await duplicateAdvertisement(id);
-      if (response && response.success) {
-        toastRef.current?.show({
-          severity: "success",
-          summary: "Başarılı",
-          detail: response.message || "İlan başarıyla kopyalandı.",
-          life: 4000,
-        });
-        refetch();
-      } else {
-        toastRef.current?.show({
-          severity: "error",
-          summary: "İşlem Başarısız",
-          detail: response?.message || "İlan kopyalanamadı.",
-          life: 4000,
-        });
-      }
-    } catch (err: any) {
-      toastRef.current?.show({
-        severity: "error",
-        summary: "Hata",
-        detail: err.message || err.response?.data?.message || "İlan kopyalanırken bir hata oluştu.",
-        life: 4000,
-      });
-    } finally {
-      setDuplicateModal(null);
-    }
+    let route = `/${locale}/ad-management/add?duplicateId=${id}`;
+    if (cat === "workshop") route = `/${locale}/ad-management/workshop/add?duplicateId=${id}`;
+    else if (cat === "hediye_kiti") route = `/${locale}/ad-management/gift-kit/add?duplicateId=${id}`;
+    router.push(route);
   };
 
   return (
@@ -470,37 +442,6 @@ export default function AdManagementPage() {
                   </div>
                 </>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Duplicate Confirmation Modal */}
-      {duplicateModal?.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-xl transform transition-all">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                <i className="pi pi-copy text-blue-500 text-3xl"></i>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">İlanı Kopyala</h3>
-              <p className="text-gray-500 mb-6">
-                Aynı ilan kaydından tekrar oluşturacaksınız. Bu işlemi onaylıyor musunuz?
-              </p>
-              <div className="flex w-full gap-3">
-                <button
-                  onClick={() => setDuplicateModal(null)}
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  Vazgeç
-                </button>
-                <button
-                  onClick={() => confirmDuplicate(duplicateModal.id, duplicateModal.category)}
-                  className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <i className="pi pi-copy"></i>
-                  Evet, Kopyala
-                </button>
-              </div>
             </div>
           </div>
         </div>

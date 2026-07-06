@@ -31,7 +31,8 @@
     },
     "mostPreferred": {
       "title": "Most Preferred",
-      "subtitle": "Most preferred influencers"
+      "subtitle": "Most preferred influencers",
+      "noItems": "You have no popular listings yet."
     },
     "applications": {
       "title": "Recent Applications",

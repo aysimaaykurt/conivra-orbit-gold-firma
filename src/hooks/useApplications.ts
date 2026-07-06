@@ -24,6 +24,7 @@ export const useApplications = (filters: GetApplicationsParams = {}): UseApplica
     try {
       const response = await getApplications(filters);
       if (response && response.success && Array.isArray(response.data)) {
+        console.log('[useApplications] İlk kayıt (API):', response.data[0]);
         setData(response.data);
         setTotalItems(response.totalItems || response.data.length);
         setTotalPages(response.totalPages || 1);

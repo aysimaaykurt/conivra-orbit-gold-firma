@@ -43,7 +43,7 @@ export default function ApplicationList() {
         </p>
       ) : applications.length > 0 ? (
         <div className="space-y-3 overflow-y-auto pr-1 flex-1 custom-scrollbar">
-          {applications.map((application) => (
+          {applications.slice(0, 5).map((application) => (
             <ApplicationItem key={application.id} application={application} />
           ))}
         </div>

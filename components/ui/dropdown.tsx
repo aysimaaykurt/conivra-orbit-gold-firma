@@ -10,6 +10,7 @@ export type DropdownProps = React.ComponentProps<typeof PrimeDropdown> & {
   dropdownClassName?: string;
   options?: Array<{ label: string; value: any }>;
   placeholder?: string;
+  filterInputProps?: React.InputHTMLAttributes<HTMLInputElement> & { [key: string]: any };
 };
 
 export const Dropdown = React.forwardRef<any, DropdownProps>(

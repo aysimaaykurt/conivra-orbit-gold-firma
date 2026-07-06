@@ -5,6 +5,8 @@ import type {
   RegisterRequest,
   RegisterResponse,
   GetCurrentUserResponse,
+  SendOtpRequest,
+  SendOtpResponse,
   SendPasswordMailRequest,
   SendPasswordMailResponse,
   ChangePasswordRequest,
@@ -202,7 +204,32 @@ export const isAuthenticated = (): boolean => {
 };
 
 /**
- * Send Password Mail Service
+ * Send OTP Service
+ * POST auth/send-otp
+ * Kullanıcının e-postasına OTP kodu gönderir
+ */
+export const sendOtp = async (
+  data: SendOtpRequest
+): Promise<SendOtpResponse> => {
+  try {
+    const response = await apiClient.post<SendOtpResponse>(
+      'auth/send-otp',
+      data
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'OTP gönderilirken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+/**
+ * Send Password Mail Service (legacy)
  * POST auth/sendPasswordMail
  */
 export const sendPasswordMail = async (
@@ -213,10 +240,8 @@ export const sendPasswordMail = async (
       'auth/sendPasswordMail',
       data
     );
-
     return response.data;
   } catch (error: any) {
-    // Axios error handling
     if (error.response?.data) {
       throw error.response.data as ApiErrorResponse;
     }

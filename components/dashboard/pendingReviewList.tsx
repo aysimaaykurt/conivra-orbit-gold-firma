@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/src/navigation";
 import { getPendingReviews } from "@/src/api/company/dashboard/dashboard.service";
-import type { ApplicationListItem } from "@/src/api/applications/applications.models";
 import PendingReviewItemComponent from "./pendingReviewItem";
 
 export default function PendingReviewList() {
   const t = useTranslations("dashboard.pendingReviews");
   const router = useRouter();
-  const [applications, setApplications] = useState<ApplicationListItem[]>([]);
+  const [applications, setApplications] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,8 +37,8 @@ export default function PendingReviewList() {
     fetchPendingReviews();
   }, []);
 
-  const handleEvaluate = () => {
-    router.push("/applications");
+  const handleEvaluate = (id: string) => {
+    router.push(`/applications/${id}`);
   };
 
   if (isLoading) {
@@ -86,7 +85,7 @@ export default function PendingReviewList() {
             <PendingReviewItemComponent 
               key={application.id} 
               application={application}
-              onEvaluate={handleEvaluate}
+              onEvaluate={() => handleEvaluate(application.id)}
             />
           ))}
         </div>

@@ -195,14 +195,36 @@ export default function ApplicationsList() {
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4 flex-wrap">
-          <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#4C226A" }}>
-            Başvurularım
-          </h1>
+      {/* Header & Tabs Control Row */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        {/* Left: Tabs & Bulk Actions */}
+        <div className="flex items-center gap-4 flex-wrap flex-1 min-w-0">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {adTypeTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setCurrentPage(1);
+                }}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 text-sm ${
+                  activeTab === tab.id
+                    ? "text-white"
+                    : "text-gray-600 bg-gray-100 hover:bg-gray-200"
+                }`}
+                style={
+                  activeTab === tab.id
+                    ? { backgroundColor: "#4C226A" }
+                    : undefined
+                }
+              >
+                {t(tab.id)}
+              </button>
+            ))}
+          </div>
+
           {selectedAppIds.length > 0 && (
-            <div className="flex items-center gap-2 bg-[#4C226A]/5 px-3 py-1.5 rounded-lg border border-[#4C226A]/20 animate-fade-in">
+            <div className="flex items-center gap-2 bg-[#4C226A]/5 px-3 py-1.5 rounded-lg border border-[#4C226A]/20 animate-fade-in flex-shrink-0">
               <span className="text-sm font-semibold text-[#4C226A]">{selectedAppIds.length} Seçildi</span>
               <button
                 onClick={() => handleBulkAction("approve")}
@@ -219,7 +241,9 @@ export default function ApplicationsList() {
             </div>
           )}
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
+
+        {/* Right: Search & Sort */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0">
           {/* Search */}
           <div className="relative flex-1 sm:flex-none">
             <i className="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -231,7 +255,7 @@ export default function ApplicationsList() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full sm:w-60 pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
             />
           </div>
           {/* Sort */}
@@ -240,38 +264,13 @@ export default function ApplicationsList() {
               setSortOrder(prev => prev === "desc" ? "asc" : "desc");
               setCurrentPage(1);
             }}
-            className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex-shrink-0"
+            className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex-shrink-0 text-sm"
           >
             <i className="pi pi-list text-gray-600" />
             <span className="text-gray-700 w-[55px] text-left">{sortOrder === "asc" ? "En Eski" : "En Yeni"}</span>
             <i className="pi pi-sort-alt text-gray-400 text-xs ml-1" />
           </button>
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-        {adTypeTabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setCurrentPage(1);
-            }}
-            className={`px-4 md:px-6 py-2.5 md:py-3 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-              activeTab === tab.id
-                ? "text-white"
-                : "text-gray-600 bg-gray-100 hover:bg-gray-200"
-            }`}
-            style={
-              activeTab === tab.id
-                ? { backgroundColor: "#4C226A" }
-                : undefined
-            }
-          >
-            {t(tab.id)}
-          </button>
-        ))}
       </div>
 
       {/* Table */}
@@ -555,28 +554,37 @@ function ApplicationTableRow({
       </td>
       <td className="py-4 px-4 min-w-[200px]">
         <div className="flex flex-col gap-1">
-          <Link
-            href={`/applications/${application.id}`}
-            className="text-sm font-semibold text-purple-700 hover:text-purple-900 hover:underline transition-colors"
-          >
-            {((application as any).advertisementTitle || 
+          {(() => {
+            const adTitle = ((application as any).advertisementTitle || 
               (application as any).adTitle || 
               (application as any).advert?.title || 
               (application as any).advertisement?.title || 
               (application as any).title || 
-              "").trim() || (
-                application.adType === "campaign" ? "İlan Detayı" :
-                application.adType === "giftkit" ? "Hediye Kiti Detayı" :
-                application.adType === "workshop" ? "Workshop Detayı" :
-                "Detay Gör"
-              )}
-          </Link>
-          <span className="text-xs text-purple-600 bg-purple-50 w-max px-2 py-0.5 rounded font-medium">
-            {application.adType === "campaign" ? "İlan" :
-             application.adType === "giftkit" ? "Hediye Kiti" :
-             application.adType === "workshop" ? "Workshop" :
-             application.adType}
-          </span>
+              "").trim();
+            
+            return (
+              <>
+                {adTitle && (
+                  <Link
+                    href={`/applications/${application.id}`}
+                    className="text-sm font-semibold text-purple-700 hover:text-purple-900 hover:underline transition-colors"
+                  >
+                    {adTitle}
+                  </Link>
+                )}
+                <Link
+                  href={`/applications/${application.id}`}
+                  className="text-xs text-purple-600 bg-purple-50 w-max px-2 py-0.5 rounded font-medium hover:bg-purple-100 transition-colors"
+                  style={{ textDecoration: 'none' }}
+                >
+                  {application.adType === "campaign" ? "İlan" :
+                   application.adType === "giftkit" ? "Hediye Kiti" :
+                   application.adType === "workshop" ? "Workshop" :
+                   application.adType}
+                </Link>
+              </>
+            );
+          })()}
         </div>
       </td>
       <td className="py-4 px-4 whitespace-nowrap">
@@ -630,6 +638,20 @@ function ApplicationTableRow({
         <div className="flex items-center gap-2">
           {(() => {
             const status = application.status as any;
+            const isResubmitted = (application as any).isResubmitted;
+
+            // isResubmitted + status 7 → tek buton
+            if (isResubmitted && (status === 7 || status === "7" || status === "Submitted" || status === "submitted")) {
+              return (
+                <button
+                  onClick={() => onApproveSubmission(application.id)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-1"
+                  style={{ backgroundColor: "#10B981" }}
+                >
+                  <i className="pi pi-check-circle text-xs" /> Revizyonu Onayla
+                </button>
+              );
+            }
             if (status === 2 || status === "2" || status === "Approved") {
               return (
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">

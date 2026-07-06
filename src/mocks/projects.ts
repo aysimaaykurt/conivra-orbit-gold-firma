@@ -10,6 +10,7 @@ export interface Project {
   startDate?: string;
   endDate?: string;
   type: string;
+  category?: string;
   sector?: string;
   platforms?: string;
   assignee?: string;

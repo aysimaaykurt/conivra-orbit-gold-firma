@@ -26,7 +26,6 @@ export const registerSchema = Yup.object({
 
 export const forgotPasswordSchema = Yup.object({
   email: Yup.string().email("Geçerli bir e-posta giriniz").required("E-posta zorunludur"),
-  oldPassword: Yup.string().required("Eski şifre zorunludur"),
 });
 
 export const resetPasswordSchema = Yup.object({

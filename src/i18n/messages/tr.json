@@ -1,9 +1,9 @@
 {
   "header": {
     "status": {
-      "gold": "Gold Statü",
-      "silver": "Silver Statü",
-      "bronze": "Bronze Statü",
+      "gold": "Gold",
+      "silver": "Silver",
+      "bronze": "Bronze",
       "standard": "Standart"
     },
     "referralCode": "Referans Kodu",
@@ -31,7 +31,8 @@
     },
     "mostPreferred": {
       "title": "En Popüler İlanlar",
-      "subtitle": "En çok başvuru alan ilanlarınız"
+      "subtitle": "En çok başvuru alan ilanlarınız",
+      "noItems": "Henüz popüler bir ilanınız bulunmuyor."
     },
     "applications": {
       "title": "Son Gelen Başvurular",
