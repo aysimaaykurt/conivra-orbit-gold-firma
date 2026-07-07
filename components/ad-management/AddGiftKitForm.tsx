@@ -87,7 +87,6 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories();
   const { sectors: sectorOptions, isLoading: isSectorsLoading } = useSectors();
 
   const formik = useFormik<FormValues>({
@@ -167,6 +166,8 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
       }
     },
   });
+
+  const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories(formik.values.sector);
 
   useEffect(() => {
     const targetId = editId || duplicateId;
@@ -403,7 +404,10 @@ export default function AddGiftKitForm({ onClose }: AddGiftKitFormProps) {
                         label="Sektör (İsteğe Bağlı)"
                         name="sector"
                         value={values.sector}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          handleChange(e);
+                          setFieldValue("category", "");
+                        }}
                         onBlur={handleBlur}
                         error={touched.sector ? errors.sector : undefined}
                         options={sectorOptions}

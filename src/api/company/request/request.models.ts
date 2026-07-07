@@ -2,6 +2,7 @@ import { RequestStatus } from './requestStatus.enum';
 
 // Create Request Request Models (POST)
 export interface CreateRequestRequest {
+  supportTypeId: number;
   title: string;
   type: string;
   description: string;
@@ -10,10 +11,13 @@ export interface CreateRequestRequest {
 // Request Response Models (GET)
 export interface Request {
   id: string;
+  supportTypeId?: number;
   title: string;
   type: string;
+  category?: string;
   description: string;
   status: RequestStatus;
+  isEdited?: boolean;
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)
 }

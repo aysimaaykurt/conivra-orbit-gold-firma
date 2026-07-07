@@ -108,7 +108,6 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories();
   const { sectors: sectorOptions, isLoading: isSectorsLoading } = useSectors();
   const { cities: cityOptions, fetchDistricts } = useLocations();
   const [districtOptions, setDistrictOptions] = useState<{label: string, value: string | number}[]>([]);
@@ -241,6 +240,8 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
       }
     },
   });
+
+  const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories(formik.values.sector);
 
   useEffect(() => {
     const targetId = editId || duplicateId;
@@ -758,6 +759,20 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Dropdown
+                        label="Sektör"
+                        name="sector"
+                        value={values.sector}
+                        onChange={(e) => {
+                          handleChange(e);
+                          setFieldValue("category", "");
+                        }}
+                        onBlur={handleBlur}
+                        error={touched.sector ? errors.sector : undefined}
+                        options={sectorOptions}
+                        placeholder="Bir Sektör seçiniz"
+                      />
+
+                      <Dropdown
                         label="Kategori"
                         name="category"
                         value={values.category}
@@ -768,27 +783,18 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                         placeholder="Bir Kategori seçiniz"
                       />
 
-                      <Dropdown
-                        label="Sektör (İsteğe Bağlı)"
-                        name="sector"
-                        value={values.sector}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={touched.sector ? errors.sector : undefined}
-                        options={sectorOptions}
-                        placeholder="Bir Sektör seçiniz"
-                      />
-
-                      <Dropdown
-                        label="Hedef Kitle"
-                        name="targetAudience"
-                        value={values.targetAudience}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={touched.targetAudience ? errors.targetAudience : undefined}
-                        options={targetAudienceOptions}
-                        placeholder="Hedef Kitle seçiniz"
-                      />
+                      <div className="md:col-span-2">
+                        <Dropdown
+                          label="Hedef Kitle"
+                          name="targetAudience"
+                          value={values.targetAudience}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          error={touched.targetAudience ? errors.targetAudience : undefined}
+                          options={targetAudienceOptions}
+                          placeholder="Hedef Kitle seçiniz"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -821,13 +827,13 @@ export default function AddWorkshopForm({ onClose }: AddWorkshopFormProps) {
                     </div>
 
                     <Input
-                      label="Ücret Bilgisi"
+                      label="Ücret Bilgisi *"
                       name="fee"
                       value={values.fee}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       error={touched.fee ? errors.fee : undefined}
-                      placeholder="Ücret yoksa boş bırakınız"
+                      placeholder=""
                     />
 
                     <MultiSelect

@@ -119,8 +119,8 @@ export default function AdManagementPage() {
         endTime,
         startDateIso: startDate.toISOString(),
         endDateIso: endDate.toISOString(),
-        coverImageUrl: (item as any).images && (item as any).images.length > 0  
-          ? ((item as any).images.find((img: any) => img.isMain)?.imageUrl || (item as any).images[0].imageUrl) 
+        coverImageUrl: (item as any).images && (item as any).images.length > 0
+          ? ((item as any).images.find((img: any) => img.isMain)?.imageUrl || (item as any).images[0].imageUrl)
           : "/images/soiree.png",
         images: (item as any).images || [],
         type: category === "ilan" ? "Reklam" : category === "workshop" ? "Workshop" : "Hediye Kiti",
@@ -186,7 +186,7 @@ export default function AdManagementPage() {
       } else if (deleteModal.category === "hediye_kiti") {
         await deleteGiftKit(deleteModal.id);
       }
-      
+
       setEvents((prev) => prev.filter((e) => e.id !== deleteModal.id));
       setDeleteModal(null);
     } catch (err) {
@@ -200,7 +200,7 @@ export default function AdManagementPage() {
   const handlePause = (id: string, cat: string) => {
     const event = events.find(e => e.id === id);
     const isCurrentlyActive = event?.status === "active";
-    
+
     if (isCurrentlyActive) {
       setPauseModal({ isOpen: true, id, category: cat, action: "pause" });
     } else {
@@ -264,13 +264,13 @@ export default function AdManagementPage() {
       </div>
 
       <div className="mb-4">
-        <Tabs 
-          active={active} 
+        <Tabs
+          active={active}
           onChange={(key) => {
             const category = key as AdCategory;
             setActive(category);
             window.history.replaceState(null, '', `/${locale}/ad-management?tab=${category}`);
-          }} 
+          }}
         />
       </div>
 
@@ -291,7 +291,7 @@ export default function AdManagementPage() {
           <p className="text-red-600 max-w-sm mx-auto mb-6">
             {error}
           </p>
-          <button 
+          <button
             onClick={() => refetch()}
             className="flex items-center gap-2 px-6 py-3 bg-white text-red-600 border border-red-200 font-medium rounded-xl hover:bg-red-50 transition-all shadow-sm"
           >
@@ -310,7 +310,7 @@ export default function AdManagementPage() {
           <p className="text-slate-500 max-w-sm mx-auto mb-6">
             Henüz herhangi bir {active === "ilan" ? "ilan" : active === "workshop" ? "workshop" : "hediye kiti"} oluşturmamışsınız. Yeni bir tane oluşturarak başlayabilirsiniz.
           </p>
-          <button 
+          <button
             onClick={() => {
               if (active === "workshop") router.push(`/${locale}/ad-management/workshop/add`);
               else if (active === "hediye_kiti") router.push(`/${locale}/ad-management/gift-kit/add`);
@@ -324,23 +324,24 @@ export default function AdManagementPage() {
           </button>
         </div>
       ) : active === "hediye_kiti" ? (
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
           {events.map((event) => (
-            <EventCard 
-              key={event.id} 
-              event={event} 
-              onEdit={handleEdit}
-              onDelete={handleDeleteClick}
-              onPause={handlePause}
-              onDuplicate={handleDuplicate}
-            />
+            <div key={event.id} className="w-full max-w-[430px]">
+              <EventCard 
+                event={event} 
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+                onPause={handlePause}
+                onDuplicate={handleDuplicate}
+              />
+            </div>
           ))}
         </div>
       ) : (
-        <CalendarGrid 
-          events={events} 
-          onEdit={handleEdit} 
-          onDelete={handleDeleteClick} 
+        <CalendarGrid
+          events={events}
+          onEdit={handleEdit}
+          onDelete={handleDeleteClick}
           onPause={handlePause}
           onDuplicate={handleDuplicate}
         />

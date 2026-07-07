@@ -34,6 +34,9 @@ export const addWorkshop = async (
     formData.append('participantCount', data.participantCount);
     formData.append('participationCondition', data.participationCondition);
     formData.append('fee', data.fee);
+    if (data.sector) {
+      formData.append('sector', data.sector);
+    }
     // Append array fields properly
     if (Array.isArray(data.contentType)) {
       data.contentType.forEach(c => formData.append('contentType', c));
@@ -106,6 +109,10 @@ export const updateWorkshop = async (
     formData.append('participantCount', data.participantCount);
     formData.append('participationCondition', data.participationCondition);
     formData.append('fee', data.fee);
+    if (data.sector) {
+      formData.append('sector', data.sector);
+    }
+    
     // Append array fields properly
     if (Array.isArray(data.contentType)) {
       data.contentType.forEach(c => formData.append('contentType', c));

@@ -9,7 +9,7 @@ export interface Sector {
 
 export const getSectors = async (): Promise<Sector[]> => {
   try {
-    const response = await apiClient.get('/company/profile/sectors');
+    const response = await apiClient.get('/sectors');
     
     // Support various formats the backend might return
     if (response.data?.success && response.data.data?.sectors && Array.isArray(response.data.data.sectors)) {

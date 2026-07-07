@@ -67,19 +67,21 @@ export default function RequestsTable({ requests, isLoading, onEdit, onDelete }:
           <tbody>
             {requests.map((request) => (
               <tr key={request.id} className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="py-3 px-4 text-sm text-dark">{request.title}</td>
-                <td className="py-3 px-4 text-sm text-dark">{request.type}</td>
+                <td className="py-3 px-4 text-sm text-dark">{request.title || (request as any).subject}</td>
+                <td className="py-3 px-4 text-sm text-dark">{request.category || request.type || (request as any).requestType || (request as any).supportType}</td>
                 <td className="py-3 px-4 text-sm text-dark">
-                  <div className="max-w-[200px] md:max-w-md truncate" title={request.description}>
-                    {request.description}
+                  <div className="max-w-[200px] md:max-w-md" title={request.description}>
+                    {request.description && request.description.length > 50 
+                      ? `${request.description.substring(0, 50)}...` 
+                      : request.description}
                   </div>
                 </td>
                 <td className="py-3 px-4">
-                  <StatusBadge status={request.status as RequestStatus} type="request" />
+                  <StatusBadge status={request.status as RequestStatus} type="request" isEdited={request.isEdited} />
                 </td>
                 <td className="py-3 px-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    {/* {onEdit && (
+                    {onEdit && (
                       <button
                         onClick={() => onEdit(request)}
                         className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
@@ -87,7 +89,7 @@ export default function RequestsTable({ requests, isLoading, onEdit, onDelete }:
                       >
                         <i className="pi pi-pencil" style={{ fontSize: '1rem' }}></i>
                       </button>
-                    )} */}
+                    )}
                     {onDelete && (
                       <button
                         onClick={() => onDelete(request)}

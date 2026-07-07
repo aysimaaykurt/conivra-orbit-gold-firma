@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import React from "react";
  
 interface StatusBadgeProps {
-  status: RequestStatus | SupportStatus;
+  status: RequestStatus | SupportStatus | number;
   type?: "request" | "support";
+  isEdited?: boolean;
 }
 
 const requestStatusColors: Record<RequestStatus, string> = {
@@ -25,21 +26,51 @@ const supportStatusColors: Record<SupportStatus, string> = {
   [SupportStatus.CANCELLED]: "#EF4444", // red
 };
 
-export default function StatusBadge({ status, type = "request" }: StatusBadgeProps) {
+const requestStatusMap: Record<number, RequestStatus> = {
+  1: RequestStatus.PENDING,
+  2: RequestStatus.IN_PROGRESS,
+  3: RequestStatus.RESOLVED,
+  4: RequestStatus.CANCELLED,
+};
+
+const supportStatusMap: Record<number, SupportStatus> = {
+  1: SupportStatus.PENDING,
+  2: SupportStatus.IN_PROGRESS,
+  3: SupportStatus.ANSWERED,
+  4: SupportStatus.RESOLVED,
+  5: SupportStatus.CANCELLED,
+};
+
+export default function StatusBadge({ status, type = "request", isEdited }: StatusBadgeProps) {
   const t = useTranslations("supportRequests.status");
+
+  let normalizedStatus = status as string;
+  if (typeof status === 'number') {
+    normalizedStatus = type === 'request'
+      ? requestStatusMap[status] || RequestStatus.PENDING
+      : supportStatusMap[status] || SupportStatus.PENDING;
+  }
+
   const bgColor = type === "request" 
-    ? requestStatusColors[status as RequestStatus]
-    : supportStatusColors[status as SupportStatus];
+    ? requestStatusColors[normalizedStatus as RequestStatus]
+    : supportStatusColors[normalizedStatus as SupportStatus];
   
-  const label = t(status);
+  const label = t(normalizedStatus);
 
   return (
-    <span
-      className="px-3 py-1 rounded-full text-xs font-medium text-white"
-      style={{ backgroundColor: bgColor }}
-    >
-      {label}
-    </span>
+    <div className="flex items-center gap-2">
+      <span
+        className="px-3 py-1 rounded-full text-xs font-medium text-white"
+        style={{ backgroundColor: bgColor || "#9CA3AF" }}
+      >
+        {label || normalizedStatus}
+      </span>
+      {isEdited && (
+        <span className="px-3 py-1 rounded-full text-xs font-medium text-white bg-blue-500">
+          Düzenlendi
+        </span>
+      )}
+    </div>
   );
 }
 

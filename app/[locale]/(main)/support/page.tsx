@@ -168,14 +168,16 @@ export default function SupportPage() {
       let response;
       if (selectedRequest) {
         response = await updateRequest(selectedRequest.id, {
+          supportTypeId: Number(values.supportTypeId),
           title: values.title,
-          type: values.type,
+          type: "Talep",
           description: values.description,
         });
       } else {
         response = await createRequest({
+          supportTypeId: Number(values.supportTypeId),
           title: values.title,
-          type: values.type,
+          type: "Talep",
           description: values.description,
         });
       }
@@ -217,14 +219,16 @@ export default function SupportPage() {
       let response;
       if (selectedSupport) {
         response = await updateSupport(selectedSupport.id, {
+          supportTypeId: Number(values.supportTypeId),
           title: values.title,
-          type: values.type,
+          type: "Destek",
           description: values.description,
         });
       } else {
         response = await createSupport({
+          supportTypeId: Number(values.supportTypeId),
           title: values.title,
-          type: values.type,
+          type: "Destek",
           description: values.description,
         });
       }
@@ -328,7 +332,11 @@ export default function SupportPage() {
           isLoading={isSubmitting}
           initialData={selectedRequest ? {
             title: selectedRequest.title,
-            type: selectedRequest.type,
+            supportTypeId: (() => {
+              if (selectedRequest.supportTypeId) return selectedRequest.supportTypeId;
+              return "";
+            })(),
+            categoryName: selectedRequest.category || selectedRequest.type || (selectedRequest as any).requestType || (selectedRequest as any).supportType || "",
             description: selectedRequest.description
           } : undefined}
         />
@@ -343,7 +351,11 @@ export default function SupportPage() {
           isLoading={isSubmitting}
           initialData={selectedSupport ? {
             title: selectedSupport.title,
-            type: selectedSupport.type,
+            supportTypeId: (() => {
+              if (selectedSupport.supportTypeId) return selectedSupport.supportTypeId;
+              return "";
+            })(),
+            categoryName: selectedSupport.category || selectedSupport.type || (selectedSupport as any).supportType || (selectedSupport as any).requestType || "",
             description: selectedSupport.description
           } : undefined}
         />

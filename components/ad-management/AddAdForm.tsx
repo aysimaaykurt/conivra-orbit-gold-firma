@@ -102,7 +102,6 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories();
   const { sectors: sectorOptions, isLoading: isSectorsLoading } = useSectors();
   const { cities: cityOptions, fetchDistricts } = useLocations();
   const [districtOptions, setDistrictOptions] = useState<{label: string, value: string | number}[]>([]);
@@ -230,6 +229,8 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
       }
     },
   });
+
+  const { categories: categoryOptions, isLoading: isCategoriesLoading } = useCategories(formik.values.sector);
 
   useEffect(() => {
     const targetId = editId || duplicateId;
@@ -741,7 +742,10 @@ export default function AddAdForm({ onClose }: AddAdFormProps) {
                         label="Sektör"
                         name="sector"
                         value={values.sector}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          handleChange(e);
+                          setFieldValue("category", "");
+                        }}
                         onBlur={handleBlur}
                         error={touched.sector ? errors.sector : undefined}
                         options={sectorOptions}

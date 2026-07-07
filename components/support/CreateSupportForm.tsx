@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { getSupportTypes } from "@/src/api/company/support/support.service";
 
 interface CreateSupportFormProps {
   onSubmit: (values: SupportFormValues) => void;
@@ -15,24 +16,19 @@ interface CreateSupportFormProps {
 }
 
 export interface SupportFormValues {
+  supportTypeId: number | string;
   title: string;
-  type: string;
   description: string;
+  categoryName?: string;
 }
 
-const supportTypes = [
-  { label: "Teknik Destek", value: "Teknik Destek" },
-  { label: "Hesap Sorunu", value: "Hesap Sorunu" },
-  { label: "Özellik İsteği", value: "Özellik İsteği" },
-  { label: "Geri Bildirim", value: "Geri Bildirim" },
-];
-
+// Types will be fetched from API
 const validationSchema = Yup.object({
   title: Yup.string()
     .required("Destek başlığı gereklidir")
     .min(3, "Destek başlığı en az 3 karakter olmalıdır")
     .max(100, "Destek başlığı en fazla 100 karakter olabilir"),
-  type: Yup.string()
+  supportTypeId: Yup.number()
     .required("Destek türü seçilmelidir"),
   description: Yup.string()
     .required("Destek açıklaması gereklidir")
@@ -45,11 +41,37 @@ export default function CreateSupportForm({
   onCancel,
   initialData,
 }: CreateSupportFormProps) {
+  const [supportTypes, setSupportTypes] = React.useState<{label: string, value: number}[]>([]);
+
+  React.useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const response = await getSupportTypes('Destek');
+        if (response.success && response.data) {
+          const fetchedTypes = response.data.map((type) => ({ label: type.name, value: type.id }));
+          setSupportTypes(fetchedTypes);
+
+          // Eğer ID yoksa, ancak kategori adı varsa eşleşen ID'yi bul ve seç
+          if (initialData?.categoryName && !initialData.supportTypeId) {
+            const matched = fetchedTypes.find(t => t.label === initialData.categoryName);
+            if (matched) {
+              formik.setFieldValue("supportTypeId", matched.value);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Destek türleri alınamadı:", error);
+      }
+    };
+    fetchTypes();
+  }, [initialData]);
+
   const formik = useFormik<SupportFormValues>({
     initialValues: {
       title: initialData?.title || "",
-      type: initialData?.type || "",
+      supportTypeId: initialData?.supportTypeId || "",
       description: initialData?.description || "",
+      categoryName: initialData?.categoryName || "",
     },
     validationSchema,
     enableReinitialize: true,
@@ -79,14 +101,14 @@ export default function CreateSupportForm({
       <div>
         <Dropdown
           label="Destek Türü"
-          name="type"
-          id="type"
-          value={formik.values.type}
+          name="supportTypeId"
+          id="supportTypeId"
+          value={formik.values.supportTypeId}
           onChange={(e) => {
-            formik.setFieldValue("type", e.target.value);
+            formik.setFieldValue("supportTypeId", Number(e.target.value));
           }}
-          onBlur={() => formik.setFieldTouched("type", true)}
-          error={formik.touched.type && formik.errors.type ? formik.errors.type : undefined}
+          onBlur={() => formik.setFieldTouched("supportTypeId", true)}
+          error={formik.touched.supportTypeId && formik.errors.supportTypeId ? formik.errors.supportTypeId as string : undefined}
           options={supportTypes}
           placeholder="Destek türü seçiniz"
         />

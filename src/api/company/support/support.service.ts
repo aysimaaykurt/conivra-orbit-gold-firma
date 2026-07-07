@@ -6,6 +6,7 @@ import type {
   UpdateSupportRequest,
   BasicResponse,
   ApiErrorResponse,
+  GetSupportTypesResponse,
 } from './support.models';
 
 /**
@@ -37,7 +38,7 @@ export const getSupports = async (
   searchTerm?: string
 ): Promise<GetSupportsListResponse> => {
   try {
-    const params: any = {};
+    const params: any = { type: 'Destek' };
     if (page) params.page = page;
     if (pageSize) params.pageSize = pageSize;
     if (searchTerm) params.searchTerm = searchTerm;
@@ -51,6 +52,25 @@ export const getSupports = async (
     throw {
       success: false,
       message: error.message || 'Destek talepleri alınırken bir hata oluştu',
+    } as ApiErrorResponse;
+  }
+};
+
+export const getSupportTypes = async (
+  type: 'Destek' | 'Talep'
+): Promise<GetSupportTypesResponse> => {
+  try {
+    const response = await apiClient.get<GetSupportTypesResponse>('company/support/types', {
+      params: { type },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      throw error.response.data as ApiErrorResponse;
+    }
+    throw {
+      success: false,
+      message: error.message || 'Türler alınırken bir hata oluştu',
     } as ApiErrorResponse;
   }
 };

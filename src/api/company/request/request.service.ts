@@ -16,7 +16,7 @@ export const createRequest = async (
   data: CreateRequestRequest
 ): Promise<CreateRequestResponse> => {
   try {
-    const response = await apiClient.post<CreateRequestResponse>('company/request', data);
+    const response = await apiClient.post<CreateRequestResponse>('company/support', data);
     return response.data;
   } catch (error: any) {
     if (error.response?.data) {
@@ -35,12 +35,12 @@ export const getRequests = async (
   searchTerm?: string
 ): Promise<GetRequestsListResponse> => {
   try {
-    const params: any = {};
+    const params: any = { type: 'Talep' };
     if (page) params.page = page;
     if (pageSize) params.pageSize = pageSize;
     if (searchTerm) params.searchTerm = searchTerm;
 
-    const response = await apiClient.get<GetRequestsListResponse>('company/request', { params });
+    const response = await apiClient.get<GetRequestsListResponse>('company/support', { params });
     return response.data;
   } catch (error: any) {
     if (error.response?.data) {

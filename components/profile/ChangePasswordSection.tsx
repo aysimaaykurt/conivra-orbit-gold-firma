@@ -100,10 +100,10 @@ export default function ChangePasswordSection() {
   return (
     <>
       <Toast ref={toastRef} />
-      <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
+      <div className="mt-12 pt-8 border-t border-gray-200">
 
         {/* Başlık */}
-        <h2 className="text-lg font-semibold mb-6" style={{ color: "#4C226A" }}>
+        <h2 className="text-lg font-bold mb-6" style={{ color: "#4C226A" }}>
           Şifre Değiştir
         </h2>
 
@@ -135,27 +135,29 @@ export default function ChangePasswordSection() {
         {/* Adım 1 */}
         {step === 1 && (
           <form onSubmit={step1.handleSubmit} autoComplete="off" noValidate>
-            <div className="flex flex-col gap-4 mb-6 max-w-sm">
-              <Input
-                label="E-posta Adresiniz"
-                name="email"
-                type="email"
-                placeholder="ornek@email.com"
-                value={step1.values.email}
-                onChange={step1.handleChange}
-                onBlur={step1.handleBlur}
-                error={step1.touched.email ? step1.errors.email : undefined}
-              />
-              <Input
-                label="Mevcut Şifre"
-                name="oldPassword"
-                type="password"
-                placeholder="••••••••"
-                value={step1.values.oldPassword}
-                onChange={step1.handleChange}
-                onBlur={step1.handleBlur}
-                error={step1.touched.oldPassword ? step1.errors.oldPassword : undefined}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-6">
+                <Input
+                  label="E-posta Adresiniz"
+                  name="email"
+                  type="email"
+                  placeholder="ornek@email.com"
+                  value={step1.values.email}
+                  onChange={step1.handleChange}
+                  onBlur={step1.handleBlur}
+                  error={step1.touched.email ? step1.errors.email : undefined}
+                />
+                <Input
+                  label="Mevcut Şifre"
+                  name="oldPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={step1.values.oldPassword}
+                  onChange={step1.handleChange}
+                  onBlur={step1.handleBlur}
+                  error={step1.touched.oldPassword ? step1.errors.oldPassword : undefined}
+                />
+              </div>
             </div>
             <div className="flex justify-center pt-2">
               <Button
@@ -173,41 +175,43 @@ export default function ChangePasswordSection() {
         {/* Adım 2 */}
         {step === 2 && (
           <form onSubmit={step2.handleSubmit} autoComplete="off" noValidate>
-            <div className="mb-4 px-3 py-2.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 max-w-sm">
-              Kod <strong>{step1.values.email}</strong> adresine gönderildi.
-            </div>
-            <div className="flex flex-col gap-4 mb-6 max-w-sm">
-              <Input
-                label="Doğrulama Kodu"
-                name="verificationCode"
-                type="text"
-                placeholder="6 haneli kod"
-                value={step2.values.verificationCode}
-                onChange={step2.handleChange}
-                onBlur={step2.handleBlur}
-                error={step2.touched.verificationCode ? step2.errors.verificationCode : undefined}
-                maxLength={6}
-              />
-              <Input
-                label="Yeni Şifre"
-                name="newPassword"
-                type="password"
-                placeholder="••••••••"
-                value={step2.values.newPassword}
-                onChange={step2.handleChange}
-                onBlur={step2.handleBlur}
-                error={step2.touched.newPassword ? step2.errors.newPassword : undefined}
-              />
-              <Input
-                label="Yeni Şifre Tekrar"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={step2.values.confirmPassword}
-                onChange={step2.handleChange}
-                onBlur={step2.handleBlur}
-                error={step2.touched.confirmPassword ? step2.errors.confirmPassword : undefined}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-6">
+                <div className="px-3 py-2.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                  Kod <strong>{step1.values.email}</strong> adresine gönderildi.
+                </div>
+                <Input
+                  label="Doğrulama Kodu"
+                  name="verificationCode"
+                  type="text"
+                  placeholder="6 haneli kod"
+                  value={step2.values.verificationCode}
+                  onChange={step2.handleChange}
+                  onBlur={step2.handleBlur}
+                  error={step2.touched.verificationCode ? step2.errors.verificationCode : undefined}
+                  maxLength={6}
+                />
+                <Input
+                  label="Yeni Şifre"
+                  name="newPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={step2.values.newPassword}
+                  onChange={step2.handleChange}
+                  onBlur={step2.handleBlur}
+                  error={step2.touched.newPassword ? step2.errors.newPassword : undefined}
+                />
+                <Input
+                  label="Yeni Şifre Tekrar"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={step2.values.confirmPassword}
+                  onChange={step2.handleChange}
+                  onBlur={step2.handleBlur}
+                  error={step2.touched.confirmPassword ? step2.errors.confirmPassword : undefined}
+                />
+              </div>
             </div>
             <div className="flex justify-center items-center gap-4 pt-2">
               <button

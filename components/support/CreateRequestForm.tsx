@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { getSupportTypes } from "@/src/api/company/support/support.service";
 
 interface CreateRequestFormProps {
   onSubmit: (values: RequestFormValues) => void;
@@ -15,24 +16,19 @@ interface CreateRequestFormProps {
 }
 
 export interface RequestFormValues {
+  supportTypeId: number | string;
   title: string;
-  type: string;
   description: string;
+  categoryName?: string;
 }
 
-const requestTypes = [
-  { label: "Reklam Talebi", value: "Reklam Talebi" },
-  { label: "Teknik Destek", value: "Teknik Destek" },
-  { label: "Genel Talep", value: "Genel Talep" },
-  { label: "Ödeme Sorunu", value: "Ödeme Sorunu" },
-];
-
+// Types will be fetched from API
 const validationSchema = Yup.object({
   title: Yup.string()
     .required("Talep başlığı gereklidir")
     .min(3, "Talep başlığı en az 3 karakter olmalıdır")
     .max(100, "Talep başlığı en fazla 100 karakter olabilir"),
-  type: Yup.string()
+  supportTypeId: Yup.number()
     .required("Talep türü seçilmelidir"),
   description: Yup.string()
     .required("Talep açıklaması gereklidir")
@@ -45,11 +41,37 @@ export default function CreateRequestForm({
   onCancel,
   initialData,
 }: CreateRequestFormProps) {
+  const [requestTypes, setRequestTypes] = React.useState<{label: string, value: number}[]>([]);
+
+  React.useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const response = await getSupportTypes('Talep');
+        if (response.success && response.data) {
+          const fetchedTypes = response.data.map((type) => ({ label: type.name, value: type.id }));
+          setRequestTypes(fetchedTypes);
+
+          // Eğer ID yoksa, ancak kategori adı varsa eşleşen ID'yi bul ve seç
+          if (initialData?.categoryName && !initialData.supportTypeId) {
+            const matched = fetchedTypes.find(t => t.label === initialData.categoryName);
+            if (matched) {
+              formik.setFieldValue("supportTypeId", matched.value);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Talep türleri alınamadı:", error);
+      }
+    };
+    fetchTypes();
+  }, [initialData]);
+
   const formik = useFormik<RequestFormValues>({
     initialValues: {
       title: initialData?.title || "",
-      type: initialData?.type || "",
+      supportTypeId: initialData?.supportTypeId || "",
       description: initialData?.description || "",
+      categoryName: initialData?.categoryName || "",
     },
     validationSchema,
     enableReinitialize: true,
@@ -79,14 +101,14 @@ export default function CreateRequestForm({
       <div>
         <Dropdown
           label="Talep Türü"
-          name="type"
-          id="type"
-          value={formik.values.type}
+          name="supportTypeId"
+          id="supportTypeId"
+          value={formik.values.supportTypeId}
           onChange={(e) => {
-            formik.setFieldValue("type", e.target.value);
+            formik.setFieldValue("supportTypeId", Number(e.target.value));
           }}
-          onBlur={() => formik.setFieldTouched("type", true)}
-          error={formik.touched.type && formik.errors.type ? formik.errors.type : undefined}
+          onBlur={() => formik.setFieldTouched("supportTypeId", true)}
+          error={formik.touched.supportTypeId && formik.errors.supportTypeId ? formik.errors.supportTypeId as string : undefined}
           options={requestTypes}
           placeholder="Talep türü seçiniz"
         />

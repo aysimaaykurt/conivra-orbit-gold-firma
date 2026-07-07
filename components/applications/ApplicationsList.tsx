@@ -574,7 +574,7 @@ function ApplicationTableRow({
                 )}
                 <Link
                   href={`/applications/${application.id}`}
-                  className="text-xs text-purple-600 bg-purple-50 w-max px-2 py-0.5 rounded font-medium hover:bg-purple-100 transition-colors"
+                  className="text-sm text-purple-600 bg-purple-50 w-max px-2.5 py-1 rounded-md font-semibold hover:bg-purple-100 transition-colors"
                   style={{ textDecoration: 'none' }}
                 >
                   {application.adType === "campaign" ? "İlan" :
@@ -645,7 +645,7 @@ function ApplicationTableRow({
               return (
                 <button
                   onClick={() => onApproveSubmission(application.id)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-1"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-2 whitespace-nowrap"
                   style={{ backgroundColor: "#10B981" }}
                 >
                   <i className="pi pi-check-circle text-xs" /> Revizyonu Onayla

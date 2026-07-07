@@ -32,8 +32,19 @@ export default function ApplicationDetailPage({
   const [isEvaluationModalOpen, setIsEvaluationModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const toastRef = useRef<any>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { sectors } = useSectors();
   const { categories } = useCategories();
+
+  const scrollSocialMedia = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
   const [adData, setAdData] = useState<any>(null);
   const [adLoading, setAdLoading] = useState(false);
   const [adDetailsExpanded, setAdDetailsExpanded] = useState(false);
@@ -306,6 +317,44 @@ export default function ApplicationDetailPage({
   const statusBadge = getStatusBadge(detailData.status);
   const socialMedia = detailData.socialMedia || {};
 
+  const socialItems = [
+    {
+      name: "Instagram",
+      link: socialMedia.instagramLink || (typeof socialMedia.instagram === 'string' ? socialMedia.instagram : null),
+      followers: socialMedia.instagramFollowers,
+      icon: "pi pi-instagram",
+      bg: "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
+    },
+    {
+      name: "TikTok",
+      link: socialMedia.tiktokLink || (typeof socialMedia.tiktok === 'string' ? socialMedia.tiktok : null),
+      followers: socialMedia.tiktokFollowers,
+      icon: "pi pi-video",
+      bgColor: "#000000",
+    },
+    {
+      name: "YouTube",
+      link: socialMedia.youtubeLink || (typeof socialMedia.youtube === 'string' ? socialMedia.youtube : null),
+      followers: socialMedia.youtubeFollowers,
+      icon: "pi pi-youtube",
+      bgColor: "#FF0000",
+    },
+    {
+      name: "LinkedIn",
+      link: socialMedia.linkedinLink || (typeof socialMedia.linkedin === 'string' ? socialMedia.linkedin : null),
+      followers: socialMedia.linkedinFollowers,
+      icon: "pi pi-linkedin",
+      bgColor: "#0077B5",
+    },
+    {
+      name: "X (Twitter)",
+      link: socialMedia.xLink || socialMedia.twitterLink || (typeof socialMedia.x === 'string' ? socialMedia.x : typeof socialMedia.twitter === 'string' ? socialMedia.twitter : null),
+      followers: socialMedia.xFollowers || socialMedia.twitterFollowers,
+      icon: "pi pi-twitter",
+      bgColor: "#14171A",
+    }
+  ].filter(item => item.link);
+
   const renderFollowers = (followers: any) => {
     const val = String(followers || "").trim();
     if (!val || val === "null" || val === "undefined" || val === "string") {
@@ -371,7 +420,7 @@ export default function ApplicationDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Left Column - Profile Card */}
-        <div className="lg:col-span-1 lg:self-start">
+        <div className="lg:col-span-1 lg:self-start sticky top-24 z-10">
           <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
             {/* Profile Image */}
             <div className="flex flex-col items-center">
@@ -462,109 +511,74 @@ export default function ApplicationDetailPage({
                 <i className="pi pi-share-alt" style={{ color: "#4C226A" }} />
                 Sosyal Medya Hesapları
               </h3>
-              <button
-                onClick={handleRefreshFollowers}
-                disabled={isRefreshingFollowers}
-                className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50"
-                style={{ 
-                  borderColor: isRefreshingFollowers ? "#e5e7eb" : "#4C226A", 
-                  color: isRefreshingFollowers ? "#9ca3af" : "#4C226A",
-                  backgroundColor: isRefreshingFollowers ? "#f3f4f6" : "#E8DAF5" 
-                }}
-              >
-                <i className={`pi pi-sync ${isRefreshingFollowers ? "pi-spin" : ""}`} />
-                {isRefreshingFollowers ? "Güncelleniyor..." : "Takipçi Sayısını Güncelle"}
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Instagram */}
-              <div className="border border-gray-100 rounded-xl p-4 flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRefreshFollowers}
+                  disabled={isRefreshingFollowers}
+                  className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 mr-2 cursor-pointer"
+                  style={{ 
+                    borderColor: isRefreshingFollowers ? "#e5e7eb" : "#4C226A", 
+                    color: isRefreshingFollowers ? "#9ca3af" : "#4C226A",
+                    backgroundColor: isRefreshingFollowers ? "#f3f4f6" : "#E8DAF5" 
                   }}
                 >
-                  <i className="pi pi-instagram text-white" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400">Instagram</p>
-                  {socialMedia.instagram || socialMedia.instagramLink ? (
+                  <i className={`pi pi-sync ${isRefreshingFollowers ? "pi-spin" : ""}`} />
+                  {isRefreshingFollowers ? "Güncelleniyor..." : "Takipçi Sayısını Güncelle"}
+                </button>
+                <button
+                  onClick={() => scrollSocialMedia('left')}
+                  className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-purple-600 active:scale-95 transition-all cursor-pointer"
+                >
+                  <i className="pi pi-chevron-left text-xs" />
+                </button>
+                <button
+                  onClick={() => scrollSocialMedia('right')}
+                  className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-purple-600 active:scale-95 transition-all cursor-pointer"
+                >
+                  <i className="pi pi-chevron-right text-xs" />
+                </button>
+              </div>
+            </div>
+            <div 
+              ref={scrollContainerRef}
+              className="flex gap-4 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory custom-scrollbar"
+            >
+              {socialItems.map((item) => (
+                <div 
+                  key={item.name} 
+                  className="w-60 flex-shrink-0 snap-start border border-gray-100 rounded-xl p-4 flex items-center gap-3 bg-white"
+                >
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={
+                      item.bg
+                        ? { background: item.bg }
+                        : { backgroundColor: item.bgColor }
+                    }
+                  >
+                    <i className={`${item.icon} text-white`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-gray-400 font-medium">{item.name}</p>
                     <div className="flex flex-col">
                       <a
-                        href={socialMedia.instagramLink || "#"}
+                        href={item.link || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm font-semibold text-purple-700 hover:underline truncate block"
                       >
                         Profili Görüntüle
                       </a>
-                      {renderFollowers(socialMedia.instagramFollowers)}
+                      {renderFollowers(item.followers)}
                     </div>
-                  ) : (
-                    <div className="flex flex-col">
-                      <p className="text-sm text-gray-400 italic">Bağlı değil</p>
-                      <span className="text-xs text-transparent select-none mt-0.5">Spacer</span>
-                    </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-
-              {/* TikTok */}
-              <div className="border border-gray-100 rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0">
-                  <i className="pi pi-video text-white" />
+              ))}
+              {socialItems.length === 0 && (
+                <div className="w-full py-4 text-center text-sm text-gray-500 italic">
+                  Bağlı sosyal medya hesabı bulunamadı.
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 font-medium">TikTok</p>
-                  {socialMedia.tiktok || socialMedia.tiktokLink ? (
-                    <div className="flex flex-col">
-                      <a
-                        href={socialMedia.tiktokLink || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-semibold text-purple-700 hover:underline truncate block"
-                      >
-                        Profili Görüntüle
-                      </a>
-                      {renderFollowers(socialMedia.tiktokFollowers)}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col">
-                      <p className="text-sm text-gray-400 italic">Bağlı değil</p>
-                      <span className="text-xs text-transparent select-none mt-0.5">Spacer</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* YouTube */}
-              <div className="border border-gray-100 rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
-                  <i className="pi pi-youtube text-white" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 font-medium">YouTube</p>
-                  {socialMedia.youtube || socialMedia.youtubeLink ? (
-                    <div className="flex flex-col">
-                      <a
-                        href={socialMedia.youtubeLink || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-semibold text-purple-700 hover:underline truncate block"
-                      >
-                        Profili Görüntüle
-                      </a>
-                      {renderFollowers(socialMedia.youtubeFollowers)}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col">
-                      <p className="text-sm text-gray-400 italic">Bağlı değil</p>
-                      <span className="text-xs text-transparent select-none mt-0.5">Spacer</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           </div>
 

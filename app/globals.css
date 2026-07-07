@@ -263,8 +263,7 @@ header .p-dropdown[class*="rounded-full"] .p-dropdown-label {
 }
 
 /* Header language dropdown - single chevron */
-header .header-language-dropdown {
-}
+header .header-language-dropdown {}
 
 header .header-language-dropdown .p-dropdown-label {
   width: 100% !important;
@@ -335,7 +334,7 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
   padding: 0.15rem !important;
 }
 
-.p-datepicker table td > span {
+.p-datepicker table td>span {
   width: 2.25rem !important;
   height: 2.25rem !important;
   border-radius: 8px !important;
@@ -343,13 +342,13 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
   transition: all 0.2s !important;
 }
 
-.p-datepicker table td > span:not(.p-highlight):not(.p-disabled):hover {
+.p-datepicker table td>span:not(.p-highlight):not(.p-disabled):hover {
   background-color: rgba(76, 34, 106, 0.08) !important;
   color: #4C226A !important;
 }
 
 /* Datepicker active date highlight - purple theme */
-.p-datepicker table td > span.p-highlight {
+.p-datepicker table td>span.p-highlight {
   background-color: #4C226A !important;
   color: white !important;
   box-shadow: 0 4px 6px -1px rgba(76, 34, 106, 0.2) !important;
@@ -361,6 +360,7 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
   border-color: #4C226A !important;
   color: white !important;
 }
+
 .p-datepicker-trigger:hover {
   background-color: rgba(76, 34, 106, 0.9) !important;
   border-color: rgba(76, 34, 106, 0.9) !important;
@@ -370,11 +370,13 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
 .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
   color: #202020;
 }
+
 .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
   background-color: rgba(76, 34, 106, 0.1) !important;
   color: #4C226A !important;
   font-weight: 600 !important;
 }
+
 .p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
   background-color: rgba(76, 34, 106, 0.04) !important;
   color: #202020 !important;
@@ -385,19 +387,23 @@ header .header-language-dropdown.p-dropdown-open .p-dropdown-trigger i {
   background-color: rgba(76, 34, 106, 0.1) !important;
   color: #4C226A !important;
 }
+
 .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
   background-color: rgba(76, 34, 106, 0.04) !important;
   color: #202020 !important;
 }
+
 .p-multiselect-panel .p-checkbox-box.p-highlight,
 .p-multiselect-panel .p-checkbox.p-highlight .p-checkbox-box,
 body .p-multiselect-panel .p-checkbox .p-checkbox-box.p-highlight {
   background-color: #4C226A !important;
   border-color: #4C226A !important;
 }
+
 .p-multiselect-panel .p-checkbox-box:not(.p-disabled):hover {
   border-color: #4C226A !important;
 }
+
 .p-multiselect-panel .p-checkbox-box.p-focus {
   box-shadow: 0 0 0 2px rgba(76, 34, 106, 0.2) !important;
   border-color: #4C226A !important;
@@ -408,6 +414,7 @@ body .p-multiselect-panel .p-checkbox .p-checkbox-box.p-highlight {
   display: flex !important;
   align-items: center !important;
 }
+
 .p-multiselect-panel .p-multiselect-header .p-checkbox::after {
   content: "Tümü";
   margin-left: 0.5rem;
@@ -422,6 +429,39 @@ body .p-multiselect-panel .p-checkbox .p-checkbox-box.p-highlight {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* PrimeReact Toast Responsive Override */
+@media screen and (max-width: 640px) {
+  .p-toast {
+    width: calc(100% - 2rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+
+  .p-toast-message-content {
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .p-toast-message-icon {
+    font-size: 1.25rem !important;
+  }
+
+  .p-toast-summary {
+    font-size: 0.875rem !important;
+  }
+
+  .p-toast-detail {
+    font-size: 0.75rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .p-toast-icon-close {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
 }

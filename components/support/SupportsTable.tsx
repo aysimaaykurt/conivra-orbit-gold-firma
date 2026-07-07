@@ -67,15 +67,17 @@ export default function SupportsTable({ supports, isLoading, onEdit, onDelete }:
           <tbody>
             {supports.map((support) => (
               <tr key={support.id} className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="py-3 px-4 text-sm text-dark">{support.title}</td>
-                <td className="py-3 px-4 text-sm text-dark">{support.type}</td>
+                <td className="py-3 px-4 text-sm text-dark">{support.title || (support as any).subject}</td>
+                <td className="py-3 px-4 text-sm text-dark">{support.category || support.type || (support as any).supportType}</td>
                 <td className="py-3 px-4 text-sm text-dark">
-                  <div className="max-w-[200px] md:max-w-md truncate" title={support.description}>
-                    {support.description}
+                  <div className="max-w-[200px] md:max-w-md" title={support.description}>
+                    {support.description && support.description.length > 50 
+                      ? `${support.description.substring(0, 50)}...` 
+                      : support.description}
                   </div>
                 </td>
                 <td className="py-3 px-4">
-                  <StatusBadge status={support.status as SupportStatus} type="support" />
+                  <StatusBadge status={support.status as SupportStatus} type="support" isEdited={support.isEdited} />
                 </td>
                 <td className="py-3 px-4 text-center">
                   <div className="flex items-center justify-center gap-2">

@@ -2,6 +2,7 @@ import { SupportStatus } from './supportStatus.enum';
 
 // Create Support Request Models (POST)
 export interface CreateSupportRequest {
+  supportTypeId: number;
   title: string;
   type: string;
   description: string;
@@ -9,6 +10,7 @@ export interface CreateSupportRequest {
 
 // Update Support Request Models (PUT)
 export interface UpdateSupportRequest {
+  supportTypeId: number;
   title: string;
   type: string;
   description: string;
@@ -16,11 +18,14 @@ export interface UpdateSupportRequest {
 
 // Support Response Models (GET)
 export interface Support {
-  id: string;
+  id?: string;
+  supportTypeId?: number;
   title: string;
   type: string;
+  category?: string;
   description: string;
   status: SupportStatus;
+  isEdited?: boolean;
   createDate: string; // ISO 8601 date format
   updateDate?: string; // ISO 8601 date format (optional)
 }
@@ -53,5 +58,17 @@ export interface ApiErrorResponse {
 export interface BasicResponse {
   success: boolean;
   message: string;
+}
+
+// Support Types Response
+export interface SupportType {
+  id: number;
+  name: string;
+}
+
+export interface GetSupportTypesResponse {
+  success: boolean;
+  message: string;
+  data: SupportType[];
 }
 

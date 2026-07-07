@@ -102,7 +102,7 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
         </div>
         
         {/* Right Content Area */}
-        <div className="flex flex-col flex-1 min-w-0 p-3 pl-4 pr-16 justify-center">
+        <div className="flex flex-col flex-1 min-w-0 p-3 pl-4 pr-[116px] justify-center">
           {/* Title */}
           <span className="text-sm font-extrabold text-gray-900 truncate mb-2" title={event.title}>
             {event.title}
@@ -141,18 +141,18 @@ export default function EventCard({ event, onEdit, onDelete, onPause, onDuplicat
             )}
 
             {event.city && (
-              <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700">
+              <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2.5 py-0.5 rounded-full shadow-sm text-gray-700 whitespace-nowrap">
                 <i className="pi pi-map-marker text-[10px] text-[#4C226A]"></i>
                 <span className={`text-[10px] font-semibold truncate ${spanCount <= 3 ? 'max-w-[50px]' : 'max-w-[80px]'}`}>{event.city}</span>
               </div>
             )}
             
-            <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700">
+            <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2.5 py-0.5 rounded-full shadow-sm text-gray-700 whitespace-nowrap">
               <i className="pi pi-clock text-[10px] text-[#4C226A]"></i>
               <span className="text-[10px] font-semibold">{event.formattedDate}</span>
             </div>
 
-            <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm text-gray-700">
+            <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm px-3 py-0.5 rounded-full shadow-sm text-gray-700 whitespace-nowrap">
               <i className="pi pi-tag text-[10px] text-[#4C226A]"></i>
               <span className="text-[10px] font-semibold uppercase">{event.type === 'Reklam' ? 'İlan' : event.type}</span>
             </div>
